@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { Pill } from '@/components/ui/Pill';
 import { SessionSummaryCard } from '@/components/ui/SessionSummaryCard';
+import { useProfile } from '@/profile/profile-context';
 import { trainingRepository } from '@/repositories/local-training-repository';
 import { useAppTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -13,7 +14,12 @@ import { radius, spacing } from '@/theme/tokens';
 export default function TodayScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
-  const profile = trainingRepository.getProfile();
+  const { profile } = useProfile();
+
+  if (!profile) {
+    return null;
+  }
+
   const plan = trainingRepository.getPlan();
   const progress = trainingRepository.getProgress();
   const nextSession = trainingRepository.getNextSession();
@@ -28,7 +34,7 @@ export default function TodayScreen() {
         <AppText tone="secondary" variant="label">
           Hoy · {plan.version}
         </AppText>
-        <AppText variant="display">Hola, {profile.firstName}</AppText>
+        <AppText variant="display">{profile.firstName ? `Hola, ${profile.firstName}` : 'Hola'}</AppText>
         <AppText tone="secondary">Tu próxima sesión ya está preparada.</AppText>
       </View>
 
