@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose an improvement to Workout Plan Companion.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: User problem
+      description: What training-planning problem would this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed approach
+      description: Keep the proposal within the product scope and avoid medical claims.
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This request does not add payments, social features, diet tracking, wearables, or injury diagnosis.
+          required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Additional context
+      description: Optional screenshots, references, or implementation notes without personal data.

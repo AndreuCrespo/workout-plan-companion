@@ -46,6 +46,10 @@ GitHub Actions runs both checks for every push and pull request targeting `main`
 - `mobile/repositories/`: contracts and local implementations for data and preferences.
 - `docs/`: approved product brief and visual system.
 
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/github-workflow.md) for branches, pull requests, releases, and repository hygiene.
+
 ## Test Android over USB from WSL
 
 To use Expo Go without Wi-Fi, Windows must share the phone with WSL through `usbipd-win`. USB debugging must be authorised on the phone and `adb` must be installed in WSL.
