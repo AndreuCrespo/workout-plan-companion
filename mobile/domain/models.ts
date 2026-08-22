@@ -7,10 +7,17 @@ export interface ExerciseSet {
   rest: string;
 }
 
+export interface ExerciseTechniqueStep {
+  label: string;
+  description: string;
+}
+
 export interface Exercise {
   id: string;
   name: string;
   equipment: string;
+  equipmentSetup: string;
+  techniqueSteps: ExerciseTechniqueStep[];
   coachingCue: string;
   preparation: string;
   execution: string;

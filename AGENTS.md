@@ -20,7 +20,7 @@ The product communicates in clear, approachable Spanish and makes no result prom
 1. Editable onboarding and profile.
 2. Monthly plan navigable by week and workout.
 3. Workout execution and logging for load, repetitions, RPE, and notes.
-4. Exercise detail with instructions, technical cues, common mistakes, and an illustration/animation that can be safely replaced later.
+4. Exercise detail with instructions, technical cues, common mistakes, and a step-by-step guide. Visual media will be added after a reviewed asset is selected.
 5. Basic progress: adherence, volume, and progression by exercise.
 
 Out of scope for the MVP: social features, payments, wearables, nutrition/calorie tracking, injury diagnosis, unreviewed automatic generation, and complex notifications.

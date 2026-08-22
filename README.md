@@ -7,7 +7,7 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 ## Current status · v0.1.0
 
 - Expo Router navigation: **Today**, **My plan**, **Progress**, and **Profile**.
-- A local four-week monthly plan, exercise details, and a structural workout-session flow.
+- A local four-week monthly plan, exercise details with material and step-by-step guidance, and a structural workout-session flow.
 - Two persistent themes: Active Green and Graphite Orange.
 - Sample data and local repositories, ready to be replaced by remote persistence later.
 - No accounts, Supabase, credentials, or external data services.

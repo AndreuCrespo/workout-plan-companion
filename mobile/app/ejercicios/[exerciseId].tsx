@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
-import { ExerciseIllustrationPlaceholder } from '@/components/ui/ExerciseIllustrationPlaceholder';
+import { ExerciseStepGuide } from '@/components/ui/ExerciseStepGuide';
 import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
@@ -32,8 +32,17 @@ export default function ExerciseDetailScreen() {
 
   return (
     <Screen>
-      <ScreenHeader description={exercise.equipment} onBack={() => router.back()} title={exercise.name} />
-      <ExerciseIllustrationPlaceholder />
+      <ScreenHeader description="Guía de técnica y recorrido" onBack={() => router.back()} title={exercise.name} />
+
+      <Card style={styles.materialCard}>
+        <AppText tone="secondary" variant="label">
+          Material necesario
+        </AppText>
+        <AppText variant="heading">{exercise.equipment}</AppText>
+        <AppText tone="secondary">{exercise.equipmentSetup}</AppText>
+      </Card>
+
+      <ExerciseStepGuide steps={exercise.techniqueSteps} />
 
       <Card style={styles.card}>
         <Pill label="Punto técnico" tone="accent" />
@@ -87,6 +96,9 @@ const styles = StyleSheet.create({
   },
   card: {
     gap: spacing.sm,
+  },
+  materialCard: {
+    gap: spacing.xs,
   },
   techniqueRow: {
     gap: spacing.xxs,
