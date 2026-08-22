@@ -70,6 +70,18 @@ async function readLogs(storageKey: string): Promise<WorkoutLog[]> {
 }
 
 class LocalWorkoutLogRepository implements WorkoutLogRepository {
+  private writeQueue: Promise<void> = Promise.resolve();
+
+  private enqueueWrite<TValue>(write: () => Promise<TValue>): Promise<TValue> {
+    const result = this.writeQueue.then(write);
+    this.writeQueue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    return result;
+  }
+
   async getDraft(sessionId: string): Promise<WorkoutLog | null> {
     const drafts = await readLogs(DRAFTS_STORAGE_KEY);
     return drafts.find((draft) => draft.sessionId === sessionId) ?? null;
@@ -85,34 +97,38 @@ class LocalWorkoutLogRepository implements WorkoutLogRepository {
   }
 
   async saveDraft(log: WorkoutLog): Promise<void> {
-    const drafts = await readLogs(DRAFTS_STORAGE_KEY);
-    const otherDrafts = drafts.filter((draft) => draft.sessionId !== log.sessionId);
-    await AsyncStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify([...otherDrafts, log]));
+    await this.enqueueWrite(async () => {
+      const drafts = await readLogs(DRAFTS_STORAGE_KEY);
+      const otherDrafts = drafts.filter((draft) => draft.sessionId !== log.sessionId);
+      await AsyncStorage.setItem(DRAFTS_STORAGE_KEY, JSON.stringify([...otherDrafts, log]));
+    });
   }
 
   async complete(log: WorkoutLog): Promise<WorkoutLog> {
-    const completedLogs = await this.getCompletedLogs();
-    const existingLog = completedLogs.find((storedLog) => storedLog.sessionId === log.sessionId);
+    return this.enqueueWrite(async () => {
+      const completedLogs = await this.getCompletedLogs();
+      const existingLog = completedLogs.find((storedLog) => storedLog.sessionId === log.sessionId);
 
-    if (existingLog) {
-      return existingLog;
-    }
+      if (existingLog) {
+        return existingLog;
+      }
 
-    const timestamp = new Date().toISOString();
-    const completedLog: WorkoutLog = {
-      ...log,
-      status: 'completed',
-      updatedAt: timestamp,
-      completedAt: timestamp,
-    };
-    const drafts = await readLogs(DRAFTS_STORAGE_KEY);
+      const timestamp = new Date().toISOString();
+      const completedLog: WorkoutLog = {
+        ...log,
+        status: 'completed',
+        updatedAt: timestamp,
+        completedAt: timestamp,
+      };
+      const drafts = await readLogs(DRAFTS_STORAGE_KEY);
 
-    await AsyncStorage.multiSet([
-      [COMPLETED_LOGS_STORAGE_KEY, JSON.stringify([...completedLogs, completedLog])],
-      [DRAFTS_STORAGE_KEY, JSON.stringify(drafts.filter((draft) => draft.sessionId !== log.sessionId))],
-    ]);
+      await AsyncStorage.multiSet([
+        [COMPLETED_LOGS_STORAGE_KEY, JSON.stringify([...completedLogs, completedLog])],
+        [DRAFTS_STORAGE_KEY, JSON.stringify(drafts.filter((draft) => draft.sessionId !== log.sessionId))],
+      ]);
 
-    return completedLog;
+      return completedLog;
+    });
   }
 }
 
