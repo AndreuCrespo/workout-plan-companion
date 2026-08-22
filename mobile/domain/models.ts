@@ -51,16 +51,35 @@ export interface MonthlyPlan {
   weeks: PlanWeek[];
 }
 
+export type PrimaryGoal = 'strength' | 'muscle-gain' | 'general-health' | 'return-to-training';
+
+export type ExperienceLevel = 'beginner' | 'returning' | 'intermediate' | 'advanced';
+
+export type TrainingAvailability = 'two-days' | 'three-days' | 'four-days' | 'five-days';
+
+export type SessionDurationMinutes = 45 | 60 | 75;
+
+export type EquipmentAccess = 'full-gym' | 'basic-gym' | 'home';
+
+export type MeasurementUnits = 'metric' | 'imperial';
+
+export type TrainingPreference = 'guided' | 'simple' | 'varied';
+
 export interface UserProfile {
   firstName: string;
-  primaryGoal: string;
-  experience: string;
-  availability: string;
-  sessionDuration: string;
-  equipment: string;
+  primaryGoal: PrimaryGoal;
+  experience: ExperienceLevel;
+  availability: TrainingAvailability;
+  sessionDurationMinutes: SessionDurationMinutes;
+  equipment: EquipmentAccess;
   limitations: string;
-  units: string;
+  units: MeasurementUnits;
+  trainingPreference: TrainingPreference;
+  createdAt: string;
+  updatedAt: string;
 }
+
+export type ProfileDraft = Omit<UserProfile, 'createdAt' | 'updatedAt'>;
 
 export interface ExerciseTrendPoint {
   label: string;

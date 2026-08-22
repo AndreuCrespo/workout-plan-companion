@@ -6,15 +6,33 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ListRow } from '@/components/ui/ListRow';
 import { Pill } from '@/components/ui/Pill';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { trainingRepository } from '@/repositories/local-training-repository';
+import {
+  availabilityOptions,
+  durationOptions,
+  equipmentOptions,
+  experienceOptions,
+  getLimitationsLabel,
+  getProfileOptionLabel,
+  primaryGoalOptions,
+  trainingPreferenceOptions,
+  unitOptions,
+} from '@/data/profile-options';
+import { useProfile } from '@/profile/profile-context';
 import { useAppTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
-  const profile = trainingRepository.getProfile();
+  const { profile } = useProfile();
+
+  if (!profile) {
+    return null;
+  }
+
+  const profileName = profile.firstName ? `Perfil de ${profile.firstName}` : 'Tu perfil';
 
   return (
     <Screen>
@@ -23,23 +41,30 @@ export default function ProfileScreen() {
       <Card style={styles.profileCard}>
         <Pill label="Perfil local" tone="primary" />
         <View style={styles.copyBlock}>
-          <AppText variant="heading">Objetivo actual</AppText>
-          <AppText tone="secondary">{profile.primaryGoal}</AppText>
+          <AppText variant="heading">{profileName}</AppText>
+          <AppText tone="secondary">{getProfileOptionLabel(primaryGoalOptions, profile.primaryGoal)}</AppText>
         </View>
+        <PrimaryButton
+          accessibilityHint="Abre el formulario para cambiar tu perfil"
+          label="Editar mi perfil"
+          onPress={() => router.push('/perfil/editar')}
+          variant="secondary"
+        />
       </Card>
 
       <View style={styles.section}>
         <AppText variant="heading">Tu contexto</AppText>
-        <ListRow label="Experiencia" value={profile.experience} />
-        <ListRow label="Disponibilidad" value={profile.availability} />
-        <ListRow label="Duración" value={profile.sessionDuration} />
-        <ListRow label="Equipamiento" value={profile.equipment} />
-        <ListRow label="Limitaciones declaradas" value={profile.limitations} />
-        <ListRow label="Unidades" value={profile.units} />
+        <ListRow label="Experiencia" value={getProfileOptionLabel(experienceOptions, profile.experience)} />
+        <ListRow label="Disponibilidad" value={getProfileOptionLabel(availabilityOptions, profile.availability)} />
+        <ListRow label="Duración" value={getProfileOptionLabel(durationOptions, profile.sessionDurationMinutes)} />
+        <ListRow label="Equipamiento" value={getProfileOptionLabel(equipmentOptions, profile.equipment)} />
+        <ListRow label="Limitaciones declaradas" value={getLimitationsLabel(profile.limitations)} />
+        <ListRow label="Unidades" value={getProfileOptionLabel(unitOptions, profile.units)} />
       </View>
 
       <View style={styles.section}>
         <AppText variant="heading">Preferencias</AppText>
+        <ListRow label="Estilo de entrenamiento" value={getProfileOptionLabel(trainingPreferenceOptions, profile.trainingPreference)} />
         <ListRow
           accessibilityHint="Abre el selector de temas"
           label="Apariencia"
@@ -49,9 +74,9 @@ export default function ProfileScreen() {
       </View>
 
       <Card style={styles.privacyCard}>
-        <AppText variant="bodyStrong">Datos de muestra en este dispositivo</AppText>
+        <AppText variant="bodyStrong">Datos guardados en este dispositivo</AppText>
         <AppText tone="secondary" variant="caption">
-          Esta primera entrega no crea una cuenta ni envía información a servicios externos.
+          Esta versión no crea una cuenta ni envía información a servicios externos. Podrás editar tu perfil cuando quieras.
         </AppText>
       </Card>
     </Screen>
