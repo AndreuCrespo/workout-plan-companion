@@ -1,14 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import {
-  availabilityOptions,
-  durationOptions,
-  equipmentOptions,
-  experienceOptions,
-  primaryGoalOptions,
-  trainingPreferenceOptions,
-  unitOptions,
-} from '@/data/profile-options';
+import { availabilityOptions, durationOptions, unitOptions } from '@/data/profile-options';
 import type { ProfileOption } from '@/data/profile-options';
 import type { UserProfile } from '@/domain/models';
 import type { ProfileRepository } from '@/repositories/profile-repository';
@@ -33,14 +25,10 @@ function isUserProfile(value: unknown): value is UserProfile {
 
   return (
     typeof value.firstName === 'string' &&
-    isOptionValue(primaryGoalOptions, value.primaryGoal) &&
-    isOptionValue(experienceOptions, value.experience) &&
     isOptionValue(availabilityOptions, value.availability) &&
     isOptionValue(durationOptions, value.sessionDurationMinutes) &&
-    isOptionValue(equipmentOptions, value.equipment) &&
     typeof value.limitations === 'string' &&
     isOptionValue(unitOptions, value.units) &&
-    isOptionValue(trainingPreferenceOptions, value.trainingPreference) &&
     typeof value.createdAt === 'string' &&
     typeof value.updatedAt === 'string'
   );

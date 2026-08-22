@@ -2,12 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
-import {
-  BasicsProfileFields,
-  EquipmentProfileFields,
-  SafetyProfileFields,
-  TrainingProfileFields,
-} from '@/components/profile/ProfileFormSections';
+import { BasicsProfileFields, DetailsProfileFields, TrainingProfileFields } from '@/components/profile/ProfileFormSections';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -58,23 +53,14 @@ export default function EditProfileScreen() {
       />
 
       <View style={styles.section}>
-        <AppText variant="heading">Sobre ti</AppText>
-        <BasicsProfileFields draft={draft} onChange={updateDraft} />
-      </View>
-
-      <View style={styles.section}>
         <AppText variant="heading">Tu semana</AppText>
+        <BasicsProfileFields draft={draft} onChange={updateDraft} />
         <TrainingProfileFields draft={draft} onChange={updateDraft} />
       </View>
 
       <View style={styles.section}>
-        <AppText variant="heading">Tu entrenamiento</AppText>
-        <EquipmentProfileFields draft={draft} onChange={updateDraft} />
-      </View>
-
-      <View style={styles.section}>
-        <AppText variant="heading">Bienestar y unidades</AppText>
-        <SafetyProfileFields draft={draft} onChange={updateDraft} />
+        <AppText variant="heading">Detalles</AppText>
+        <DetailsProfileFields draft={draft} onChange={updateDraft} />
       </View>
 
       {saveError ? (

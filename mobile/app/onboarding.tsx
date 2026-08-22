@@ -2,12 +2,7 @@ import { StyleSheet, View } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
-import {
-  BasicsProfileFields,
-  EquipmentProfileFields,
-  SafetyProfileFields,
-  TrainingProfileFields,
-} from '@/components/profile/ProfileFormSections';
+import { BasicsProfileFields, DetailsProfileFields, TrainingProfileFields } from '@/components/profile/ProfileFormSections';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -23,24 +18,14 @@ import { spacing } from '@/theme/tokens';
 
 const onboardingSteps = [
   {
-    eyebrow: 'Paso 1 de 4',
-    title: 'Empezamos por ti',
-    description: 'Conocer tu objetivo nos ayuda a presentar próximos planes con contexto.',
-  },
-  {
-    eyebrow: 'Paso 2 de 4',
+    eyebrow: 'Paso 1 de 2',
     title: 'Tu ritmo semanal',
-    description: 'Elige un punto de partida realista para tus semanas habituales.',
+    description: 'Unos pocos detalles para presentar el plan de muestra de forma clara.',
   },
   {
-    eyebrow: 'Paso 3 de 4',
-    title: 'Tu espacio de entrenamiento',
-    description: 'Así sabremos con qué material y estilo quieres contar.',
-  },
-  {
-    eyebrow: 'Paso 4 de 4',
+    eyebrow: 'Paso 2 de 2',
     title: 'Últimos ajustes',
-    description: 'Puedes cambiar todo esto desde Perfil cuando lo necesites.',
+    description: 'Podrás cambiar esto desde Perfil cuando lo necesites.',
   },
 ] as const;
 
@@ -66,7 +51,7 @@ export default function OnboardingScreen() {
 
   async function continueOnboarding() {
     if (!isLastStep) {
-      setStep((currentStepIndex) => currentStepIndex + 1);
+      setStep(1);
       return;
     }
 
@@ -83,30 +68,6 @@ export default function OnboardingScreen() {
     }
   }
 
-  function renderStep() {
-    switch (step) {
-      case 0:
-        return <BasicsProfileFields draft={draft} onChange={updateDraft} />;
-      case 1:
-        return <TrainingProfileFields draft={draft} onChange={updateDraft} />;
-      case 2:
-        return <EquipmentProfileFields draft={draft} onChange={updateDraft} />;
-      default:
-        return (
-          <View style={styles.finalStep}>
-            <SafetyProfileFields draft={draft} onChange={updateDraft} />
-            <ChoiceGroup
-              description="Se aplica ahora mismo y podrás cambiarlo después en Perfil."
-              label="Apariencia"
-              onValueChange={setThemeName}
-              options={themeOptions}
-              value={themeName}
-            />
-          </View>
-        );
-    }
-  }
-
   return (
     <Screen contentContainerStyle={styles.content}>
       <View style={styles.progressSection}>
@@ -116,7 +77,23 @@ export default function OnboardingScreen() {
 
       <ScreenHeader description={currentStep.description} title={currentStep.title} />
 
-      {renderStep()}
+      {step === 0 ? (
+        <View style={styles.stepContent}>
+          <BasicsProfileFields draft={draft} onChange={updateDraft} />
+          <TrainingProfileFields draft={draft} onChange={updateDraft} />
+        </View>
+      ) : (
+        <View style={styles.stepContent}>
+          <DetailsProfileFields draft={draft} onChange={updateDraft} />
+          <ChoiceGroup
+            description="Se aplica ahora mismo y podrás cambiarlo después en Perfil."
+            label="Apariencia"
+            onValueChange={setThemeName}
+            options={themeOptions}
+            value={themeName}
+          />
+        </View>
+      )}
 
       {saveError ? (
         <Card style={[styles.errorCard, { borderColor: theme.colors.warning }]}>
@@ -132,7 +109,7 @@ export default function OnboardingScreen() {
           <PrimaryButton
             accessibilityHint="Vuelve al paso anterior"
             label="Volver"
-            onPress={() => setStep((currentStepIndex) => currentStepIndex - 1)}
+            onPress={() => setStep(0)}
             variant="secondary"
           />
         ) : null}
@@ -153,7 +130,7 @@ const styles = StyleSheet.create({
   progressSection: {
     gap: spacing.xs,
   },
-  finalStep: {
+  stepContent: {
     gap: spacing.lg,
   },
   actions: {
