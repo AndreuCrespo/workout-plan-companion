@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
@@ -8,20 +8,186 @@ import { Card } from '@/components/ui/Card';
 import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { createWorkoutLog, updateWorkoutLog } from '@/domain/workout-log';
+import type { LoggedSet, WorkoutLog } from '@/domain/models';
+import { useProfile } from '@/profile/profile-context';
 import { trainingRepository } from '@/repositories/local-training-repository';
+import { workoutLogRepository } from '@/repositories/local-workout-log-repository';
 import { useAppTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 
 type SessionFlowState = 'ready' | 'in-progress' | 'completed';
 
+function parseNumericValue(value: string): number | null {
+  const trimmedValue = value.trim();
+
+  if (!trimmedValue) {
+    return null;
+  }
+
+  const parsedValue = Number(trimmedValue.replace(',', '.'));
+  return Number.isFinite(parsedValue) && parsedValue >= 0 ? parsedValue : null;
+}
+
+interface SetInputProps {
+  accessibilityLabel: string;
+  label: string;
+  value: number | null;
+  editable: boolean;
+  keyboardType: 'decimal-pad' | 'number-pad';
+  onChange: (value: number | null) => void;
+}
+
+function SetInput({ accessibilityLabel, label, value, editable, keyboardType, onChange }: SetInputProps) {
+  const { theme } = useAppTheme();
+
+  return (
+    <View style={styles.setInput}>
+      <AppText tone="secondary" variant="caption">{label}</AppText>
+      <TextInput
+        accessibilityLabel={accessibilityLabel}
+        editable={editable}
+        keyboardType={keyboardType}
+        onChangeText={(nextValue) => onChange(parseNumericValue(nextValue))}
+        placeholder="—"
+        placeholderTextColor={theme.colors.textSecondary}
+        selectTextOnFocus
+        style={[styles.input, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }]}
+        value={value?.toString() ?? ''}
+      />
+    </View>
+  );
+}
+
+interface LoggedSetRowProps {
+  loggedSet: LoggedSet;
+  canEdit: boolean;
+  loadUnit: string;
+  onChange: (changes: Partial<Pick<LoggedSet, 'completed' | 'load' | 'repetitions' | 'rpe'>>) => void;
+}
+
+function LoggedSetRow({ loggedSet, canEdit, loadUnit, onChange }: LoggedSetRowProps) {
+  const { theme } = useAppTheme();
+
+  return (
+    <View style={[styles.loggedSet, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border }]}>
+      <View style={styles.loggedSetHeader}>
+        <Pressable
+          accessibilityLabel={`Serie ${loggedSet.setNumber} de ${loggedSet.exerciseName}`}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: loggedSet.completed, disabled: !canEdit }}
+          disabled={!canEdit}
+          onPress={() => onChange({ completed: !loggedSet.completed })}
+          style={({ pressed }) => [
+            styles.seriesToggle,
+            {
+              backgroundColor: loggedSet.completed ? theme.colors.primary : theme.colors.surface,
+              borderColor: theme.colors.primaryStrong,
+              opacity: pressed || !canEdit ? 0.72 : 1,
+            },
+          ]}>
+          <AppText style={{ color: loggedSet.completed ? theme.colors.onPrimary : theme.colors.primaryStrong }} variant="bodyStrong">
+            {loggedSet.completed ? '✓' : loggedSet.setNumber}
+          </AppText>
+        </Pressable>
+        <View style={styles.loggedSetCopy}>
+          <AppText variant="bodyStrong">Serie {loggedSet.setNumber}</AppText>
+          <AppText tone="secondary" variant="caption">
+            Objetivo {loggedSet.target} · Descanso {loggedSet.rest}
+          </AppText>
+        </View>
+      </View>
+
+      <View style={styles.setInputs}>
+        <SetInput
+          accessibilityLabel={`Carga de la serie ${loggedSet.setNumber} de ${loggedSet.exerciseName}`}
+          editable={canEdit}
+          keyboardType="decimal-pad"
+          label={`Carga (${loadUnit})`}
+          onChange={(load) => onChange({ load })}
+          value={loggedSet.load}
+        />
+        <SetInput
+          accessibilityLabel={`Repeticiones de la serie ${loggedSet.setNumber} de ${loggedSet.exerciseName}`}
+          editable={canEdit}
+          keyboardType="number-pad"
+          label="Repeticiones"
+          onChange={(repetitions) => onChange({ repetitions })}
+          value={loggedSet.repetitions}
+        />
+        <SetInput
+          accessibilityLabel={`RPE de la serie ${loggedSet.setNumber} de ${loggedSet.exerciseName}`}
+          editable={canEdit}
+          keyboardType="decimal-pad"
+          label="RPE"
+          onChange={(rpe) => onChange({ rpe })}
+          value={loggedSet.rpe}
+        />
+      </View>
+    </View>
+  );
+}
+
 export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const router = useRouter();
+  const { profile } = useProfile();
   const { theme } = useAppTheme();
   const session = trainingRepository.getSession(sessionId);
+  const plan = trainingRepository.getPlan();
   const [flowState, setFlowState] = useState<SessionFlowState>('ready');
-  const [completedSeries, setCompletedSeries] = useState<string[]>([]);
-  const [note, setNote] = useState('');
+  const [log, setLog] = useState<WorkoutLog | null>(null);
+  const [isHydrating, setIsHydrating] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [storageError, setStorageError] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function hydrateLog() {
+      if (!session) {
+        if (isMounted) {
+          setIsHydrating(false);
+        }
+        return;
+      }
+
+      const [completedLog, draft] = await Promise.all([
+        workoutLogRepository.getCompletedLog(session.id),
+        workoutLogRepository.getDraft(session.id),
+      ]);
+
+      if (!isMounted) {
+        return;
+      }
+
+      if (completedLog) {
+        setLog(completedLog);
+        setFlowState('completed');
+      } else if (draft) {
+        setLog(draft);
+        setFlowState('in-progress');
+      } else {
+        setLog(null);
+        setFlowState('ready');
+      }
+      setIsHydrating(false);
+    }
+
+    void hydrateLog();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [session]);
+
+  const completedSetCount = useMemo(
+    () => log?.sets.filter((loggedSet) => loggedSet.completed).length ?? 0,
+    [log?.sets],
+  );
+  const loadUnit = profile?.units === 'imperial' ? 'lb' : 'kg';
+  const isCompleted = flowState === 'completed';
+  const canEdit = flowState === 'in-progress' && !isCompleted && !isSaving;
 
   if (!session) {
     return (
@@ -36,25 +202,89 @@ export default function SessionScreen() {
     );
   }
 
-  function toggleSeries(seriesId: string) {
-    setCompletedSeries((current) =>
-      current.includes(seriesId) ? current.filter((item) => item !== seriesId) : [...current, seriesId],
+  async function startSession() {
+    if (!session) {
+      return;
+    }
+
+    const nextLog = createWorkoutLog(plan, session);
+    setIsSaving(true);
+    setStorageError(false);
+
+    try {
+      await workoutLogRepository.saveDraft(nextLog);
+      setLog(nextLog);
+      setFlowState('in-progress');
+    } catch {
+      setStorageError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  function persistLog(nextLog: WorkoutLog) {
+    setLog(nextLog);
+    setStorageError(false);
+    void workoutLogRepository.saveDraft(nextLog).catch(() => setStorageError(true));
+  }
+
+  function updateLoggedSet(setId: string, changes: Partial<Pick<LoggedSet, 'completed' | 'load' | 'repetitions' | 'rpe'>>) {
+    if (!log || !canEdit) {
+      return;
+    }
+
+    const nextLog = updateWorkoutLog(log, {
+      note: log.note,
+      sets: log.sets.map((loggedSet) => (loggedSet.id === setId ? { ...loggedSet, ...changes } : loggedSet)),
+    });
+    persistLog(nextLog);
+  }
+
+  function updateNote(note: string) {
+    if (!log || !canEdit) {
+      return;
+    }
+
+    persistLog(updateWorkoutLog(log, { note, sets: log.sets }));
+  }
+
+  async function completeSession() {
+    if (!log || flowState !== 'in-progress') {
+      return;
+    }
+
+    setIsSaving(true);
+    setStorageError(false);
+
+    try {
+      const completedLog = await workoutLogRepository.complete(log);
+      setLog(completedLog);
+      setFlowState('completed');
+    } catch {
+      setStorageError(true);
+    } finally {
+      setIsSaving(false);
+    }
+  }
+
+  if (isHydrating) {
+    return (
+      <Screen>
+        <ScreenHeader
+          description={`${session.estimatedMinutes} min · ${session.focus}`}
+          eyebrow={session.dayLabel}
+          onBack={() => router.back()}
+          title={session.title}
+        />
+        <Card style={styles.card}>
+          <AppText variant="heading">Cargando tu registro</AppText>
+          <AppText tone="secondary">Comprobamos si tienes una sesión en curso o ya guardada.</AppText>
+        </Card>
+      </Screen>
     );
   }
 
-  function advanceSession() {
-    if (flowState === 'ready') {
-      setFlowState('in-progress');
-      return;
-    }
-    if (flowState === 'in-progress') {
-      setFlowState('completed');
-    }
-  }
-
-  const trackedSeriesCount = 3;
-  const isComplete = flowState === 'completed';
-  const actionLabel = flowState === 'ready' ? 'Empezar sesión' : isComplete ? 'Sesión completada' : 'Finalizar sesión';
+  const actionLabel = flowState === 'ready' ? 'Empezar sesión' : isCompleted ? 'Sesión guardada' : 'Finalizar y guardar';
 
   return (
     <Screen>
@@ -66,16 +296,29 @@ export default function SessionScreen() {
       />
 
       <Card style={[styles.statusCard, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
-        <Pill label={isComplete ? 'Registro simulado completado' : flowState === 'ready' ? 'Lista para empezar' : 'Sesión en curso'} tone="accent" />
+        <Pill label={isCompleted ? 'Sesión guardada' : flowState === 'ready' ? 'Lista para empezar' : 'Borrador guardado'} tone="accent" />
         <AppText variant="bodyStrong">
-          {isComplete ? 'Has marcado la sesión como completada.' : 'Registra solo lo que te resulte útil durante el entrenamiento.'}
+          {isCompleted
+            ? 'Este registro queda guardado como parte de esta sesión.'
+            : flowState === 'ready'
+              ? 'Empieza cuando estés preparado y registra cada serie a tu ritmo.'
+              : 'Tus cambios se guardan en este dispositivo mientras entrenas.'}
         </AppText>
-        <AppText tone="secondary" variant="caption">
-          {isComplete && note.trim().length > 0
-            ? 'Tu nota queda mostrada en este flujo de muestra.'
-            : 'Los registros de esta primera entrega son datos simulados y no se envían fuera del dispositivo.'}
-        </AppText>
+        {log ? (
+          <AppText tone="secondary" variant="caption">
+            {completedSetCount} de {log.sets.length} series marcadas
+          </AppText>
+        ) : null}
       </Card>
+
+      {storageError ? (
+        <Card style={[styles.errorCard, { borderColor: theme.colors.warning }]}>
+          <AppText variant="bodyStrong">No pudimos guardar el registro</AppText>
+          <AppText tone="secondary" variant="caption">
+            Comprueba el almacenamiento del dispositivo e inténtalo de nuevo antes de cerrar la sesión.
+          </AppText>
+        </Card>
+      ) : null}
 
       <View style={styles.section}>
         <AppText variant="heading">Calentamiento</AppText>
@@ -92,115 +335,84 @@ export default function SessionScreen() {
       </View>
 
       <View style={styles.section}>
-        <View style={styles.rowBetween}>
-          <AppText variant="heading">Ejercicios</AppText>
-          <AppText tone="secondary" variant="caption">
-            {completedSeries.length}/{trackedSeriesCount} series marcadas
-          </AppText>
-        </View>
+        <AppText variant="heading">Ejercicios</AppText>
 
-        {session.exercises.map((exercise, exerciseIndex) => (
-          <Card key={exercise.id} style={styles.exerciseCard}>
-            <View style={styles.exerciseHeading}>
-              <View style={styles.exerciseTitle}>
-                <Pill label={exercise.equipment} tone="primary" />
-                <AppText variant="heading">{exercise.name}</AppText>
-              </View>
-              <AppText tone="secondary" variant="caption">
-                {exercise.coachingCue}
-              </AppText>
-            </View>
+        {session.exercises.map((exercise) => {
+          const loggedSets = log?.sets.filter((loggedSet) => loggedSet.exerciseId === exercise.id) ?? [];
 
-            <View style={styles.targetList}>
-              {exercise.sets.map((set) => (
-                <View key={set.target} style={styles.targetRow}>
-                  <AppText variant="bodyStrong">{set.target}</AppText>
-                  <AppText tone="secondary" variant="caption">
-                    Descanso {set.rest}
-                  </AppText>
+          return (
+            <Card key={exercise.id} style={styles.exerciseCard}>
+              <View style={styles.exerciseHeading}>
+                <View style={styles.exerciseTitle}>
+                  <Pill label={exercise.equipment} tone="primary" />
+                  <AppText variant="heading">{exercise.name}</AppText>
                 </View>
-              ))}
-            </View>
-
-            {exerciseIndex === 0 ? (
-              <View style={styles.logger}>
                 <AppText tone="secondary" variant="caption">
-                  Registro rápido de ejemplo
+                  {exercise.coachingCue}
                 </AppText>
-                {[1, 2, 3].map((seriesNumber) => {
-                  const seriesId = `${exercise.id}-${seriesNumber}`;
-                  const isSeriesCompleted = completedSeries.includes(seriesId);
-                  return (
-                    <View key={seriesId} style={styles.seriesRow}>
-                      <Pressable
-                        accessibilityLabel={`Serie ${seriesNumber}`}
-                        accessibilityRole="checkbox"
-                        accessibilityState={{ checked: isSeriesCompleted }}
-                        disabled={flowState !== 'in-progress' || isComplete}
-                        onPress={() => toggleSeries(seriesId)}
-                        style={({ pressed }) => [
-                          styles.seriesToggle,
-                          {
-                            backgroundColor: isSeriesCompleted ? theme.colors.primary : theme.colors.surface,
-                            borderColor: theme.colors.primaryStrong,
-                            opacity: pressed || flowState !== 'in-progress' || isComplete ? 0.72 : 1,
-                          },
-                        ]}>
-                        <AppText style={{ color: isSeriesCompleted ? theme.colors.onPrimary : theme.colors.primaryStrong }} variant="bodyStrong">
-                          {isSeriesCompleted ? '✓' : seriesNumber}
-                        </AppText>
-                      </Pressable>
-                      <TextInput
-                        accessibilityLabel={`Carga de la serie ${seriesNumber}`}
-                        editable={flowState === 'in-progress' && !isComplete}
-                        keyboardType="decimal-pad"
-                        placeholder="kg"
-                        placeholderTextColor={theme.colors.textSecondary}
-                        style={[styles.input, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }]}
-                      />
-                      <TextInput
-                        accessibilityLabel={`Repeticiones de la serie ${seriesNumber}`}
-                        editable={flowState === 'in-progress' && !isComplete}
-                        keyboardType="number-pad"
-                        placeholder="reps"
-                        placeholderTextColor={theme.colors.textSecondary}
-                        style={[styles.input, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }]}
-                      />
-                    </View>
-                  );
-                })}
               </View>
-            ) : null}
 
-            <PrimaryButton
-              accessibilityHint={`Abre instrucciones de ${exercise.name}`}
-              label="Ver técnica"
-              onPress={() => router.push({ pathname: '/ejercicios/[exerciseId]', params: { exerciseId: exercise.id } })}
-              variant="secondary"
-            />
-          </Card>
-        ))}
+              {flowState === 'ready' ? (
+                <View style={styles.targetList}>
+                  {exercise.sets.map((set) => (
+                    <View key={set.target} style={styles.targetRow}>
+                      <AppText variant="bodyStrong">{set.target}</AppText>
+                      <AppText tone="secondary" variant="caption">
+                        Descanso {set.rest}
+                      </AppText>
+                    </View>
+                  ))}
+                </View>
+              ) : (
+                <View style={styles.loggedSetList}>
+                  {loggedSets.map((loggedSet) => (
+                    <LoggedSetRow
+                      canEdit={canEdit}
+                      key={loggedSet.id}
+                      loadUnit={loadUnit}
+                      loggedSet={loggedSet}
+                      onChange={(changes) => updateLoggedSet(loggedSet.id, changes)}
+                    />
+                  ))}
+                </View>
+              )}
+
+              <PrimaryButton
+                accessibilityHint={`Abre instrucciones de ${exercise.name}`}
+                label="Ver técnica"
+                onPress={() => router.push({ pathname: '/ejercicios/[exerciseId]', params: { exerciseId: exercise.id } })}
+                variant="secondary"
+              />
+            </Card>
+          );
+        })}
       </View>
 
       <View style={styles.section}>
         <AppText variant="heading">Cierre</AppText>
         <Card style={styles.card}>
           <AppText>{session.coolDown}</AppText>
-          <TextInput
-            accessibilityLabel="Nota opcional de la sesión"
-            editable={!isComplete}
-            multiline
-            onChangeText={setNote}
-            placeholder="Añade una nota opcional sobre cómo te has sentido"
-            placeholderTextColor={theme.colors.textSecondary}
-            style={[styles.noteInput, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }]}
-            textAlignVertical="top"
-            value={note}
-          />
+          {log ? (
+            <TextInput
+              accessibilityLabel="Nota opcional de la sesión"
+              editable={canEdit}
+              multiline
+              onChangeText={updateNote}
+              placeholder="Añade una nota opcional sobre cómo te has sentido"
+              placeholderTextColor={theme.colors.textSecondary}
+              style={[styles.noteInput, { backgroundColor: theme.colors.surface, borderColor: theme.colors.border, color: theme.colors.text }]}
+              textAlignVertical="top"
+              value={log.note}
+            />
+          ) : null}
         </Card>
       </View>
 
-      <PrimaryButton disabled={isComplete} label={actionLabel} onPress={advanceSession} />
+      <PrimaryButton
+        disabled={isCompleted || isSaving}
+        label={isSaving ? 'Guardando…' : actionLabel}
+        onPress={() => void (flowState === 'ready' ? startSession() : completeSession())}
+      />
     </Screen>
   );
 }
@@ -215,6 +427,9 @@ const styles = StyleSheet.create({
   statusCard: {
     gap: spacing.sm,
   },
+  errorCard: {
+    gap: spacing.xs,
+  },
   bulletRow: {
     alignItems: 'flex-start',
     flexDirection: 'row',
@@ -222,12 +437,6 @@ const styles = StyleSheet.create({
   },
   bulletText: {
     flex: 1,
-  },
-  rowBetween: {
-    alignItems: 'baseline',
-    flexDirection: 'row',
-    gap: spacing.sm,
-    justifyContent: 'space-between',
   },
   exerciseCard: {
     gap: spacing.md,
@@ -247,29 +456,47 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
     justifyContent: 'space-between',
   },
-  logger: {
-    gap: spacing.xs,
+  loggedSetList: {
+    gap: spacing.sm,
   },
-  seriesRow: {
+  loggedSet: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.sm,
+  },
+  loggedSetHeader: {
     alignItems: 'center',
     flexDirection: 'row',
-    gap: spacing.xs,
+    gap: spacing.sm,
   },
   seriesToggle: {
     alignItems: 'center',
     borderRadius: radius.sm,
     borderWidth: 1,
-    height: 44,
+    height: 48,
     justifyContent: 'center',
-    width: 44,
+    width: 48,
+  },
+  loggedSetCopy: {
+    flex: 1,
+    gap: spacing.xxs,
+  },
+  setInputs: {
+    flexDirection: 'row',
+    gap: spacing.xs,
+  },
+  setInput: {
+    flex: 1,
+    gap: spacing.xxs,
   },
   input: {
     borderRadius: radius.sm,
     borderWidth: 1,
-    flex: 1,
     fontSize: 16,
-    minHeight: 44,
-    paddingHorizontal: spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: spacing.xs,
+    textAlign: 'center',
   },
   noteInput: {
     borderRadius: radius.sm,
