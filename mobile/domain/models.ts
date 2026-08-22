@@ -69,6 +69,35 @@ export interface UserProfile {
 
 export type ProfileDraft = Omit<UserProfile, 'createdAt' | 'updatedAt'>;
 
+export type WorkoutLogStatus = 'in-progress' | 'completed';
+
+export interface LoggedSet {
+  id: string;
+  exerciseId: string;
+  exerciseName: string;
+  setNumber: number;
+  target: string;
+  rest: string;
+  load: number | null;
+  repetitions: number | null;
+  rpe: number | null;
+  completed: boolean;
+}
+
+export interface WorkoutLog {
+  id: string;
+  planId: string;
+  planVersion: string;
+  sessionId: string;
+  sessionTitle: string;
+  startedAt: string;
+  updatedAt: string;
+  completedAt: string | null;
+  status: WorkoutLogStatus;
+  note: string;
+  sets: LoggedSet[];
+}
+
 export interface ExerciseTrendPoint {
   label: string;
   load: number;
