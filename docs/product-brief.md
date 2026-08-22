@@ -33,7 +33,7 @@ This data is stored in the profile and can be edited. Each plan stores a copy of
 ## Safety principles
 
 - Show clear notices for acute pain, injury, or declared pregnancy/conditions; recommend professional care when appropriate.
-- Explain technique in practical language: setup, execution, breathing, common mistakes, and a safer alternative.
+- Explain technique in practical language: setup, execution, breathing, and common mistakes.
 - Do not present recommendations as medical prescriptions or set absolute loads without the person's own data.
 
 ## First-version criteria

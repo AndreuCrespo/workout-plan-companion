@@ -16,7 +16,6 @@ export interface Exercise {
   execution: string;
   breathing: string;
   commonMistakes: string[];
-  saferAlternative: string;
   sets: ExerciseSet[];
 }
 

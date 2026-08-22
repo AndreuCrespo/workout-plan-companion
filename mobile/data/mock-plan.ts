@@ -9,7 +9,6 @@ const createGobletSquat = (): Exercise => ({
   execution: 'Desciende con control hasta una profundidad cómoda y empuja el suelo para volver arriba.',
   breathing: 'Inspira antes de bajar y suelta el aire al subir sin perder la tensión del tronco.',
   commonMistakes: ['Elevar los talones', 'Perder la posición neutra de la espalda', 'Rebotar al final del recorrido'],
-  saferAlternative: 'Reduce la carga o usa una caja como referencia de profundidad.',
   sets: [
     { target: '3 × 8 repeticiones · RPE 7', rest: '90 s' },
     { target: '1 × 10 repeticiones · RPE 6', rest: '90 s' },
@@ -25,7 +24,6 @@ const createRomanianDeadlift = (): Exercise => ({
   execution: 'Desplaza la cadera hacia atrás hasta notar tensión en la parte posterior de las piernas y vuelve apretando glúteos.',
   breathing: 'Toma aire antes de bajar y expúlsalo de forma controlada al regresar.',
   commonMistakes: ['Doblar demasiado las rodillas', 'Alejar la carga del cuerpo', 'Buscar más recorrido perdiendo control'],
-  saferAlternative: 'Haz el movimiento sin carga frente a un espejo o acorta el recorrido.',
   sets: [
     { target: '3 × 10 repeticiones · RPE 7', rest: '90 s' },
   ],
@@ -40,7 +38,6 @@ const createChestPress = (): Exercise => ({
   execution: 'Baja las mancuernas a los lados del pecho con control y empuja hasta extender los brazos sin bloquearlos con fuerza.',
   breathing: 'Inspira al bajar y expulsa el aire durante el empuje.',
   commonMistakes: ['Perder el apoyo de los pies', 'Abrir demasiado los codos', 'Bajar rápido sin control'],
-  saferAlternative: 'Usa menos carga o realiza el press en máquina con recorrido cómodo.',
   sets: [
     { target: '3 × 8 repeticiones · RPE 7', rest: '90 s' },
   ],
@@ -55,7 +52,6 @@ const createSeatedRow = (): Exercise => ({
   execution: 'Lleva el agarre hacia el abdomen mientras juntas suavemente las escápulas; vuelve lento al inicio.',
   breathing: 'Suelta el aire al remar e inspira al volver.',
   commonMistakes: ['Tirar con impulso del tronco', 'Elevar los hombros', 'Acortar la vuelta del movimiento'],
-  saferAlternative: 'Reduce la carga y pausa un segundo con los codos atrás.',
   sets: [
     { target: '3 × 10 repeticiones · RPE 7', rest: '75 s' },
   ],
@@ -70,7 +66,6 @@ const createStepUp = (): Exercise => ({
   execution: 'Apoya todo el pie, sube sin impulsarte con la pierna de atrás y baja despacio.',
   breathing: 'Respira de forma continua, expulsando aire al subir.',
   commonMistakes: ['Impulsarse con la pierna de atrás', 'Dejar caer la rodilla hacia dentro', 'Usar una altura excesiva'],
-  saferAlternative: 'Baja la altura del cajón o realiza una zancada asistida.',
   sets: [
     { target: '3 × 8 por lado · RPE 6', rest: '75 s' },
   ],
@@ -85,7 +80,6 @@ const createDeadBug = (): Exercise => ({
   execution: 'Extiende de forma alterna una pierna y el brazo contrario hasta donde mantengas control; vuelve y cambia.',
   breathing: 'Expulsa el aire al extender y toma aire al regresar.',
   commonMistakes: ['Arquear la espalda baja', 'Moverse demasiado rápido', 'Forzar el rango de la pierna'],
-  saferAlternative: 'Mueve solo una pierna o acorta el recorrido.',
   sets: [
     { target: '3 × 6 por lado · RPE 6', rest: '45 s' },
   ],

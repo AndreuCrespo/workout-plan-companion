@@ -63,17 +63,6 @@ export default function ExerciseDetailScreen() {
         </Card>
       </View>
 
-      <Card style={[styles.card, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
-        <AppText variant="bodyStrong">Alternativa más sencilla</AppText>
-        <AppText tone="secondary">{exercise.saferAlternative}</AppText>
-      </Card>
-
-      <Card style={styles.card}>
-        <AppText variant="bodyStrong">Escucha tus señales</AppText>
-        <AppText tone="secondary" variant="caption">
-          Si notas dolor agudo, detén el ejercicio. Una lesión o condición clínica requiere consultar a un profesional.
-        </AppText>
-      </Card>
     </Screen>
   );
 }
