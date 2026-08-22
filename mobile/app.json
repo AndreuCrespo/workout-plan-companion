@@ -15,7 +15,8 @@
         "backgroundColor": "#121416",
         "foregroundImage": "./assets/images/logo-epic-v1.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.anonymous.gimnasio"
     },
     "web": {
       "bundler": "metro",
