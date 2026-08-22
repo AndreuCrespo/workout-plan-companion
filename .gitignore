@@ -1,0 +1,19 @@
+# JavaScript / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Native build artefacts
+android/
+ios/
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.vscode/
