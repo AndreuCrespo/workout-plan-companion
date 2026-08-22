@@ -4,16 +4,13 @@ import { useRouter } from 'expo-router';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
-import { Pill } from '@/components/ui/Pill';
 import { SessionSummaryCard } from '@/components/ui/SessionSummaryCard';
 import { useProfile } from '@/profile/profile-context';
 import { trainingRepository } from '@/repositories/local-training-repository';
-import { useAppTheme } from '@/theme/theme-context';
-import { radius, spacing } from '@/theme/tokens';
+import { spacing } from '@/theme/tokens';
 
 export default function TodayScreen() {
   const router = useRouter();
-  const { theme } = useAppTheme();
   const { profile } = useProfile();
 
   if (!profile) {
@@ -63,13 +60,6 @@ export default function TodayScreen() {
         </View>
       </View>
 
-      <Card style={[styles.safetyCard, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
-        <Pill label="Entrena con atención" tone="accent" />
-        <AppText variant="bodyStrong">Ajusta el plan a cómo te encuentres hoy.</AppText>
-        <AppText tone="secondary" variant="caption">
-          Si aparece dolor agudo, pausa el ejercicio y consulta a un profesional.
-        </AppText>
-      </Card>
     </Screen>
   );
 }
@@ -96,9 +86,5 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
     minHeight: 100,
     justifyContent: 'center',
-  },
-  safetyCard: {
-    borderRadius: radius.lg,
-    gap: spacing.sm,
   },
 });
