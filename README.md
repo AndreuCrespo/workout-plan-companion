@@ -44,6 +44,31 @@ GitHub Actions ejecuta ambas comprobaciones en cada push y pull request dirigido
 - `mobile/repositories/`: contratos e implementación local de datos y preferencias.
 - `docs/`: brief de producto y sistema visual aprobados.
 
+## Probar Android por USB desde WSL
+
+Para trabajar con Expo Go sin red Wi-Fi, Windows debe compartir el teléfono con WSL mediante `usbipd-win`. Hace falta tener la depuración USB autorizada en el teléfono y `adb` instalado en WSL.
+
+1. En PowerShell de Windows con permisos de administrador, identifica y adjunta el dispositivo:
+
+   ```powershell
+   usbipd list
+   usbipd bind --busid <BUSID>
+   usbipd attach --wsl --busid <BUSID>
+   ```
+
+2. En WSL, comprueba que el estado del teléfono es `device`, crea el puente y arranca Expo:
+
+   ```bash
+   adb devices -l
+   adb reverse tcp:8081 tcp:8081
+   cd mobile
+   npm start -- --localhost --port 8081
+   ```
+
+3. Escanea el QR desde Expo Go. Al guardar cambios, Fast Refresh actualiza la app en el teléfono.
+
+Al desconectar, puede ser necesario repetir el adjunto USB. Nunca compartas autorizaciones RSA ni tokens.
+
 ## Licencia
 
 Pendiente de decidir antes de autorizar explícitamente la reutilización del código por terceros.
