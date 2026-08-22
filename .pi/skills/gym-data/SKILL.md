@@ -1,12 +1,12 @@
 ---
 name: gym-data
-description: Diseña la futura persistencia de perfil, planes, sesiones y progreso para la app de gimnasio con privacidad y versionado.
+description: Design future persistence for profiles, plans, workouts, and progress in the gym app with privacy and versioning.
 ---
 
-# Datos y backend
+# Data and backend
 
-Usa este skill solo para definir o implementar la capa de datos. Lee `docs/product-brief.md` y conserva el historial: un plan publicado y una sesión registrada no se reescriben.
+Use this skill only to define or implement the data layer. Read `docs/product-brief.md` and preserve history: a published plan and a logged workout must not be overwritten.
 
-- Modela perfil, preferencias, plan mensual, semanas, sesiones, ejercicios, series registradas y notas.
-- Cuando llegue Supabase, protege los datos por usuario con RLS y nunca expongas claves de servicio en el cliente.
-- Separa datos sensibles de analítica opcional y pide autorización antes de crear o cambiar recursos remotos.
+- Model the profile, preferences, monthly plan, weeks, workouts, exercises, logged sets, and notes.
+- When Supabase is introduced, protect user data with RLS and never expose service keys in the client.
+- Separate sensitive data from optional analytics and request authorisation before creating or changing remote resources.

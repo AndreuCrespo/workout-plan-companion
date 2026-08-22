@@ -1,43 +1,43 @@
-# Brief de producto — app de gimnasio
+# Product brief — gym app
 
-## Usuario y problema
+## User and problem
 
-Una persona que antes seguía el plan de un monitor y ahora entrena por su cuenta. Quiere llegar al gimnasio, saber exactamente qué toca, entender cada ejercicio y ver que progresa sin perder tiempo configurando hojas de cálculo.
+A person who used to follow a coach's plan and now trains independently. They want to arrive at the gym, know exactly what to do, understand each exercise, and see progress without spending time maintaining spreadsheets.
 
-## Experiencia principal
+## Core experience
 
-1. Al abrir por primera vez, completa un onboarding breve.
-2. Ve en **Hoy** la próxima sesión, duración estimada y objetivo.
-3. Inicia la sesión, consulta técnica del ejercicio cuando la necesita y registra cada serie.
-4. Termina, añade una nota opcional y actualiza su progreso.
-5. Al inicio de un ciclo, revisa y confirma el siguiente plan mensual; los resultados anteriores sirven de contexto, pero el usuario conserva el control.
+1. On first launch, they complete a short onboarding flow.
+2. In **Today (Hoy)**, they see the next workout, estimated duration, and goal.
+3. They start the workout, consult exercise technique when needed, and log every set.
+4. They finish, add an optional note, and update their progress.
+5. At the beginning of a cycle, they review and confirm the next monthly plan; previous results provide context, while the user stays in control.
 
-## Navegación
+## Navigation
 
-| Sección | Contenido principal |
+| Section | Main content |
 | --- | --- |
-| Hoy | Próxima sesión, estado del plan, CTA para entrenar y racha/adherencia. |
-| Mi plan | Ciclo mensual, selector de semana, sesiones y detalle de día. |
-| Progreso | Adherencia, volumen, evolución de cargas y notas relevantes. |
-| Perfil | Datos del onboarding, unidades, equipo, privacidad y Apariencia. |
+| Today (Hoy) | Next workout, plan status, workout CTA, and streak/adherence. |
+| My plan (Mi plan) | Monthly cycle, week selector, workouts, and day detail. |
+| Progress (Progreso) | Adherence, volume, load progression, and relevant notes. |
+| Profile (Perfil) | Onboarding details, units, equipment, privacy, and Appearance. |
 
-## Datos del onboarding
+## Onboarding data
 
-- Objetivo prioritario (fuerza, masa muscular, salud general o volver a entrenar).
-- Experiencia, días disponibles, duración de sesión y equipamiento.
-- Preferencias y limitaciones declaradas por la persona.
-- Unidades y tema visual.
+- Primary goal (strength, muscle gain, general health, or returning to training).
+- Experience, available days, workout duration, and equipment.
+- The person's preferences and declared limitations.
+- Units and visual theme.
 
-Estos datos se guardan en el perfil y son editables. Cada plan guarda una copia de los parámetros que lo originaron y sus sesiones registradas no se modifican retrospectivamente.
+This data is stored in the profile and can be edited. Each plan stores a copy of the parameters that originated it, and its logged workouts are not retrospectively modified.
 
-## Principios de seguridad
+## Safety principles
 
-- Mostrar avisos claros ante dolor agudo, lesión o embarazo/condiciones declaradas; recomendar atención profesional cuando corresponda.
-- Explicar técnica con lenguaje práctico: preparación, ejecución, respiración, errores comunes y alternativa segura.
-- No presentar recomendaciones como prescripción médica ni fijar cargas absolutas sin datos de la persona.
+- Show clear notices for acute pain, injury, or declared pregnancy/conditions; recommend professional care when appropriate.
+- Explain technique in practical language: setup, execution, breathing, common mistakes, and a safer alternative.
+- Do not present recommendations as medical prescriptions or set absolute loads without the person's own data.
 
-## Criterios de la primera versión
+## First-version criteria
 
-- La persona puede completar el flujo principal con datos de muestra, incluso sin conexión o cuenta.
-- Cambiar de tema no altera navegación ni datos y permanece al reiniciar la aplicación.
-- La UI cabe y se puede usar en una pantalla de móvil de 360 px de ancho.
+- A person can complete the main flow with sample data, even without a connection or account.
+- Changing the theme does not alter navigation or data and persists after the app restarts.
+- The UI fits and remains usable on a 360 px-wide mobile screen.

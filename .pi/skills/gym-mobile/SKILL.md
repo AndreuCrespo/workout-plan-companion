@@ -1,14 +1,14 @@
 ---
 name: gym-mobile
-description: Implementa la aplicación Expo/React Native con TypeScript, rutas claras, estado local y una base preparada para el backend futuro.
+description: Implement the Expo app with TypeScript, clear routes, local state, and a foundation ready for a future backend.
 ---
 
-# Implementación móvil
+# Mobile implementation
 
-Trabaja dentro de `mobile/` y conserva las decisiones de `AGENTS.md`.
+Work inside `mobile/` and preserve the decisions in `AGENTS.md`.
 
-- Usa TypeScript estricto y APIs compatibles con la versión de Expo instalada.
-- Separa rutas, componentes, dominio, datos de muestra y almacenamiento local; no mezcles contenido de ejemplo con presentación compleja.
-- Introduce una interfaz de repositorio antes de acoplar una pantalla a Supabase.
-- Mantén cambios pequeños y verificables; ejecuta lint, typecheck y tests disponibles al terminar.
-- No ejecutes builds de tienda, despliegues, ni configures credenciales sin autorización explícita.
+- Use strict TypeScript and APIs compatible with the installed Expo version.
+- Separate routes, components, domain, sample data, and local storage; do not mix example content with complex presentation.
+- Introduce a repository interface before coupling a screen to Supabase.
+- Keep changes small and verifiable; run lint, typecheck, and available tests at the end.
+- Do not run store builds, deployments, or configure credentials without explicit authorisation.

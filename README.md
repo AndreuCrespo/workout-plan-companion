@@ -1,20 +1,22 @@
 # Workout Plan Companion
 
-Aplicación móvil personal para organizar un plan mensual de gimnasio, guiar cada sesión y registrar progreso. Está construida con Expo, React Native y TypeScript.
+A personal mobile app for organising a monthly gym plan, guiding each workout, and tracking progress. It is built with Expo, React Native, and TypeScript.
 
-> Esta aplicación no realiza diagnósticos médicos ni sustituye a un profesional sanitario. Ante dolor agudo, lesión o una condición clínica, pausa el ejercicio y consulta a un profesional.
+> This app does not provide medical diagnoses or replace healthcare professionals. If you experience acute pain, an injury, or a clinical condition, stop exercising and seek professional advice.
 
-## Estado actual · v0.1.0
+## Current status · v0.1.0
 
-- Navegación con Expo Router: **Hoy**, **Mi plan**, **Progreso** y **Perfil**.
-- Plan mensual local de cuatro semanas, detalle de ejercicios y flujo estructural de sesión.
-- Dos temas persistentes: Verde activo y Grafito naranja.
-- Datos de muestra y repositorios locales, preparados para sustituirse más adelante por una persistencia remota.
-- Sin cuentas, Supabase, credenciales ni servicios externos de datos.
+- Expo Router navigation: **Today**, **My plan**, **Progress**, and **Profile**.
+- A local four-week monthly plan, exercise details, and a structural workout-session flow.
+- Two persistent themes: Active Green and Graphite Orange.
+- Sample data and local repositories, ready to be replaced by remote persistence later.
+- No accounts, Supabase, credentials, or external data services.
 
-## Ejecutar en desarrollo
+The repository documentation is in English. The current in-app interface is Spanish; bilingual localisation is planned separately.
 
-Requiere Node.js 24 y npm.
+## Run in development
+
+Requires Node.js 24 and npm.
 
 ```bash
 cd mobile
@@ -22,9 +24,9 @@ npm install
 npm start
 ```
 
-Para probarlo en un teléfono, instala Expo Go y escanea el código QR desde la misma red Wi-Fi.
+To test it on a phone, install Expo Go and scan the QR code while connected to the same Wi-Fi network.
 
-## Comprobaciones
+## Checks
 
 ```bash
 cd mobile
@@ -32,23 +34,23 @@ npm run lint
 npm run typecheck
 ```
 
-GitHub Actions ejecuta ambas comprobaciones en cada push y pull request dirigido a `main`.
+GitHub Actions runs both checks for every push and pull request targeting `main`.
 
-## Estructura
+## Structure
 
-- `mobile/app/`: rutas y pantallas de Expo Router.
-- `mobile/components/`: componentes reutilizables de interfaz.
-- `mobile/theme/`: tokens y proveedor de temas.
-- `mobile/domain/`: modelos TypeScript.
-- `mobile/data/`: datos de muestra aislados.
-- `mobile/repositories/`: contratos e implementación local de datos y preferencias.
-- `docs/`: brief de producto y sistema visual aprobados.
+- `mobile/app/`: Expo Router routes and screens.
+- `mobile/components/`: reusable UI components.
+- `mobile/theme/`: theme tokens and provider.
+- `mobile/domain/`: TypeScript models.
+- `mobile/data/`: isolated sample data.
+- `mobile/repositories/`: contracts and local implementations for data and preferences.
+- `docs/`: approved product brief and visual system.
 
-## Probar Android por USB desde WSL
+## Test Android over USB from WSL
 
-Para trabajar con Expo Go sin red Wi-Fi, Windows debe compartir el teléfono con WSL mediante `usbipd-win`. Hace falta tener la depuración USB autorizada en el teléfono y `adb` instalado en WSL.
+To use Expo Go without Wi-Fi, Windows must share the phone with WSL through `usbipd-win`. USB debugging must be authorised on the phone and `adb` must be installed in WSL.
 
-1. En PowerShell de Windows con permisos de administrador, identifica y adjunta el dispositivo:
+1. In an elevated Windows PowerShell, identify and attach the device:
 
    ```powershell
    usbipd list
@@ -56,7 +58,7 @@ Para trabajar con Expo Go sin red Wi-Fi, Windows debe compartir el teléfono con
    usbipd attach --wsl --busid <BUSID>
    ```
 
-2. En WSL, comprueba que el estado del teléfono es `device`, crea el puente y arranca Expo:
+2. In WSL, confirm that the phone state is `device`, create the port bridge, and start Expo:
 
    ```bash
    adb devices -l
@@ -65,10 +67,10 @@ Para trabajar con Expo Go sin red Wi-Fi, Windows debe compartir el teléfono con
    npm start -- --localhost --port 8081
    ```
 
-3. Escanea el QR desde Expo Go. Al guardar cambios, Fast Refresh actualiza la app en el teléfono.
+3. Scan the QR code from Expo Go. Fast Refresh updates the app on the phone after each saved change.
 
-Al desconectar, puede ser necesario repetir el adjunto USB. Nunca compartas autorizaciones RSA ni tokens.
+You may need to attach the phone again after unplugging it. Never share RSA authorisations or tokens.
 
-## Licencia
+## Licence
 
-Pendiente de decidir antes de autorizar explícitamente la reutilización del código por terceros.
+Pending a decision before explicitly allowing third parties to reuse the code.

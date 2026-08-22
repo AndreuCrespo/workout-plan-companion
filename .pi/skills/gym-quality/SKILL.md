@@ -1,13 +1,13 @@
 ---
 name: gym-quality
-description: Revisa calidad, accesibilidad y regresiones de la app móvil de gimnasio antes de dar una entrega por terminada.
+description: Review the gym mobile app for quality, accessibility, and regressions before considering a delivery complete.
 ---
 
-# Calidad de entrega
+# Delivery quality
 
-Revisa el cambio contra `AGENTS.md`, `docs/product-brief.md` y `docs/design-system.md`.
+Review the change against `AGENTS.md`, `docs/product-brief.md`, and `docs/design-system.md`.
 
-- Ejecuta las comprobaciones disponibles y reporta exactamente cuáles se ejecutaron y sus resultados.
-- Comprueba rutas principales, alternancia persistente de temas, legibilidad en móvil estrecho y estados sin datos.
-- Señala riesgos de seguridad, accesibilidad, privacidad o historial de entrenamiento sin arreglar asuntos ajenos al cambio.
-- No declares una verificación que no se haya ejecutado.
+- Run the available checks and report exactly which ones ran and their results.
+- Check main routes, persistent theme switching, readability on narrow mobile screens, and no-data states.
+- Flag unresolved security, accessibility, privacy, or workout-history risks without fixing unrelated issues.
+- Never claim a check was run if it was not executed.

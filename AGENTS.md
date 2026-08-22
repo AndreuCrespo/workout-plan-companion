@@ -1,39 +1,39 @@
-# Gimnasio — contexto de proyecto
+# Gym App — project context
 
-## Propósito
+## Purpose
 
-Aplicación móvil personal para entrenar en gimnasio sin depender de un monitor: recoge contexto, crea y presenta planes mensuales de cuatro semanas, guía cada sesión y registra progreso. La aplicación no hace diagnóstico médico ni sustituye a un profesional sanitario.
+A personal mobile app for training at the gym without relying on a coach: it gathers context, creates and presents four-week monthly plans, guides each workout, and records progress. The application does not provide medical diagnoses or replace healthcare professionals.
 
-El producto se comunica en español claro, cercano y sin promesas de resultados. Un dolor agudo, lesión o condición clínica requiere pausar y consultar a un profesional.
+The product communicates in clear, approachable Spanish and makes no result promises. Acute pain, an injury, or a clinical condition requires pausing and consulting a professional.
 
-## Decisiones ya tomadas
+## Approved decisions
 
-- Cliente: React Native con Expo y TypeScript estricto, dentro de `mobile/`.
-- Navegación: Expo Router, con cuatro pestañas: **Hoy**, **Mi plan**, **Progreso** y **Perfil**.
-- Persistencia futura: Supabase para cuenta, perfil, planes y registros. No crear un proyecto remoto, credenciales ni migraciones en producción sin autorización explícita.
-- Plan inicial: plantilla mensual de 4 semanas; cada sesión tiene calentamiento, ejercicios, series/repeticiones/RPE o descanso y cierre. Los planes publicados se versionan: nunca se reescribe el histórico.
-- Onboarding persistente: objetivo, experiencia, disponibilidad, duración de sesión, equipamiento, limitaciones declaradas, unidades y preferencias; se puede editar desde Perfil y alimenta próximos planes.
-- Tema visual: selector persistente en **Perfil → Apariencia**. Predeterminado `verde-activo`; alternativa `grafito-naranja`; el cambio se aplica inmediatamente.
+- Client: React Native with Expo and strict TypeScript, inside `mobile/`.
+- Navigation: Expo Router, with four tabs: **Today (Hoy)**, **My plan (Mi plan)**, **Progress (Progreso)**, and **Profile (Perfil)**.
+- Future persistence: Supabase for accounts, profiles, plans, and logs. Do not create a remote project, credentials, or production migrations without explicit approval.
+- Initial plan: a four-week monthly template; every workout has a warm-up, exercises, sets/repetitions/RPE or rest, and a cool-down. Published plans are versioned: history is never overwritten.
+- Persistent onboarding: goal, experience, availability, workout duration, equipment, declared limitations, units, and preferences; it can be edited from Profile and informs future plans.
+- Visual theme: persistent selector in **Profile → Appearance (Perfil → Apariencia)**. The default is `verde-activo`; `grafito-naranja` is the alternative; changes apply immediately.
 
-## Alcance MVP
+## MVP scope
 
-1. Onboarding y perfil editable.
-2. Plan mensual navegable por semanas y sesiones.
-3. Ejecución y registro de una sesión con carga, repeticiones, RPE y notas.
-4. Ficha de ejercicio con instrucciones, puntos técnicos, errores frecuentes y una ilustración/animación segura de sustituir más tarde.
-5. Progreso básico: adherencia, volumen y evolución por ejercicio.
+1. Editable onboarding and profile.
+2. Monthly plan navigable by week and workout.
+3. Workout execution and logging for load, repetitions, RPE, and notes.
+4. Exercise detail with instructions, technical cues, common mistakes, and an illustration/animation that can be safely replaced later.
+5. Basic progress: adherence, volume, and progression by exercise.
 
-Fuera del MVP: redes sociales, pagos, wearables, dieta/calorías, diagnóstico de lesiones, generación automática sin revisión y notificaciones complejas.
+Out of scope for the MVP: social features, payments, wearables, nutrition/calorie tracking, injury diagnosis, unreviewed automatic generation, and complex notifications.
 
-## Forma de trabajar
+## Working approach
 
-- Lee `docs/product-brief.md` y `docs/design-system.md` antes de decisiones de producto o UI.
-- Antes de añadir una dependencia, comprueba que Expo no cubra la necesidad; prefiera bibliotecas mantenidas y compatibles con el SDK instalado.
-- Mantén datos de muestra aislados y una capa de repositorio para que Supabase sustituya el almacenamiento local sin reescribir pantallas.
-- No almacenes secretos en el repositorio ni en el cliente. Pide confirmación antes de crear servicios externos, desplegar o ejecutar builds de distribución.
-- Tras cambios, ejecuta comprobaciones proporcionadas por el proyecto: typecheck, lint y tests relevantes. No ignores errores.
-- Usa el skill adecuado al área: `/skill:gym-product`, `/skill:gym-ui`, `/skill:gym-mobile`, `/skill:gym-data` o `/skill:gym-quality`.
+- Read `docs/product-brief.md` and `docs/design-system.md` before making product or UI decisions.
+- Before adding a dependency, check whether Expo already covers the need; prefer maintained libraries compatible with the installed SDK.
+- Keep sample data isolated and use a repository layer so Supabase can replace local storage without rewriting screens.
+- Never store secrets in the repository or client. Ask for confirmation before creating external services, deploying, or running distribution builds.
+- After changes, run the project's provided typecheck, lint, and relevant tests. Do not ignore errors.
+- Use the appropriate skill: `/skill:gym-product`, `/skill:gym-ui`, `/skill:gym-mobile`, `/skill:gym-data`, or `/skill:gym-quality`.
 
-## Primera entrega de código
+## First code delivery
 
-Crear el shell de la app Expo en `mobile/`: rutas de las cuatro pestañas, datos de muestra locales, tema verde activo, cambio a grafito naranja desde Perfil y pantallas estructurales para el flujo de sesión. No integrar Supabase todavía.
+Create the Expo app shell in `mobile/`: four-tab routes, local sample data, the Active Green theme, a switch to Graphite Orange from Profile, and structural screens for the workout flow. Do not integrate Supabase yet.

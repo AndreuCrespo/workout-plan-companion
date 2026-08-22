@@ -1,14 +1,14 @@
 ---
 name: gym-ui
-description: Diseña o implementa pantallas y componentes de la app de gimnasio respetando los temas Verde activo y Grafito naranja.
+description: Design or implement gym app screens and components while respecting the Active Green and Graphite Orange themes.
 ---
 
-# Interfaz de gimnasio
+# Gym interface
 
-Lee `docs/design-system.md` y las decisiones pertinentes en `AGENTS.md` antes de tocar UI.
+Read `docs/design-system.md` and the relevant decisions in `AGENTS.md` before changing UI.
 
-- Centraliza tokens y evita colores codificados en las pantallas.
-- Mantén las cuatro pestañas aprobadas y el selector en Perfil → Apariencia.
-- Diseña primero para móvil estrecho, uso con una mano y estados reales: vacío, carga, completado y error.
-- Para ejercicios, reserva una zona sustituible para ilustración/animación y ofrece texto técnico breve y accionable.
-- Verifica contraste, objetivos táctiles, etiquetas de accesibilidad, Safe Area y tamaño de fuente.
+- Centralise tokens and avoid hard-coded colours in screens.
+- Keep the four approved tabs and the selector in **Profile → Appearance (Perfil → Apariencia)**.
+- Design first for narrow mobile screens, one-handed use, and real states: empty, loading, completed, and error.
+- For exercises, reserve a replaceable illustration/animation area and provide short, actionable technique text.
+- Verify contrast, accessible labels, Safe Area, touch targets, and font scaling.

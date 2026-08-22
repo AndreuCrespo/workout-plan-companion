@@ -1,53 +1,53 @@
-# Sistema visual — base aprobada
+# Visual system — approved foundation
 
-La interfaz debe sentirse cálida, clara y enfocada. No es una app de culturismo agresiva: prioriza lectura rápida, confianza y acción durante el entrenamiento.
+The interface should feel warm, clear, and focused. This is not an aggressive bodybuilding app: it prioritises fast reading, confidence, and action during training.
 
-## Temas
+## Themes
 
-### 01 · Verde activo — predeterminado
+### 01 · Active Green — default
 
-| Token | Valor |
+| Token | Value |
 | --- | --- |
-| Fondo | `#F4F7F5` |
-| Superficie | `#FFFFFF` |
-| Texto | `#14241E` |
-| Texto secundario | `#587066` |
-| Primario | `#177453` |
-| Primario suave | `#DDEFE7` |
-| Lima de énfasis | `#C8EE72` |
-| Ámbar cálido | `#FFBD72` |
-| Borde | `#D9E5DE` |
+| Background | `#F4F7F5` |
+| Surface | `#FFFFFF` |
+| Text | `#14241E` |
+| Secondary text | `#587066` |
+| Primary | `#177453` |
+| Soft primary | `#DDEFE7` |
+| Emphasis lime | `#C8EE72` |
+| Warm amber | `#FFBD72` |
+| Border | `#D9E5DE` |
 
-### 09 · Grafito naranja — alternativa
+### 09 · Graphite Orange — alternative
 
-| Token | Valor |
+| Token | Value |
 | --- | --- |
-| Fondo | `#202326` |
-| Superficie | `#2B2F32` |
-| Superficie elevada | `#353A3E` |
-| Texto | `#F7F7F5` |
-| Texto secundario | `#B4BAB8` |
-| Primario | `#ED682B` |
-| Primario intenso | `#FF8040` |
-| Ámbar de énfasis | `#FACB65` |
-| Borde | `#454B50` |
+| Background | `#202326` |
+| Surface | `#2B2F32` |
+| Elevated surface | `#353A3E` |
+| Text | `#F7F7F5` |
+| Secondary text | `#B4BAB8` |
+| Primary | `#ED682B` |
+| Strong primary | `#FF8040` |
+| Emphasis amber | `#FACB65` |
+| Border | `#454B50` |
 
-## Componentes y jerarquía
+## Components and hierarchy
 
-- Barra superior compacta: saludo/contexto y acción contextual; no saturar con iconos.
-- Tarjeta de sesión destacada: día, foco, duración y botón primario de acción.
-- Tarjetas secundarias: superficie limpia, radio 20–24, borde discreto; las acciones quedan claras con jerarquía de tamaño y color, no solo con sombra.
-- Navegación inferior fija con icono y etiqueta: Hoy, Mi plan, Progreso y Perfil.
-- Botones principales de ancho completo y altura táctil mínima de 48 px. Los controles de registro son cómodos con una mano.
-- Tipografía: sans serif del sistema, títulos con peso semibold/bold; números de series y carga con buena alineación tabular cuando sea posible.
+- Compact top bar: greeting/context and a contextual action; do not overload it with icons.
+- Prominent workout card: day, focus, duration, and a primary action button.
+- Secondary cards: clean surface, 20–24 radius, and a subtle border; actions are clear through colour and size hierarchy, not shadows alone.
+- Fixed bottom navigation with icon and label: Hoy, Mi plan, Progreso, and Perfil.
+- Full-width primary buttons with a minimum 48 px touch height. Logging controls should be comfortable to use with one hand.
+- System sans serif typeface, semibold/bold titles, and well-aligned tabular set and load numbers when available.
 
-## Comportamiento del tema
+## Theme behaviour
 
-El usuario cambia el tema en **Perfil → Apariencia**. El estado se aplica al instante, se persiste localmente al principio y se sincronizará con el perfil cuando exista cuenta. Nunca se hereda por accidente de la configuración del sistema ni se pierde al actualizar un plan.
+The user changes the theme in **Profile → Appearance (Perfil → Apariencia)**. The state applies immediately, is initially persisted locally, and will synchronise with the profile when an account exists. It must never be accidentally inherited from the system setting or lost when a plan is updated.
 
-## Accesibilidad
+## Accessibility
 
-- Contraste suficiente en texto, botones y estados.
-- No comunicar estado solo mediante color.
-- Etiquetas accesibles en controles e iconos, objetivos táctiles amplios y soporte de tamaño de fuente.
-- Respetar Safe Area, teclado y reducción de movimiento cuando aplique.
+- Sufficient contrast for text, buttons, and states.
+- Do not communicate state through colour alone.
+- Accessible labels for controls and icons, generous touch targets, and support for font scaling.
+- Respect Safe Area, keyboard handling, and reduced motion where applicable.

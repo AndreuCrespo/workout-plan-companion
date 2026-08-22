@@ -1,13 +1,13 @@
 ---
 name: gym-product
-description: Define o ajusta el alcance, flujos y reglas de producto de la aplicación personal de gimnasio, sin convertirlo en consejo médico.
+description: Define or adjust the scope, flows, and product rules of the personal gym app without turning it into medical advice.
 ---
 
-# Producto de gimnasio
+# Gym product
 
-Lee `docs/product-brief.md` antes de cambiar requisitos. Prioriza que una persona pueda entender y completar su sesión con poco esfuerzo.
+Read `docs/product-brief.md` before changing requirements. Prioritise a person's ability to understand and complete their workout with minimal effort.
 
-- Conserva como núcleo onboarding, plan mensual, ejecución, ficha de ejercicio y progreso.
-- Distingue hechos registrados, recomendaciones propuestas y planes publicados versionados.
-- Si aparece dolor agudo, lesión o una condición clínica, ofrece una advertencia prudente; no diagnostiques ni prescribas.
-- No introduzcas monetización, social, nutrición, wearables o generación remota en el MVP sin que se solicite.
+- Keep onboarding, the monthly plan, workout execution, exercise detail, and progress as the core.
+- Distinguish logged facts, proposed recommendations, and versioned published plans.
+- For acute pain, injury, or a clinical condition, provide a cautious warning; do not diagnose or prescribe.
+- Do not introduce monetisation, social features, nutrition, wearables, or remote generation to the MVP unless requested.
