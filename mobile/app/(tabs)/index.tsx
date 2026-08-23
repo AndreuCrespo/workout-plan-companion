@@ -6,20 +6,20 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { SessionSummaryCard } from '@/components/ui/SessionSummaryCard';
 import { useProfile } from '@/profile/profile-context';
+import { useProgressSnapshot } from '@/progress/use-progress-snapshot';
 import { trainingRepository } from '@/repositories/local-training-repository';
 import { spacing } from '@/theme/tokens';
 
 export default function TodayScreen() {
   const router = useRouter();
   const { profile } = useProfile();
+  const plan = trainingRepository.getPlan();
+  const nextSession = trainingRepository.getNextSession();
+  const { progress, isLoading } = useProgressSnapshot(plan);
 
   if (!profile) {
     return null;
   }
-
-  const plan = trainingRepository.getPlan();
-  const progress = trainingRepository.getProgress();
-  const nextSession = trainingRepository.getNextSession();
 
   function openNextSession() {
     router.push({ pathname: '/sesion/[sessionId]', params: { sessionId: nextSession.id } });
@@ -46,20 +46,19 @@ export default function TodayScreen() {
         </View>
         <View style={styles.metrics}>
           <Card style={styles.metricCard}>
-            <AppText variant="title">{progress.adherencePercent}%</AppText>
+            <AppText variant="title">{isLoading || !progress ? '—' : `${progress.adherencePercent}%`}</AppText>
             <AppText tone="secondary" variant="caption">
               Adherencia
             </AppText>
           </Card>
           <Card style={styles.metricCard}>
-            <AppText variant="title">2 días</AppText>
+            <AppText variant="title">{isLoading || !progress ? '—' : progress.completedSessions}</AppText>
             <AppText tone="secondary" variant="caption">
-              Racha actual
+              Sesiones completadas
             </AppText>
           </Card>
         </View>
       </View>
-
     </Screen>
   );
 }

@@ -103,14 +103,16 @@ export interface WorkoutLog {
   updatedAt: string;
   completedAt: string | null;
   status: WorkoutLogStatus;
+  units: MeasurementUnits;
   note: string;
   sets: LoggedSet[];
   exerciseFeedback: ExerciseFeedback[];
 }
 
 export interface ExerciseTrendPoint {
+  id: string;
   label: string;
-  load: number;
+  loadKg: number;
 }
 
 export interface ProgressSnapshot {
@@ -118,8 +120,7 @@ export interface ProgressSnapshot {
   completedSessions: number;
   plannedSessions: number;
   monthlyVolumeKg: number;
-  volumeChangePercent: number;
-  exerciseName: string;
+  exerciseName: string | null;
   exerciseTrend: ExerciseTrendPoint[];
   latestNote: string | null;
 }
