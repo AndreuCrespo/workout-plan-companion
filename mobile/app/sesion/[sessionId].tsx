@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
+import { ExerciseFeedbackControl } from '@/components/session/ExerciseFeedbackControl';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -9,7 +10,7 @@ import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { createWorkoutLog, updateWorkoutLog } from '@/domain/workout-log';
-import type { LoggedSet, WorkoutLog } from '@/domain/models';
+import type { ExerciseFeedback, LoggedSet, WorkoutLog } from '@/domain/models';
 import { useProfile } from '@/profile/profile-context';
 import { trainingRepository } from '@/repositories/local-training-repository';
 import { workoutLogRepository } from '@/repositories/local-workout-log-repository';
@@ -236,6 +237,7 @@ export default function SessionScreen() {
     const nextLog = updateWorkoutLog(log, {
       note: log.note,
       sets: log.sets.map((loggedSet) => (loggedSet.id === setId ? { ...loggedSet, ...changes } : loggedSet)),
+      exerciseFeedback: log.exerciseFeedback,
     });
     persistLog(nextLog);
   }
@@ -245,7 +247,33 @@ export default function SessionScreen() {
       return;
     }
 
-    persistLog(updateWorkoutLog(log, { note, sets: log.sets }));
+    persistLog(updateWorkoutLog(log, { note, sets: log.sets, exerciseFeedback: log.exerciseFeedback }));
+  }
+
+  function updateExerciseFeedback(
+    exerciseId: string,
+    exerciseName: string,
+    changes: Partial<Pick<ExerciseFeedback, 'reaction' | 'note'>>,
+  ) {
+    if (!log || !canEdit) {
+      return;
+    }
+
+    const currentFeedback = log.exerciseFeedback.find((feedback) => feedback.exerciseId === exerciseId) ?? {
+      exerciseId,
+      exerciseName,
+      reaction: null,
+      note: '',
+    };
+    const otherFeedback = log.exerciseFeedback.filter((feedback) => feedback.exerciseId !== exerciseId);
+
+    persistLog(
+      updateWorkoutLog(log, {
+        note: log.note,
+        sets: log.sets,
+        exerciseFeedback: [...otherFeedback, { ...currentFeedback, ...changes }],
+      }),
+    );
   }
 
   async function completeSession() {
@@ -339,6 +367,12 @@ export default function SessionScreen() {
 
         {session.exercises.map((exercise) => {
           const loggedSets = log?.sets.filter((loggedSet) => loggedSet.exerciseId === exercise.id) ?? [];
+          const feedback = log?.exerciseFeedback.find((item) => item.exerciseId === exercise.id) ?? {
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            reaction: null,
+            note: '',
+          };
 
           return (
             <Card key={exercise.id} style={styles.exerciseCard}>
@@ -376,6 +410,14 @@ export default function SessionScreen() {
                   ))}
                 </View>
               )}
+
+              {flowState !== 'ready' ? (
+                <ExerciseFeedbackControl
+                  editable={canEdit}
+                  feedback={feedback}
+                  onChange={(changes) => updateExerciseFeedback(exercise.id, exercise.name, changes)}
+                />
+              ) : null}
 
               <PrimaryButton
                 accessibilityHint={`Abre instrucciones de ${exercise.name}`}

@@ -84,6 +84,15 @@ export interface LoggedSet {
   completed: boolean;
 }
 
+export type ExerciseFeedbackReaction = 'up' | 'down' | null;
+
+export interface ExerciseFeedback {
+  exerciseId: string;
+  exerciseName: string;
+  reaction: ExerciseFeedbackReaction;
+  note: string;
+}
+
 export interface WorkoutLog {
   id: string;
   planId: string;
@@ -96,6 +105,7 @@ export interface WorkoutLog {
   status: WorkoutLogStatus;
   note: string;
   sets: LoggedSet[];
+  exerciseFeedback: ExerciseFeedback[];
 }
 
 export interface ExerciseTrendPoint {
