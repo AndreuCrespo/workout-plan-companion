@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Pill } from '@/components/ui/Pill';
+import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SessionSummaryCard } from '@/components/ui/SessionSummaryCard';
 import { trainingRepository } from '@/repositories/local-training-repository';
@@ -22,6 +23,10 @@ export default function PlanScreen() {
     router.push({ pathname: '/sesion/[sessionId]', params: { sessionId } });
   }
 
+  function openPlanConversation() {
+    router.push('../plan/propuesta');
+  }
+
   return (
     <Screen>
       <ScreenHeader description={plan.version} title="Mi plan" />
@@ -31,6 +36,14 @@ export default function PlanScreen() {
         <AppText tone="secondary" variant="caption">
           Publicado · Tu historial no se modifica
         </AppText>
+      </View>
+
+      <View style={[styles.planConversationCard, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
+        <View style={styles.planConversationCopy}>
+          <AppText variant="heading">Prepara tu próximo ciclo</AppText>
+          <AppText tone="secondary">Habla con el asistente sobre lo que quieres cambiar o mantener.</AppText>
+        </View>
+        <PrimaryButton label="Hablar con el asistente" onPress={openPlanConversation} variant="secondary" />
       </View>
 
       <View style={styles.section}>
@@ -88,6 +101,15 @@ const styles = StyleSheet.create({
   },
   section: {
     gap: spacing.sm,
+  },
+  planConversationCard: {
+    borderRadius: radius.md,
+    borderWidth: 1,
+    gap: spacing.sm,
+    padding: spacing.md,
+  },
+  planConversationCopy: {
+    gap: spacing.xxs,
   },
   weekPicker: {
     gap: spacing.sm,
