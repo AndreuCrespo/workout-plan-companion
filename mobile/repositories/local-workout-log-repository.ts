@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import type { LoggedSet, WorkoutLog } from '@/domain/models';
+import type { ExerciseFeedback, LoggedSet, WorkoutLog } from '@/domain/models';
 import type { WorkoutLogRepository } from '@/repositories/workout-log-repository';
 
 const DRAFTS_STORAGE_KEY = '@gimnasio/workout-log-drafts';
@@ -33,25 +33,69 @@ function isLoggedSet(value: unknown): value is LoggedSet {
   );
 }
 
-function isWorkoutLog(value: unknown): value is WorkoutLog {
+function isExerciseFeedback(value: unknown): value is ExerciseFeedback {
   if (!isRecord(value)) {
     return false;
   }
 
   return (
-    typeof value.id === 'string' &&
-    typeof value.planId === 'string' &&
-    typeof value.planVersion === 'string' &&
-    typeof value.sessionId === 'string' &&
-    typeof value.sessionTitle === 'string' &&
-    typeof value.startedAt === 'string' &&
-    typeof value.updatedAt === 'string' &&
-    (typeof value.completedAt === 'string' || value.completedAt === null) &&
-    (value.status === 'in-progress' || value.status === 'completed') &&
-    typeof value.note === 'string' &&
-    Array.isArray(value.sets) &&
-    value.sets.every(isLoggedSet)
+    typeof value.exerciseId === 'string' &&
+    typeof value.exerciseName === 'string' &&
+    (value.reaction === 'up' || value.reaction === 'down' || value.reaction === null) &&
+    typeof value.note === 'string'
   );
+}
+
+function getExerciseFeedback(value: unknown): ExerciseFeedback[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter(isExerciseFeedback);
+}
+
+function parseWorkoutLog(value: unknown): WorkoutLog | null {
+  if (!isRecord(value)) {
+    return null;
+  }
+
+  if (
+    typeof value.id !== 'string' ||
+    typeof value.planId !== 'string' ||
+    typeof value.planVersion !== 'string' ||
+    typeof value.sessionId !== 'string' ||
+    typeof value.sessionTitle !== 'string' ||
+    typeof value.startedAt !== 'string' ||
+    typeof value.updatedAt !== 'string' ||
+    (typeof value.completedAt !== 'string' && value.completedAt !== null) ||
+    (value.status !== 'in-progress' && value.status !== 'completed') ||
+    typeof value.note !== 'string' ||
+    !Array.isArray(value.sets)
+  ) {
+    return null;
+  }
+
+  const sets = value.sets.filter(isLoggedSet);
+
+  if (sets.length !== value.sets.length) {
+    return null;
+  }
+
+  return {
+    id: value.id,
+    planId: value.planId,
+    planVersion: value.planVersion,
+    sessionId: value.sessionId,
+    sessionTitle: value.sessionTitle,
+    startedAt: value.startedAt,
+    updatedAt: value.updatedAt,
+    completedAt: value.completedAt,
+    status: value.status,
+    note: value.note,
+    sets,
+    // Los registros creados antes de este campo siguen siendo válidos.
+    exerciseFeedback: getExerciseFeedback(value.exerciseFeedback),
+  };
 }
 
 async function readLogs(storageKey: string): Promise<WorkoutLog[]> {
@@ -63,7 +107,9 @@ async function readLogs(storageKey: string): Promise<WorkoutLog[]> {
     }
 
     const parsedLogs: unknown = JSON.parse(storedLogs);
-    return Array.isArray(parsedLogs) ? parsedLogs.filter(isWorkoutLog) : [];
+    return Array.isArray(parsedLogs)
+      ? parsedLogs.map(parseWorkoutLog).filter((log): log is WorkoutLog => log !== null)
+      : [];
   } catch {
     return [];
   }
