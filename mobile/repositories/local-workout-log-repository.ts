@@ -54,6 +54,10 @@ function getExerciseFeedback(value: unknown): ExerciseFeedback[] {
   return value.filter(isExerciseFeedback);
 }
 
+function getMeasurementUnits(value: unknown): WorkoutLog['units'] {
+  return value === 'imperial' ? 'imperial' : 'metric';
+}
+
 function parseWorkoutLog(value: unknown): WorkoutLog | null {
   if (!isRecord(value)) {
     return null;
@@ -91,6 +95,8 @@ function parseWorkoutLog(value: unknown): WorkoutLog | null {
     updatedAt: value.updatedAt,
     completedAt: value.completedAt,
     status: value.status,
+    // Los registros creados antes de guardar las unidades usan kilogramos.
+    units: getMeasurementUnits(value.units),
     note: value.note,
     sets,
     // Los registros creados antes de este campo siguen siendo válidos.

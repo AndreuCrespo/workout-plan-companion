@@ -5,73 +5,128 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { convertKilogramsForDisplay } from '@/domain/progress';
+import { useProfile } from '@/profile/profile-context';
+import { useProgressSnapshot } from '@/progress/use-progress-snapshot';
 import { trainingRepository } from '@/repositories/local-training-repository';
 import { useAppTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
 export default function ProgressScreen() {
   const { theme } = useAppTheme();
-  const progress = trainingRepository.getProgress();
-  const maxLoad = Math.max(...progress.exerciseTrend.map((point) => point.load));
+  const { profile } = useProfile();
+  const plan = trainingRepository.getPlan();
+  const { progress, isLoading, hasError } = useProgressSnapshot(plan);
+
+  if (!profile) {
+    return null;
+  }
+  const loadUnit = profile.units === 'imperial' ? 'lb' : 'kg';
+  const maxLoadKg = Math.max(...(progress?.exerciseTrend.map((point) => point.loadKg) ?? [1]), 1);
 
   return (
     <Screen>
-      <ScreenHeader description="Una vista simple de tu constancia y cargas registradas." title="Progreso" />
+      <ScreenHeader description="Tus datos se actualizan al guardar una sesión." title="Progreso" />
 
-      <Card style={styles.card}>
-        <View style={styles.rowBetween}>
-          <View style={styles.copyBlock}>
-            <AppText variant="heading">Adherencia del ciclo</AppText>
-            <AppText tone="secondary" variant="caption">
-              {progress.completedSessions} de {progress.plannedSessions} sesiones completadas
-            </AppText>
-          </View>
-          <AppText variant="title">{progress.adherencePercent}%</AppText>
-        </View>
-        <ProgressBar accessibilityLabel="Adherencia del ciclo" value={progress.adherencePercent} />
-      </Card>
-
-      <View style={styles.metrics}>
-        <Card style={styles.metricCard}>
-          <AppText variant="title">{progress.monthlyVolumeKg.toLocaleString('es-ES')} kg</AppText>
-          <AppText tone="secondary" variant="caption">
-            Volumen registrado
-          </AppText>
+      {isLoading ? (
+        <Card style={styles.card}>
+          <AppText variant="heading">Cargando tu progreso</AppText>
+          <AppText tone="secondary">Leemos las sesiones guardadas en este dispositivo.</AppText>
         </Card>
-        <Card style={styles.metricCard}>
-          <AppText variant="title">+{progress.volumeChangePercent}%</AppText>
-          <AppText tone="secondary" variant="caption">
-            Frente al ciclo anterior
-          </AppText>
-        </Card>
-      </View>
+      ) : null}
 
-      <Card style={styles.card}>
-        <AppText variant="heading">Evolución por ejercicio</AppText>
-        <AppText tone="secondary" variant="caption">
-          {progress.exerciseName} · mejor serie registrada
-        </AppText>
-        <View accessibilityLabel={`Evolución de ${progress.exerciseName}`} style={styles.chart}>
-          {progress.exerciseTrend.map((point) => (
-            <View key={point.label} style={styles.chartColumn}>
-              <AppText variant="caption">{point.load} kg</AppText>
-              <View style={[styles.barTrack, { backgroundColor: theme.colors.primarySoft }]}>
-                <View style={[styles.bar, { backgroundColor: theme.colors.primary, height: `${(point.load / maxLoad) * 100}%` }]} />
+      {hasError ? (
+        <Card style={styles.card}>
+          <AppText variant="heading">No pudimos cargar el progreso</AppText>
+          <AppText tone="secondary">Vuelve a abrir esta pestaña para intentarlo de nuevo.</AppText>
+        </Card>
+      ) : null}
+
+      {progress && !isLoading && !hasError ? (
+        <>
+          <Card style={styles.card}>
+            <View style={styles.rowBetween}>
+              <View style={styles.copyBlock}>
+                <AppText variant="heading">Adherencia del ciclo</AppText>
+                <AppText tone="secondary" variant="caption">
+                  {progress.completedSessions} de {progress.plannedSessions} sesiones completadas
+                </AppText>
               </View>
-              <AppText tone="secondary" variant="caption">
-                {point.label}
-              </AppText>
+              <AppText variant="title">{progress.adherencePercent}%</AppText>
             </View>
-          ))}
-        </View>
-      </Card>
+            <ProgressBar accessibilityLabel="Adherencia del ciclo" value={progress.adherencePercent} />
+          </Card>
 
-      <Card style={styles.emptyCard}>
-        <AppText variant="heading">Notas de entrenamiento</AppText>
-        <AppText tone="secondary">
-          {progress.latestNote ?? 'Aún no hay notas registradas. Podrás añadir una al terminar una sesión.'}
-        </AppText>
-      </Card>
+          {progress.completedSessions === 0 ? (
+            <Card style={styles.emptyCard}>
+              <AppText variant="heading">Tu progreso empezará aquí</AppText>
+              <AppText tone="secondary">
+                Completa una sesión y guarda cargas, repeticiones o una nota para ver tu evolución real.
+              </AppText>
+            </Card>
+          ) : (
+            <>
+              <View style={styles.metrics}>
+                <Card style={styles.metricCard}>
+                  <AppText variant="title">
+                    {convertKilogramsForDisplay(progress.monthlyVolumeKg, profile.units).toLocaleString('es-ES')} {loadUnit}
+                  </AppText>
+                  <AppText tone="secondary" variant="caption">
+                    Volumen registrado
+                  </AppText>
+                </Card>
+                <Card style={styles.metricCard}>
+                  <AppText variant="title">{progress.completedSessions}</AppText>
+                  <AppText tone="secondary" variant="caption">
+                    Sesiones guardadas
+                  </AppText>
+                </Card>
+              </View>
+
+              {progress.exerciseName && progress.exerciseTrend.length > 0 ? (
+                <Card style={styles.card}>
+                  <AppText variant="heading">Evolución por ejercicio</AppText>
+                  <AppText tone="secondary" variant="caption">
+                    {progress.exerciseName} · mejor serie registrada
+                  </AppText>
+                  <View accessibilityLabel={`Evolución de ${progress.exerciseName}`} style={styles.chart}>
+                    {progress.exerciseTrend.map((point) => {
+                      const displayedLoad = convertKilogramsForDisplay(point.loadKg, profile.units);
+
+                      return (
+                        <View key={point.id} style={styles.chartColumn}>
+                          <AppText variant="caption">{displayedLoad} {loadUnit}</AppText>
+                          <View style={[styles.barTrack, { backgroundColor: theme.colors.primarySoft }]}>
+                            <View
+                              style={[
+                                styles.bar,
+                                {
+                                  backgroundColor: theme.colors.primary,
+                                  height: `${Math.max((point.loadKg / maxLoadKg) * 100, 8)}%`,
+                                },
+                              ]}
+                            />
+                          </View>
+                          <AppText tone="secondary" variant="caption">
+                            {point.label}
+                          </AppText>
+                        </View>
+                      );
+                    })}
+                  </View>
+                </Card>
+              ) : null}
+
+              <Card style={styles.emptyCard}>
+                <AppText variant="heading">Notas de entrenamiento</AppText>
+                <AppText tone="secondary">
+                  {progress.latestNote ?? 'Aún no has añadido una nota al terminar una sesión.'}
+                </AppText>
+              </Card>
+            </>
+          )}
+        </>
+      ) : null}
     </Screen>
   );
 }

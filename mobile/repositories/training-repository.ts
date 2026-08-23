@@ -1,4 +1,4 @@
-import type { Exercise, MonthlyPlan, ProgressSnapshot, WorkoutSession } from '@/domain/models';
+import type { Exercise, MonthlyPlan, WorkoutSession } from '@/domain/models';
 
 /**
  * Punto de acceso de las pantallas al plan y al progreso.
@@ -9,5 +9,4 @@ export interface TrainingRepository {
   getNextSession(): WorkoutSession;
   getSession(sessionId: string): WorkoutSession | undefined;
   getExercise(exerciseId: string): Exercise | undefined;
-  getProgress(): ProgressSnapshot;
 }

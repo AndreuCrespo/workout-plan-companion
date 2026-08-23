@@ -1,4 +1,4 @@
-import type { ExerciseFeedback, LoggedSet, MonthlyPlan, WorkoutLog, WorkoutSession } from '@/domain/models';
+import type { ExerciseFeedback, LoggedSet, MeasurementUnits, MonthlyPlan, WorkoutLog, WorkoutSession } from '@/domain/models';
 
 function getPlannedSetCount(target: string): number {
   const firstNumber = Number.parseInt(target, 10);
@@ -43,7 +43,7 @@ function createExerciseFeedback(session: WorkoutSession): ExerciseFeedback[] {
   }));
 }
 
-export function createWorkoutLog(plan: MonthlyPlan, session: WorkoutSession): WorkoutLog {
+export function createWorkoutLog(plan: MonthlyPlan, session: WorkoutSession, units: MeasurementUnits): WorkoutLog {
   const timestamp = new Date().toISOString();
 
   return {
@@ -56,6 +56,7 @@ export function createWorkoutLog(plan: MonthlyPlan, session: WorkoutSession): Wo
     updatedAt: timestamp,
     completedAt: null,
     status: 'in-progress',
+    units,
     note: '',
     sets: createLoggedSets(session),
     exerciseFeedback: createExerciseFeedback(session),

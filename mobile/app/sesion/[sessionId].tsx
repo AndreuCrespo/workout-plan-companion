@@ -208,7 +208,7 @@ export default function SessionScreen() {
       return;
     }
 
-    const nextLog = createWorkoutLog(plan, session);
+    const nextLog = createWorkoutLog(plan, session, profile?.units ?? 'metric');
     setIsSaving(true);
     setStorageError(false);
 
