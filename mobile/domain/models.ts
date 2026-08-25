@@ -113,6 +113,22 @@ export interface ExerciseTrendPoint {
   id: string;
   label: string;
   loadKg: number;
+  repetitions: number | null;
+  estimatedOneRepMaxKg: number | null;
+}
+
+export interface ActivityDay {
+  date: string;
+  completedSessions: number;
+}
+
+export interface ExercisePersonalRecord {
+  exerciseId: string;
+  exerciseName: string;
+  loadKg: number;
+  repetitions: number;
+  estimatedOneRepMaxKg: number;
+  recordedAt: string;
 }
 
 export interface ProgressSnapshot {
@@ -120,6 +136,8 @@ export interface ProgressSnapshot {
   completedSessions: number;
   plannedSessions: number;
   monthlyVolumeKg: number;
+  activityDays: ActivityDay[];
+  personalRecords: ExercisePersonalRecord[];
   exerciseName: string | null;
   exerciseTrend: ExerciseTrendPoint[];
   latestNote: string | null;

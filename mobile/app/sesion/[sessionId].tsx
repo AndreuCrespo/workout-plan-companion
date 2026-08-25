@@ -9,6 +9,8 @@ import { Card } from '@/components/ui/Card';
 import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { getLatestExercisePerformances } from '@/domain/workout-history';
+import type { PreviousExercisePerformance } from '@/domain/workout-history';
 import { createWorkoutLog, updateWorkoutLog } from '@/domain/workout-log';
 import type { ExerciseFeedback, LoggedSet, WorkoutLog } from '@/domain/models';
 import { useProfile } from '@/profile/profile-context';
@@ -129,6 +131,33 @@ function LoggedSetRow({ loggedSet, canEdit, loadUnit, onChange }: LoggedSetRowPr
   );
 }
 
+interface PreviousPerformanceProps {
+  performance: PreviousExercisePerformance;
+  loadUnit: string;
+}
+
+function PreviousPerformance({ performance, loadUnit }: PreviousPerformanceProps) {
+  const { theme } = useAppTheme();
+  const performedDate = new Date(performance.performedAt);
+  const dateLabel = Number.isNaN(performedDate.getTime())
+    ? 'una sesión anterior'
+    : performedDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+  return (
+    <View style={[styles.previousPerformance, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
+      <AppText tone="primary" variant="caption">Última vez · {dateLabel}</AppText>
+      <AppText tone="secondary" variant="caption">
+        {performance.sets.map((set) => {
+          const load = set.load === null ? 'Sin carga' : `${set.load} ${loadUnit}`;
+          const repetitions = set.repetitions === null ? 'sin repeticiones' : `× ${set.repetitions}`;
+          const rpe = set.rpe === null ? '' : ` · RPE ${set.rpe}`;
+          return `${load} ${repetitions}${rpe}`;
+        }).join(' · ')}
+      </AppText>
+    </View>
+  );
+}
+
 export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const router = useRouter();
@@ -141,6 +170,7 @@ export default function SessionScreen() {
   const [isHydrating, setIsHydrating] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [storageError, setStorageError] = useState(false);
+  const [previousPerformances, setPreviousPerformances] = useState<PreviousExercisePerformance[]>([]);
 
   useEffect(() => {
     let isMounted = true;
@@ -153,26 +183,39 @@ export default function SessionScreen() {
         return;
       }
 
-      const [completedLog, draft] = await Promise.all([
-        workoutLogRepository.getCompletedLog(session.id),
-        workoutLogRepository.getDraft(session.id),
-      ]);
+      try {
+        const [completedLogs, draft] = await Promise.all([
+          workoutLogRepository.getCompletedLogs(),
+          workoutLogRepository.getDraft(session.id),
+        ]);
+        const completedLog = completedLogs.find((storedLog) => storedLog.sessionId === session.id) ?? null;
 
-      if (!isMounted) {
-        return;
-      }
+        if (!isMounted) {
+          return;
+        }
 
-      if (completedLog) {
-        setLog(completedLog);
-        setFlowState('completed');
-      } else if (draft) {
-        setLog(draft);
-        setFlowState('in-progress');
-      } else {
-        setLog(null);
-        setFlowState('ready');
+        setPreviousPerformances(
+          getLatestExercisePerformances(completedLogs, session.exercises.map((exercise) => exercise.id), profile?.units ?? 'metric'),
+        );
+        if (completedLog) {
+          setLog(completedLog);
+          setFlowState('completed');
+        } else if (draft) {
+          setLog(draft);
+          setFlowState('in-progress');
+        } else {
+          setLog(null);
+          setFlowState('ready');
+        }
+      } catch {
+        if (isMounted) {
+          setStorageError(true);
+        }
+      } finally {
+        if (isMounted) {
+          setIsHydrating(false);
+        }
       }
-      setIsHydrating(false);
     }
 
     void hydrateLog();
@@ -180,7 +223,7 @@ export default function SessionScreen() {
     return () => {
       isMounted = false;
     };
-  }, [session]);
+  }, [profile?.units, session]);
 
   const completedSetCount = useMemo(
     () => log?.sets.filter((loggedSet) => loggedSet.completed).length ?? 0,
@@ -208,7 +251,7 @@ export default function SessionScreen() {
       return;
     }
 
-    const nextLog = createWorkoutLog(plan, session, profile?.units ?? 'metric');
+    const nextLog = createWorkoutLog(plan, session, profile?.units ?? 'metric', previousPerformances);
     setIsSaving(true);
     setStorageError(false);
 
@@ -373,6 +416,7 @@ export default function SessionScreen() {
             reaction: null,
             note: '',
           };
+          const previousPerformance = previousPerformances.find((performance) => performance.exerciseId === exercise.id);
 
           return (
             <Card key={exercise.id} style={styles.exerciseCard}>
@@ -388,6 +432,7 @@ export default function SessionScreen() {
 
               {flowState === 'ready' ? (
                 <View style={styles.targetList}>
+                  {previousPerformance ? <PreviousPerformance loadUnit={loadUnit} performance={previousPerformance} /> : null}
                   {exercise.sets.map((set) => (
                     <View key={set.target} style={styles.targetRow}>
                       <AppText variant="bodyStrong">{set.target}</AppText>
@@ -491,6 +536,12 @@ const styles = StyleSheet.create({
   },
   targetList: {
     gap: spacing.xs,
+  },
+  previousPerformance: {
+    borderRadius: radius.sm,
+    borderWidth: 1,
+    gap: spacing.xxs,
+    padding: spacing.sm,
   },
   targetRow: {
     alignItems: 'baseline',
