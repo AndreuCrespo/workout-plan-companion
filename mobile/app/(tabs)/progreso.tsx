@@ -1,5 +1,6 @@
 import { StyleSheet, View } from 'react-native';
 
+import { ActivityHeatmap } from '@/components/progress/ActivityHeatmap';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -12,6 +13,11 @@ import { trainingRepository } from '@/repositories/local-training-repository';
 import { useAppTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
+function formatRecordedDate(timestamp: string): string {
+  const date = new Date(timestamp);
+  return Number.isNaN(date.getTime()) ? 'Fecha no disponible' : date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+}
+
 export default function ProgressScreen() {
   const { theme } = useAppTheme();
   const { profile } = useProfile();
@@ -21,6 +27,7 @@ export default function ProgressScreen() {
   if (!profile) {
     return null;
   }
+
   const loadUnit = profile.units === 'imperial' ? 'lb' : 'kg';
   const maxLoadKg = Math.max(...(progress?.exerciseTrend.map((point) => point.loadKg) ?? [1]), 1);
 
@@ -66,6 +73,14 @@ export default function ProgressScreen() {
             </Card>
           ) : (
             <>
+              <Card style={styles.card}>
+                <View style={styles.copyBlock}>
+                  <AppText variant="heading">Actividad reciente</AppText>
+                  <AppText tone="secondary" variant="caption">Sesiones completadas en las últimas 12 semanas</AppText>
+                </View>
+                <ActivityHeatmap days={progress.activityDays} />
+              </Card>
+
               <View style={styles.metrics}>
                 <Card style={styles.metricCard}>
                   <AppText variant="title">
@@ -83,11 +98,34 @@ export default function ProgressScreen() {
                 </Card>
               </View>
 
+              {progress.personalRecords.length > 0 ? (
+                <Card style={styles.card}>
+                  <View style={styles.copyBlock}>
+                    <AppText variant="heading">Mejores marcas</AppText>
+                    <AppText tone="secondary" variant="caption">Estimación basada en una serie registrada de 1 a 12 repeticiones</AppText>
+                  </View>
+                  {progress.personalRecords.slice(0, 3).map((record) => (
+                    <View key={record.exerciseId} style={[styles.recordRow, { borderTopColor: theme.colors.border }]}>
+                      <View style={styles.copyBlock}>
+                        <AppText variant="bodyStrong">{record.exerciseName}</AppText>
+                        <AppText tone="secondary" variant="caption">
+                          {convertKilogramsForDisplay(record.loadKg, profile.units)} {loadUnit} × {record.repetitions} · {formatRecordedDate(record.recordedAt)}
+                        </AppText>
+                      </View>
+                      <View style={styles.recordValue}>
+                        <AppText variant="bodyStrong">{convertKilogramsForDisplay(record.estimatedOneRepMaxKg, profile.units)} {loadUnit}</AppText>
+                        <AppText tone="secondary" variant="caption">1RM est.</AppText>
+                      </View>
+                    </View>
+                  ))}
+                </Card>
+              ) : null}
+
               {progress.exerciseName && progress.exerciseTrend.length > 0 ? (
                 <Card style={styles.card}>
                   <AppText variant="heading">Evolución por ejercicio</AppText>
                   <AppText tone="secondary" variant="caption">
-                    {progress.exerciseName} · mejor serie registrada
+                    {progress.exerciseName} · mejor serie registrada en cada sesión
                   </AppText>
                   <View accessibilityLabel={`Evolución de ${progress.exerciseName}`} style={styles.chart}>
                     {progress.exerciseTrend.map((point) => {
@@ -114,6 +152,12 @@ export default function ProgressScreen() {
                       );
                     })}
                   </View>
+                  {progress.exerciseTrend.at(-1)?.estimatedOneRepMaxKg ? (
+                    <AppText tone="secondary" variant="caption">
+                      Última mejor serie: {convertKilogramsForDisplay(progress.exerciseTrend.at(-1)?.loadKg ?? 0, profile.units)} {loadUnit} ×{' '}
+                      {progress.exerciseTrend.at(-1)?.repetitions} · 1RM estimado {convertKilogramsForDisplay(progress.exerciseTrend.at(-1)?.estimatedOneRepMaxKg ?? 0, profile.units)} {loadUnit}
+                    </AppText>
+                  ) : null}
                 </Card>
               ) : null}
 
@@ -154,6 +198,18 @@ const styles = StyleSheet.create({
     gap: spacing.xxs,
     minHeight: 108,
     justifyContent: 'center',
+  },
+  recordRow: {
+    alignItems: 'center',
+    borderTopWidth: 1,
+    flexDirection: 'row',
+    gap: spacing.sm,
+    justifyContent: 'space-between',
+    paddingTop: spacing.sm,
+  },
+  recordValue: {
+    alignItems: 'flex-end',
+    gap: spacing.xxs,
   },
   chart: {
     alignItems: 'flex-end',
