@@ -1,3 +1,4 @@
+import type { PreviousExercisePerformance } from '@/domain/workout-history';
 import type { ExerciseFeedback, LoggedSet, MeasurementUnits, MonthlyPlan, WorkoutLog, WorkoutSession } from '@/domain/models';
 
 function getPlannedSetCount(target: string): number {
@@ -5,8 +6,11 @@ function getPlannedSetCount(target: string): number {
   return Number.isInteger(firstNumber) && firstNumber > 0 ? firstNumber : 1;
 }
 
-function createLoggedSets(session: WorkoutSession): LoggedSet[] {
+function createLoggedSets(session: WorkoutSession, previousPerformances: PreviousExercisePerformance[]): LoggedSet[] {
+  const performanceByExercise = new Map(previousPerformances.map((performance) => [performance.exerciseId, performance]));
+
   return session.exercises.flatMap((exercise) => {
+    const previousSets = performanceByExercise.get(exercise.id)?.sets ?? [];
     let nextSetNumber = 1;
 
     return exercise.sets.flatMap((set) => {
@@ -19,9 +23,9 @@ function createLoggedSets(session: WorkoutSession): LoggedSet[] {
           setNumber: nextSetNumber,
           target: set.target,
           rest: set.rest,
-          load: null,
-          repetitions: null,
-          rpe: null,
+          load: previousSets[nextSetNumber - 1]?.load ?? previousSets.at(-1)?.load ?? null,
+          repetitions: previousSets[nextSetNumber - 1]?.repetitions ?? previousSets.at(-1)?.repetitions ?? null,
+          rpe: previousSets[nextSetNumber - 1]?.rpe ?? previousSets.at(-1)?.rpe ?? null,
           completed: false,
         };
 
@@ -43,7 +47,12 @@ function createExerciseFeedback(session: WorkoutSession): ExerciseFeedback[] {
   }));
 }
 
-export function createWorkoutLog(plan: MonthlyPlan, session: WorkoutSession, units: MeasurementUnits): WorkoutLog {
+export function createWorkoutLog(
+  plan: MonthlyPlan,
+  session: WorkoutSession,
+  units: MeasurementUnits,
+  previousPerformances: PreviousExercisePerformance[] = [],
+): WorkoutLog {
   const timestamp = new Date().toISOString();
 
   return {
@@ -58,7 +67,7 @@ export function createWorkoutLog(plan: MonthlyPlan, session: WorkoutSession, uni
     status: 'in-progress',
     units,
     note: '',
-    sets: createLoggedSets(session),
+    sets: createLoggedSets(session, previousPerformances),
     exerciseFeedback: createExerciseFeedback(session),
   };
 }
