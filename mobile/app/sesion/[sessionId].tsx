@@ -3,6 +3,8 @@ import { Pressable, StyleSheet, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 
 import { ExerciseFeedbackControl } from '@/components/session/ExerciseFeedbackControl';
+import { RestTimerCard } from '@/components/session/RestTimerCard';
+import { SessionCompletionSummary } from '@/components/session/SessionCompletionSummary';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -14,6 +16,7 @@ import type { PreviousExercisePerformance } from '@/domain/workout-history';
 import { createWorkoutLog, updateWorkoutLog } from '@/domain/workout-log';
 import type { ExerciseFeedback, LoggedSet, WorkoutLog } from '@/domain/models';
 import { useProfile } from '@/profile/profile-context';
+import { useRestTimer } from '@/session/use-rest-timer';
 import { trainingRepository } from '@/repositories/local-training-repository';
 import { workoutLogRepository } from '@/repositories/local-workout-log-repository';
 import { useAppTheme } from '@/theme/theme-context';
@@ -171,6 +174,7 @@ export default function SessionScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const [storageError, setStorageError] = useState(false);
   const [previousPerformances, setPreviousPerformances] = useState<PreviousExercisePerformance[]>([]);
+  const { timer, start: startRestTimer, pause: pauseRestTimer, resume: resumeRestTimer, restart: restartRestTimer, dismiss: dismissRestTimer } = useRestTimer();
 
   useEffect(() => {
     let isMounted = true;
@@ -277,12 +281,17 @@ export default function SessionScreen() {
       return;
     }
 
+    const currentSet = log.sets.find((loggedSet) => loggedSet.id === setId);
     const nextLog = updateWorkoutLog(log, {
       note: log.note,
       sets: log.sets.map((loggedSet) => (loggedSet.id === setId ? { ...loggedSet, ...changes } : loggedSet)),
       exerciseFeedback: log.exerciseFeedback,
     });
     persistLog(nextLog);
+
+    if (changes.completed === true && !currentSet?.completed && currentSet) {
+      startRestTimer(currentSet.exerciseName, currentSet.rest);
+    }
   }
 
   function updateNote(note: string) {
@@ -381,6 +390,27 @@ export default function SessionScreen() {
           </AppText>
         ) : null}
       </Card>
+
+      {timer ? (
+        <RestTimerCard
+          exerciseName={timer.exerciseName}
+          isFinished={timer.isFinished}
+          isRunning={timer.isRunning}
+          onDismiss={dismissRestTimer}
+          onPause={pauseRestTimer}
+          onRestart={restartRestTimer}
+          onResume={resumeRestTimer}
+          remainingSeconds={timer.remainingSeconds}
+        />
+      ) : null}
+
+      {isCompleted && log ? (
+        <SessionCompletionSummary
+          displayUnits={profile?.units ?? log.units}
+          log={log}
+          onOpenProgress={() => router.replace('/progreso')}
+        />
+      ) : null}
 
       {storageError ? (
         <Card style={[styles.errorCard, { borderColor: theme.colors.warning }]}>
