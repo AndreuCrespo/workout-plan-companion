@@ -12,11 +12,20 @@ import { radius, spacing } from '@/theme/tokens';
 interface PlanConversationViewProps {
   conversation: PlanConversation;
   isSaving: boolean;
+  isGeneratingProposal: boolean;
   onRespond: (text: string, suggestionId?: string) => void;
   onRestart: () => void;
+  onGenerateProposal: () => void;
 }
 
-export function PlanConversationView({ conversation, isSaving, onRespond, onRestart }: PlanConversationViewProps) {
+export function PlanConversationView({
+  conversation,
+  isSaving,
+  isGeneratingProposal,
+  onRespond,
+  onRestart,
+  onGenerateProposal,
+}: PlanConversationViewProps) {
   const { theme } = useAppTheme();
   const [response, setResponse] = useState('');
   const activeMessageId = conversation.messages.at(-1)?.id;
@@ -83,7 +92,12 @@ export function PlanConversationView({ conversation, isSaving, onRespond, onRest
           <PrimaryButton disabled={isSaving || response.trim().length === 0} label="Enviar respuesta" onPress={sendFreeResponse} />
         </View>
       ) : (
-        <PlanRequestSummary conversation={conversation} onRestart={onRestart} />
+        <PlanRequestSummary
+          conversation={conversation}
+          isGeneratingProposal={isGeneratingProposal}
+          onGenerateProposal={onGenerateProposal}
+          onRestart={onRestart}
+        />
       )}
     </View>
   );
@@ -127,10 +141,12 @@ function Suggestions({ message, disabled, onRespond }: SuggestionsProps) {
 
 interface PlanRequestSummaryProps {
   conversation: PlanConversation;
+  isGeneratingProposal: boolean;
   onRestart: () => void;
+  onGenerateProposal: () => void;
 }
 
-function PlanRequestSummary({ conversation, onRestart }: PlanRequestSummaryProps) {
+function PlanRequestSummary({ conversation, isGeneratingProposal, onRestart, onGenerateProposal }: PlanRequestSummaryProps) {
   const { request } = conversation;
   const availability = `${trainingAvailabilityLabel(request.availability)}${request.availabilityDetails ? ` · ${request.availabilityDetails}` : ''}`;
   const environment = trainingEnvironmentLabel(request.environment, request.environmentDetails);
@@ -157,7 +173,12 @@ function PlanRequestSummary({ conversation, onRestart }: PlanRequestSummaryProps
       <AppText tone="secondary" variant="caption">
         Este borrador se guarda solo en este dispositivo. La conexión con el asistente remoto se añadirá después.
       </AppText>
-      <PrimaryButton label="Empezar de nuevo" onPress={onRestart} variant="secondary" />
+      <PrimaryButton
+        disabled={isGeneratingProposal}
+        label={isGeneratingProposal ? 'Preparando borrador…' : 'Generar borrador local'}
+        onPress={onGenerateProposal}
+      />
+      <PrimaryButton disabled={isGeneratingProposal} label="Empezar de nuevo" onPress={onRestart} variant="secondary" />
     </Card>
   );
 }

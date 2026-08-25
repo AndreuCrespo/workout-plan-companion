@@ -52,6 +52,7 @@ function RootNavigator() {
           <Stack.Screen name="perfil/apariencia" options={{ headerShown: false }} />
           <Stack.Screen name="perfil/editar" options={{ headerShown: false }} />
           <Stack.Screen name="plan/propuesta" options={{ headerShown: false }} />
+          <Stack.Screen name="plan/borrador" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Screen name="+not-found" options={{ title: 'No encontrada' }} />
       </Stack>
