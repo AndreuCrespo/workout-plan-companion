@@ -8,6 +8,7 @@ import { ExerciseStepGuide } from '@/components/ui/ExerciseStepGuide';
 import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { usePlan } from '@/plan/plan-context';
 import { trainingRepository } from '@/repositories/local-training-repository';
 import { useAppTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
@@ -15,8 +16,9 @@ import { spacing } from '@/theme/tokens';
 export default function ExerciseDetailScreen() {
   const { exerciseId } = useLocalSearchParams<{ exerciseId: string }>();
   const router = useRouter();
+  const { plan } = usePlan();
   const { theme } = useAppTheme();
-  const exercise = trainingRepository.getExercise(exerciseId);
+  const exercise = trainingRepository.getExercise(plan, exerciseId);
 
   if (!exercise) {
     return (

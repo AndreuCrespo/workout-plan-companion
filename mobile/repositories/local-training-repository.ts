@@ -1,23 +1,24 @@
-import { getMockExercise, getMockSession, mockNextSession, mockPlan } from '@/data/mock-plan';
+import type { MonthlyPlan } from '@/domain/models';
 import type { TrainingRepository } from '@/repositories/training-repository';
 
+function sessionsForPlan(plan: MonthlyPlan) {
+  return plan.weeks.flatMap((week) => week.sessions);
+}
+
 class LocalTrainingRepository implements TrainingRepository {
-  getPlan() {
-    return mockPlan;
+  getNextSession(plan: MonthlyPlan) {
+    return sessionsForPlan(plan).find((session) => session.status === 'upcoming') ?? sessionsForPlan(plan)[0];
   }
 
-  getNextSession() {
-    return mockNextSession;
+  getSession(plan: MonthlyPlan, sessionId: string) {
+    return sessionsForPlan(plan).find((session) => session.id === sessionId);
   }
 
-  getSession(sessionId: string) {
-    return getMockSession(sessionId);
+  getExercise(plan: MonthlyPlan, exerciseId: string) {
+    return sessionsForPlan(plan)
+      .flatMap((session) => session.exercises)
+      .find((exercise) => exercise.id === exerciseId);
   }
-
-  getExercise(exerciseId: string) {
-    return getMockExercise(exerciseId);
-  }
-
 }
 
 export const trainingRepository = new LocalTrainingRepository();

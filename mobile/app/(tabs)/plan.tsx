@@ -4,18 +4,24 @@ import { useRouter } from 'expo-router';
 
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
+import { Card } from '@/components/ui/Card';
 import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { SessionSummaryCard } from '@/components/ui/SessionSummaryCard';
-import { trainingRepository } from '@/repositories/local-training-repository';
+import { usePlan } from '@/plan/plan-context';
 import { useAppTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
 
+function publishedDateLabel(timestamp: string): string {
+  const date = new Date(timestamp);
+  return Number.isNaN(date.getTime()) ? 'Fecha no disponible' : date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
 export default function PlanScreen() {
   const router = useRouter();
+  const { history, plan } = usePlan();
   const { theme } = useAppTheme();
-  const plan = trainingRepository.getPlan();
   const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
   const selectedWeek = plan.weeks[selectedWeekIndex];
 
@@ -24,7 +30,7 @@ export default function PlanScreen() {
   }
 
   function openPlanConversation() {
-    router.push('../plan/propuesta');
+    router.push('/plan/propuesta');
   }
 
   return (
@@ -37,6 +43,20 @@ export default function PlanScreen() {
           Publicado · Tu historial no se modifica
         </AppText>
       </View>
+
+      {history.length > 1 ? (
+        <View style={styles.section}>
+          <AppText variant="heading">Historial de planes</AppText>
+          {history.slice(0, -1).reverse().map((publication) => (
+            <Card key={publication.id} style={styles.historyCard}>
+              <AppText variant="bodyStrong">{publication.plan.version}</AppText>
+              <AppText tone="secondary" variant="caption">
+                {publication.plan.name} · Publicado {publishedDateLabel(publication.publishedAt)}
+              </AppText>
+            </Card>
+          ))}
+        </View>
+      ) : null}
 
       <View style={[styles.planConversationCard, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
         <View style={styles.planConversationCopy}>
@@ -98,6 +118,9 @@ export default function PlanScreen() {
 const styles = StyleSheet.create({
   planMeta: {
     gap: spacing.sm,
+  },
+  historyCard: {
+    gap: spacing.xxs,
   },
   section: {
     gap: spacing.sm,

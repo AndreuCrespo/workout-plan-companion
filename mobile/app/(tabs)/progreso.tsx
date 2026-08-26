@@ -7,9 +7,9 @@ import { Card } from '@/components/ui/Card';
 import { ProgressBar } from '@/components/ui/ProgressBar';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { convertKilogramsForDisplay } from '@/domain/progress';
+import { usePlan } from '@/plan/plan-context';
 import { useProfile } from '@/profile/profile-context';
 import { useProgressSnapshot } from '@/progress/use-progress-snapshot';
-import { trainingRepository } from '@/repositories/local-training-repository';
 import { useAppTheme } from '@/theme/theme-context';
 import { spacing } from '@/theme/tokens';
 
@@ -20,8 +20,8 @@ function formatRecordedDate(timestamp: string): string {
 
 export default function ProgressScreen() {
   const { theme } = useAppTheme();
+  const { plan } = usePlan();
   const { profile } = useProfile();
-  const plan = trainingRepository.getPlan();
   const { progress, isLoading, hasError } = useProgressSnapshot(plan);
 
   if (!profile) {
