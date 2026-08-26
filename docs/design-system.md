@@ -43,7 +43,7 @@ The interface should feel warm, clear, and focused. This is not an aggressive bo
 
 ## Theme behaviour
 
-The user changes the theme in **Profile → Appearance (Perfil → Apariencia)**. The state applies immediately, is initially persisted locally, and will synchronise with the profile when an account exists. It must never be accidentally inherited from the system setting or lost when a plan is updated.
+The user changes the theme in **Profile → Appearance (Perfil → Apariencia)**. The state applies immediately and persists locally. A signed-in person can explicitly save a private backup of their profile and theme from **Account (Cuenta)**; theme changes are never uploaded automatically. It must never be accidentally inherited from the system setting or lost when a plan is updated.
 
 ## Accessibility
 

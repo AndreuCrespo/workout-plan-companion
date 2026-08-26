@@ -70,7 +70,7 @@ export default function AppearanceScreen() {
       <Card style={styles.card}>
         <AppText variant="bodyStrong">Preferencia local</AppText>
         <AppText tone="secondary" variant="caption">
-          Más adelante, esta preferencia se sincronizará con tu perfil cuando exista una cuenta. Cambiar de plan no la modifica.
+          Si tienes una cuenta, puedes guardar una copia privada del perfil y este tema desde Cuenta. Cambiar de plan no lo modifica.
         </AppText>
       </Card>
     </Screen>

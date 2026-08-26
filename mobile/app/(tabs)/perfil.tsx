@@ -75,7 +75,7 @@ export default function ProfileScreen() {
           <AppText variant="bodyStrong">{user ? 'Sesión conectada' : 'Aún usas la app sin cuenta'}</AppText>
           <AppText tone="secondary" variant="caption">
             {user
-              ? `Conectada como ${user.email ?? 'tu correo'}. La copia consentida de perfil, planes y registros se añadirá después.`
+              ? `Conectada como ${user.email ?? 'tu correo'}. Desde tu cuenta puedes guardar una copia consentida de perfil y tema; planes y registros siguen locales.`
               : 'Puedes entrar con un enlace de correo. Tus datos actuales siguen guardados solo en este dispositivo.'}
           </AppText>
           <PrimaryButton
