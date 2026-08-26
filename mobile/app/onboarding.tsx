@@ -113,6 +113,14 @@ export default function OnboardingScreen() {
             variant="secondary"
           />
         ) : null}
+        {step === 0 ? (
+          <PrimaryButton
+            accessibilityHint="Abre el acceso para recuperar una copia privada existente"
+            label="Ya tengo una cuenta"
+            onPress={() => router.push('/auth/iniciar-sesion')}
+            variant="secondary"
+          />
+        ) : null}
         <PrimaryButton
           disabled={isSaving}
           label={isLastStep ? (isSaving ? 'Guardando…' : 'Guardar y ver mi plan') : 'Continuar'}

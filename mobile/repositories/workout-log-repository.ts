@@ -8,6 +8,7 @@ export interface WorkoutLogRepository {
   getDraft(sessionId: string): Promise<WorkoutLog | null>;
   getCompletedLog(sessionId: string): Promise<WorkoutLog | null>;
   getCompletedLogs(): Promise<WorkoutLog[]>;
+  replaceCompletedLogs(logs: WorkoutLog[]): Promise<void>;
   saveDraft(log: WorkoutLog): Promise<void>;
   complete(log: WorkoutLog): Promise<WorkoutLog>;
 }

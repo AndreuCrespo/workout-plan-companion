@@ -7,18 +7,20 @@ import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { useProfile } from '@/profile/profile-context';
 import { spacing } from '@/theme/tokens';
 import { StyleSheet } from 'react-native';
 
 export default function AuthCallbackScreen() {
   const router = useRouter();
   const { authError, isHydrated, user } = useAuth();
+  const { profile } = useProfile();
 
   useEffect(() => {
     if (isHydrated && user) {
-      router.replace('/(tabs)/perfil');
+      router.replace(profile ? '/(tabs)/perfil' : '/auth/recuperar-copia');
     }
-  }, [isHydrated, router, user]);
+  }, [isHydrated, profile, router, user]);
 
   return (
     <Screen>
