@@ -49,7 +49,8 @@ GitHub Actions runs both checks for every push and pull request targeting `main`
 - `mobile/domain/`: TypeScript models.
 - `mobile/data/`: isolated sample data.
 - `mobile/repositories/`: contracts and local implementations for data and preferences.
-- `docs/`: approved product brief, visual system, third-party licence notices, and the [future Supabase/assistant architecture](docs/supabase-assistant-architecture.md).
+- `supabase/`: versioned SQL migrations; it contains no credentials.
+- `docs/`: approved product brief, visual system, third-party licence notices, the [future Supabase/assistant architecture](docs/supabase-assistant-architecture.md), and the [initial migration guide](docs/apply-supabase-foundation.md).
 
 ## Contributing
 
