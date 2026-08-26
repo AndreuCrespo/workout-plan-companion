@@ -9,6 +9,7 @@ interface ThemeContextValue {
   themeName: ThemeName;
   setThemeName: (themeName: ThemeName) => void;
   isHydrated: boolean;
+  restoreThemeName: (themeName: ThemeName) => Promise<void>;
   theme: (typeof themes)[ThemeName];
 }
 
@@ -38,19 +39,24 @@ export function AppThemeProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
-  const setThemeName = useCallback((nextThemeName: ThemeName) => {
+  const restoreThemeName = useCallback(async (nextThemeName: ThemeName) => {
+    await themePreferenceRepository.saveTheme(nextThemeName);
     setStoredThemeName(nextThemeName);
-    void themePreferenceRepository.saveTheme(nextThemeName);
   }, []);
+
+  const setThemeName = useCallback((nextThemeName: ThemeName) => {
+    void restoreThemeName(nextThemeName);
+  }, [restoreThemeName]);
 
   const value = useMemo(
     () => ({
       themeName,
       setThemeName,
       isHydrated,
+      restoreThemeName,
       theme: themes[themeName],
     }),
-    [isHydrated, setThemeName, themeName],
+    [isHydrated, restoreThemeName, setThemeName, themeName],
   );
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

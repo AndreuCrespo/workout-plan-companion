@@ -148,6 +148,14 @@ class LocalWorkoutLogRepository implements WorkoutLogRepository {
     return readLogs(COMPLETED_LOGS_STORAGE_KEY);
   }
 
+  async replaceCompletedLogs(logs: WorkoutLog[]): Promise<void> {
+    if (logs.some((log) => log.status !== 'completed' || log.completedAt === null)) {
+      throw new Error('La copia contiene un registro que no está terminado.');
+    }
+
+    await this.enqueueWrite(() => AsyncStorage.setItem(COMPLETED_LOGS_STORAGE_KEY, JSON.stringify(logs)));
+  }
+
   async saveDraft(log: WorkoutLog): Promise<void> {
     await this.enqueueWrite(async () => {
       const drafts = await readLogs(DRAFTS_STORAGE_KEY);

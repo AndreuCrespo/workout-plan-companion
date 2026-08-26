@@ -7,6 +7,7 @@ import { profileRepository } from '@/repositories/local-profile-repository';
 interface ProfileContextValue {
   profile: UserProfile | null;
   isHydrated: boolean;
+  replaceProfile: (profile: UserProfile) => Promise<void>;
   saveProfile: (draft: ProfileDraft) => Promise<void>;
 }
 
@@ -35,6 +36,11 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
+  const replaceProfile = useCallback(async (nextProfile: UserProfile) => {
+    await profileRepository.saveProfile(nextProfile);
+    setProfile(nextProfile);
+  }, []);
+
   const saveProfile = useCallback(
     async (draft: ProfileDraft) => {
       const now = new Date().toISOString();
@@ -56,9 +62,10 @@ export function ProfileProvider({ children }: PropsWithChildren) {
     () => ({
       profile,
       isHydrated,
+      replaceProfile,
       saveProfile,
     }),
-    [isHydrated, profile, saveProfile],
+    [isHydrated, profile, replaceProfile, saveProfile],
   );
 
   return <ProfileContext.Provider value={value}>{children}</ProfileContext.Provider>;
