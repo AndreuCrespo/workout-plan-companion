@@ -12,11 +12,9 @@ Esta guía aplica la base privada de datos diseñada para Workout Plan Companion
 - Triggers para impedir sobrescribir planes publicados y logs completados.
 - La RPC autenticada `complete_workout_log` para finalizar una sesión.
 
-No incorpora aún datos de catálogo, cuentas en la app, importación desde AsyncStorage, una Edge Function, proveedor de IA ni secretos.
+La migración no incorpora automáticamente datos desde AsyncStorage ni incluye una Edge Function, proveedor de IA o secretos. La app ofrece Magic Link y una copia manual y consentida de perfil y tema; los planes, logs y progreso siguen locales.
 
 ## Aplicación desde el panel
-
-No compartas la contraseña de Postgres, `service_role`, tokens personales ni claves de IA. Para conservarlos privados, aplica la migración desde el panel del proyecto:
 
 1. Abre **SQL Editor** en el panel del proyecto de desarrollo autorizado.
 2. Crea una consulta nueva.
@@ -67,4 +65,4 @@ Debe devolver una fila.
 
 ## Autenticación elegida
 
-El MVP usará **magic link por correo**. No es necesario cambiar proveedores todavía: la integración de Expo añadirá primero un esquema de enlace profundo y después se configurará su URL de redirección en Supabase Auth. El servicio de correo predeterminado de Supabase sirve para desarrollo limitado; antes de producción se necesitará SMTP propio y revisar sus límites.
+El MVP usa **magic link por correo**, con el callback profundo `gimnasio://auth/callback` configurado en Supabase Auth. El servicio de correo predeterminado de Supabase sirve para desarrollo limitado; antes de producción se necesitará SMTP propio y revisar sus límites.

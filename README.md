@@ -12,11 +12,11 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 - Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
 - Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
 - A persistent local plan conversation that produces a reviewable four-week proposal; publication is explicit, creates an immutable new version, and preserves prior plans and logs.
-- Optional Magic Link access through Supabase Auth, with the session kept in device secure storage; profile, plans, logs, and progress remain local until a consented migration is built.
-- A reviewed design for Supabase persistence and a secure remote assistant; remote data sync and AI are not implemented yet.
+- Optional Magic Link access through Supabase Auth, with the session kept in device secure storage; a person can explicitly back up their profile and theme, while plans, logs, and progress remain local.
+- A reviewed design for Supabase persistence and a secure remote assistant; remote plan/log sync and AI are not implemented yet.
 - Two persistent themes: Graphite Orange is the default; Active Green is the alternative.
 - Sample data and local repositories, ready to be replaced by remote persistence later.
-- No remote profile, plan, workout-log, progress, AI-provider, or external media service. The app only uses Supabase Auth when a person explicitly requests an email link.
+- No automatic remote sync, remote plan/workout-log/progress repository, AI-provider, or external media service. Supabase Auth and the explicit profile/theme backup are the only remote client operations.
 
 The repository documentation is in English. The current in-app interface is Spanish; bilingual localisation is planned separately.
 
@@ -91,7 +91,7 @@ Windows must share the phone with WSL through `usbipd-win`. USB debugging must b
 
 If Metro is unavailable or the phone is detached from WSL when the debug APK starts, it can remain on the splash screen because it cannot load the JavaScript bundle. A release APK embeds the bundle, but creating a distribution build requires explicit approval.
 
-You may need to attach the phone again after unplugging it. Never share RSA authorisations or tokens.
+You may need to attach the phone again after unplugging it.
 
 ## Licence
 
