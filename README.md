@@ -12,10 +12,11 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 - Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
 - Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
 - A persistent local plan conversation that produces a reviewable four-week proposal; publication is explicit, creates an immutable new version, and preserves prior plans and logs.
-- A reviewed design for future Supabase persistence and a secure remote assistant; no external service is configured yet.
+- Optional Magic Link access through Supabase Auth, with the session kept in device secure storage; profile, plans, logs, and progress remain local until a consented migration is built.
+- A reviewed design for Supabase persistence and a secure remote assistant; remote data sync and AI are not implemented yet.
 - Two persistent themes: Graphite Orange is the default; Active Green is the alternative.
 - Sample data and local repositories, ready to be replaced by remote persistence later.
-- No accounts, Supabase, credentials, AI provider, or external data services.
+- No remote profile, plan, workout-log, progress, AI-provider, or external media service. The app only uses Supabase Auth when a person explicitly requests an email link.
 
 The repository documentation is in English. The current in-app interface is Spanish; bilingual localisation is planned separately.
 

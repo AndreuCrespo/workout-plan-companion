@@ -1,6 +1,7 @@
 import { StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
+import { useAuth } from '@/auth/auth-context';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -22,6 +23,7 @@ import { spacing } from '@/theme/tokens';
 export default function ProfileScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
+  const { isConfigured, user } = useAuth();
   const { profile } = useProfile();
 
   if (!profile) {
@@ -67,12 +69,24 @@ export default function ProfileScreen() {
         />
       </View>
 
-      <Card style={styles.privacyCard}>
-        <AppText variant="bodyStrong">Datos guardados en este dispositivo</AppText>
-        <AppText tone="secondary" variant="caption">
-          Esta versión no crea una cuenta ni envía información a servicios externos. Podrás editar tu perfil cuando quieras.
-        </AppText>
-      </Card>
+      <View style={styles.section}>
+        <AppText variant="heading">Cuenta y copia privada</AppText>
+        <Card style={styles.privacyCard}>
+          <AppText variant="bodyStrong">{user ? 'Sesión conectada' : 'Aún usas la app sin cuenta'}</AppText>
+          <AppText tone="secondary" variant="caption">
+            {user
+              ? `Conectada como ${user.email ?? 'tu correo'}. La copia consentida de perfil, planes y registros se añadirá después.`
+              : 'Puedes entrar con un enlace de correo. Tus datos actuales siguen guardados solo en este dispositivo.'}
+          </AppText>
+          <PrimaryButton
+            disabled={!isConfigured}
+            label={user ? 'Ver mi cuenta' : 'Conectar con correo'}
+            onPress={() => router.push('/auth/iniciar-sesion')}
+            variant="secondary"
+          />
+          {!isConfigured ? <AppText tone="secondary" variant="caption">El acceso remoto no está configurado en esta instalación.</AppText> : null}
+        </Card>
+      </View>
     </Screen>
   );
 }
