@@ -7,10 +7,13 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 ## Current status · v0.1.0
 
 - Expo Router navigation: **Today**, **My plan**, **Progress**, and **Profile**.
-- A local four-week monthly plan, exercise details with material and step-by-step guidance, and a structural workout-session flow.
-- Two persistent themes: Active Green and Graphite Orange.
+- A local four-week monthly plan, exercise details with material and step-by-step guidance.
+- Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
+- Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
+- A persistent local plan conversation that produces a reviewable, unpublished four-week proposal. It never changes or publishes the active plan automatically.
+- Two persistent themes: Graphite Orange is the default; Active Green is the alternative.
 - Sample data and local repositories, ready to be replaced by remote persistence later.
-- No accounts, Supabase, credentials, or external data services.
+- No accounts, Supabase, credentials, AI provider, or external data services.
 
 The repository documentation is in English. The current in-app interface is Spanish; bilingual localisation is planned separately.
 
@@ -24,7 +27,7 @@ npm install
 npm start
 ```
 
-To test it on a phone, install Expo Go and scan the QR code while connected to the same Wi-Fi network.
+For a physical Android device, use a locally built debug APK or an Expo Go version compatible with the installed Expo SDK. The debug APK requires Metro while it is running; see the USB instructions below.
 
 ## Checks
 
@@ -50,28 +53,39 @@ GitHub Actions runs both checks for every push and pull request targeting `main`
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) and the [GitHub workflow](docs/github-workflow.md) for branches, pull requests, releases, and repository hygiene.
 
-## Test Android over USB from WSL
+## Test a debug APK over USB from WSL
 
-To use Expo Go without Wi-Fi, Windows must share the phone with WSL through `usbipd-win`. USB debugging must be authorised on the phone and `adb` must be installed in WSL.
+Windows must share the phone with WSL through `usbipd-win`. USB debugging must be authorised on the phone and `adb` must be available in WSL.
 
 1. In an elevated Windows PowerShell, identify and attach the device:
 
    ```powershell
    usbipd list
-   usbipd bind --busid <BUSID>
+   usbipd bind --busid <BUSID> # only needed the first time
    usbipd attach --wsl --busid <BUSID>
    ```
 
-2. In WSL, confirm that the phone state is `device`, create the port bridge, and start Expo:
+2. In WSL, confirm that the phone state is `device`, build and install the debug APK:
 
    ```bash
    adb devices -l
-   adb reverse tcp:8081 tcp:8081
-   cd mobile
-   npm start -- --localhost --port 8081
+   cd mobile/android
+   ./gradlew assembleDebug
+   adb install -r app/build/outputs/apk/debug/app-debug.apk
    ```
 
-3. Scan the QR code from Expo Go. Fast Refresh updates the app on the phone after each saved change.
+3. A debug APK does not embed the JavaScript bundle. Keep Metro running and create the USB port bridge before opening the app:
+
+   ```bash
+   cd mobile
+   npm start -- --localhost --port 8081
+
+   # In a second WSL terminal
+   adb reverse tcp:8081 tcp:8081
+   adb shell monkey -p com.anonymous.gimnasio 1
+   ```
+
+If Metro is unavailable or the phone is detached from WSL when the debug APK starts, it can remain on the splash screen because it cannot load the JavaScript bundle. A release APK embeds the bundle, but creating a distribution build requires explicit approval.
 
 You may need to attach the phone again after unplugging it. Never share RSA authorisations or tokens.
 
