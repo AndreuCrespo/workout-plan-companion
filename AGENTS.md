@@ -13,7 +13,7 @@ The product communicates in clear, approachable Spanish and makes no result prom
 - Future persistence: Supabase for accounts, profiles, plans, and logs. Do not create a remote project, credentials, or production migrations without explicit approval.
 - Initial plan: a four-week monthly template; every workout has a warm-up, exercises, sets/repetitions/RPE or rest, and a cool-down. Published plans are versioned: history is never overwritten.
 - Persistent onboarding: goal, experience, availability, workout duration, equipment, declared limitations, units, and preferences; it can be edited from Profile and informs future plans.
-- Visual theme: persistent selector in **Profile → Appearance (Perfil → Apariencia)**. The default is `verde-activo`; `grafito-naranja` is the alternative; changes apply immediately.
+- Visual theme: persistent selector in **Profile → Appearance (Perfil → Apariencia)**. The default is `grafito-naranja`; `verde-activo` is the alternative; changes apply immediately.
 
 ## MVP scope
 
@@ -36,4 +36,4 @@ Out of scope for the MVP: social features, payments, wearables, nutrition/calori
 
 ## First code delivery
 
-Create the Expo app shell in `mobile/`: four-tab routes, local sample data, the Active Green theme, a switch to Graphite Orange from Profile, and structural screens for the workout flow. Do not integrate Supabase yet.
+Create the Expo app shell in `mobile/`: four-tab routes, local sample data, the Graphite Orange theme, a switch to Active Green from Profile, and structural screens for the workout flow. Do not integrate Supabase yet.
