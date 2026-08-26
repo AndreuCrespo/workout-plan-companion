@@ -105,6 +105,20 @@ export default function PlanDraftScreen() {
         </Card>
       </View>
 
+      {proposal.exerciseSubstitutions.length > 0 ? (
+        <View style={styles.section}>
+          <AppText variant="heading">Alternativas solicitadas</AppText>
+          <Card style={styles.card}>
+            {proposal.exerciseSubstitutions.map((substitution) => (
+              <Bullet
+                key={`${substitution.fromExerciseId}:${substitution.toExerciseId}`}
+                text={`${substitution.fromExerciseName} → ${substitution.toExerciseName}`}
+              />
+            ))}
+          </Card>
+        </View>
+      ) : null}
+
       <View style={styles.section}>
         <AppText variant="heading">Antes de publicar</AppText>
         <Card style={styles.card}>
