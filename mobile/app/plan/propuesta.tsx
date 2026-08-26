@@ -9,16 +9,16 @@ import { Card } from '@/components/ui/Card';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import { createPlanProposal } from '@/domain/plan-proposal';
+import { usePlan } from '@/plan/plan-context';
 import { useProfile } from '@/profile/profile-context';
 import { usePlanConversation } from '@/plan-conversation/use-plan-conversation';
 import { planProposalRepository } from '@/repositories/local-plan-proposal-repository';
-import { trainingRepository } from '@/repositories/local-training-repository';
 import { spacing } from '@/theme/tokens';
 
 export default function PlanProposalScreen() {
   const router = useRouter();
+  const { plan } = usePlan();
   const { profile } = useProfile();
-  const plan = trainingRepository.getPlan();
   const { conversation, hasError, isLoading, isSaving, respond, restart } = usePlanConversation(plan, profile);
   const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
   const [generationError, setGenerationError] = useState(false);

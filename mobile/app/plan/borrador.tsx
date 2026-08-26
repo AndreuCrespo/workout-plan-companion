@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { Screen } from '@/components/layout/Screen';
@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/Card';
 import { Pill } from '@/components/ui/Pill';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
+import { usePlan } from '@/plan/plan-context';
 import { usePlanProposal } from '@/plan-proposal/use-plan-proposal';
 import { useAppTheme } from '@/theme/theme-context';
 import { radius, spacing } from '@/theme/tokens';
@@ -15,8 +16,11 @@ import { radius, spacing } from '@/theme/tokens';
 export default function PlanDraftScreen() {
   const router = useRouter();
   const { theme } = useAppTheme();
+  const { history, publishProposal } = usePlan();
   const { proposal, isLoading, hasError } = usePlanProposal();
   const [selectedWeekIndex, setSelectedWeekIndex] = useState(0);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [hasPublishError, setHasPublishError] = useState(false);
 
   if (isLoading) {
     return (
@@ -44,6 +48,39 @@ export default function PlanDraftScreen() {
   }
 
   const selectedWeek = proposal.plan.weeks[selectedWeekIndex];
+  const nextVersionLabel = `Versión ${history.length + 1}`;
+
+  function confirmPublication() {
+    Alert.alert(
+      `Publicar ${nextVersionLabel}`,
+      'Este borrador pasará a ser tu plan activo. El plan actual y las sesiones ya guardadas permanecerán en el historial.',
+      [
+        { style: 'cancel', text: 'Seguir revisando' },
+        {
+          text: `Publicar ${nextVersionLabel}`,
+          onPress: () => void publish(),
+        },
+      ],
+    );
+  }
+
+  async function publish() {
+    if (!proposal) {
+      return;
+    }
+
+    setIsPublishing(true);
+    setHasPublishError(false);
+
+    try {
+      await publishProposal(proposal);
+      router.replace('/plan');
+    } catch {
+      setHasPublishError(true);
+    } finally {
+      setIsPublishing(false);
+    }
+  }
 
   return (
     <Screen>
@@ -122,10 +159,21 @@ export default function PlanDraftScreen() {
       </View>
 
       <Card style={styles.card}>
-        <AppText variant="heading">Aún no se ha publicado</AppText>
+        <AppText variant="heading">Confirmación necesaria</AppText>
         <AppText tone="secondary">
-          La publicación versionada se añadirá después de revisar el borrador. Tu plan y tus registros actuales permanecen intactos.
+          Al publicar, este borrador será tu plan activo como {nextVersionLabel}. El plan actual y tus registros terminados no se modificarán.
         </AppText>
+        {hasPublishError ? (
+          <AppText tone="secondary" variant="caption">
+            No pudimos publicar este borrador. Puede que el plan activo haya cambiado; vuelve a generar una propuesta antes de intentarlo de nuevo.
+          </AppText>
+        ) : null}
+        <PrimaryButton
+          accessibilityHint="Pide confirmación antes de activar este plan"
+          disabled={isPublishing}
+          label={isPublishing ? 'Publicando…' : `Publicar ${nextVersionLabel}`}
+          onPress={confirmPublication}
+        />
         <PrimaryButton label="Volver a la conversación" onPress={() => router.back()} variant="secondary" />
       </Card>
     </Screen>

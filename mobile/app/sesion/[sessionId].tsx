@@ -15,6 +15,7 @@ import { getLatestExercisePerformances } from '@/domain/workout-history';
 import type { PreviousExercisePerformance } from '@/domain/workout-history';
 import { createWorkoutLog, updateWorkoutLog } from '@/domain/workout-log';
 import type { ExerciseFeedback, LoggedSet, WorkoutLog } from '@/domain/models';
+import { usePlan } from '@/plan/plan-context';
 import { useProfile } from '@/profile/profile-context';
 import { useRestTimer } from '@/session/use-rest-timer';
 import { trainingRepository } from '@/repositories/local-training-repository';
@@ -164,10 +165,10 @@ function PreviousPerformance({ performance, loadUnit }: PreviousPerformanceProps
 export default function SessionScreen() {
   const { sessionId } = useLocalSearchParams<{ sessionId: string }>();
   const router = useRouter();
+  const { plan } = usePlan();
   const { profile } = useProfile();
   const { theme } = useAppTheme();
-  const session = trainingRepository.getSession(sessionId);
-  const plan = trainingRepository.getPlan();
+  const session = trainingRepository.getSession(plan, sessionId);
   const [flowState, setFlowState] = useState<SessionFlowState>('ready');
   const [log, setLog] = useState<WorkoutLog | null>(null);
   const [isHydrating, setIsHydrating] = useState(true);

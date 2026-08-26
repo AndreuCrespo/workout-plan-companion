@@ -5,6 +5,7 @@ import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { SessionSummaryCard } from '@/components/ui/SessionSummaryCard';
+import { usePlan } from '@/plan/plan-context';
 import { useProfile } from '@/profile/profile-context';
 import { useProgressSnapshot } from '@/progress/use-progress-snapshot';
 import { trainingRepository } from '@/repositories/local-training-repository';
@@ -12,9 +13,9 @@ import { spacing } from '@/theme/tokens';
 
 export default function TodayScreen() {
   const router = useRouter();
+  const { plan } = usePlan();
   const { profile } = useProfile();
-  const plan = trainingRepository.getPlan();
-  const nextSession = trainingRepository.getNextSession();
+  const nextSession = trainingRepository.getNextSession(plan);
   const { progress, isLoading } = useProgressSnapshot(plan);
 
   if (!profile) {

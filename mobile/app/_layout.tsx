@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
+import { PlanProvider, usePlan } from '@/plan/plan-context';
 import { ProfileProvider, useProfile } from '@/profile/profile-context';
 import { AppThemeProvider, useAppTheme } from '@/theme/theme-context';
 
@@ -14,9 +15,11 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppThemeProvider>
-        <ProfileProvider>
-          <RootNavigator />
-        </ProfileProvider>
+        <PlanProvider>
+          <ProfileProvider>
+            <RootNavigator />
+          </ProfileProvider>
+        </PlanProvider>
       </AppThemeProvider>
     </SafeAreaProvider>
   );
@@ -24,8 +27,9 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isHydrated: isThemeHydrated, theme } = useAppTheme();
+  const { isHydrated: isPlanHydrated } = usePlan();
   const { isHydrated: isProfileHydrated, profile } = useProfile();
-  const isHydrated = isThemeHydrated && isProfileHydrated;
+  const isHydrated = isThemeHydrated && isPlanHydrated && isProfileHydrated;
   const hasProfile = profile !== null;
 
   useEffect(() => {

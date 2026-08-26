@@ -1,12 +1,11 @@
 import type { Exercise, MonthlyPlan, WorkoutSession } from '@/domain/models';
 
 /**
- * Punto de acceso de las pantallas al plan y al progreso.
- * Una implementación remota podrá respetar este contrato sin acoplar la UI a Supabase.
+ * Pure plan lookups shared by screens. Persistence of the active version lives
+ * behind PlanRepository, so this lookup layer remains replaceable later.
  */
 export interface TrainingRepository {
-  getPlan(): MonthlyPlan;
-  getNextSession(): WorkoutSession;
-  getSession(sessionId: string): WorkoutSession | undefined;
-  getExercise(exerciseId: string): Exercise | undefined;
+  getNextSession(plan: MonthlyPlan): WorkoutSession;
+  getSession(plan: MonthlyPlan, sessionId: string): WorkoutSession | undefined;
+  getExercise(plan: MonthlyPlan, exerciseId: string): Exercise | undefined;
 }
