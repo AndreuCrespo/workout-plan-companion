@@ -1,6 +1,6 @@
 # Aplicar la migración inicial de Supabase
 
-Esta guía aplica la base privada de datos diseñada para Workout Plan Companion. La migración ha sido revisada en el repositorio y está autorizada para el proyecto de desarrollo `deuujgkwrtuikdfjrnfr`.
+Esta guía aplica la base privada de datos diseñada para Workout Plan Companion. La migración debe revisarse y autorizarse para el proyecto de desarrollo elegido antes de ejecutarla.
 
 ## Qué crea
 
@@ -18,7 +18,7 @@ No incorpora aún datos de catálogo, cuentas en la app, importación desde Asyn
 
 No compartas la contraseña de Postgres, `service_role`, tokens personales ni claves de IA. Para conservarlos privados, aplica la migración desde el panel del proyecto:
 
-1. Abre [SQL Editor](https://supabase.com/dashboard/project/deuujgkwrtuikdfjrnfr/sql/new).
+1. Abre **SQL Editor** en el panel del proyecto de desarrollo autorizado.
 2. Crea una consulta nueva.
 3. Copia el contenido completo de [`supabase/migrations/20260826135522_initial_private_data_foundation.sql`](../supabase/migrations/20260826135522_initial_private_data_foundation.sql) y pégalo.
 4. Confirma que el editor está apuntando al proyecto de desarrollo correcto y pulsa **Run** una sola vez.
