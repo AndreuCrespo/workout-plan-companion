@@ -41,7 +41,7 @@ La app solo distribuye la URL pública de Supabase y la clave anónima pública.
 
 ## Datos y propiedad
 
-Todas las tablas privadas tienen `user_id uuid not null references auth.users(id)`. Los identificadores remotos son UUID generados por base de datos; los identificadores locales actuales pueden mantenerse como `legacy_client_id` durante una importación consentida.
+Todas las tablas privadas tienen `user_id uuid not null references auth.users(id)`. Los identificadores remotos son UUID generados por base de datos. Una importación consentida conserva el ID local del plan dentro de su instantánea de petición para poder repetirla sin duplicar versiones.
 
 | Área | Tabla propuesta | Datos esenciales | Regla |
 | --- | --- | --- | --- |
@@ -139,7 +139,7 @@ Para una importación aprobada:
 
 1. se lee el perfil, tema, historial de publicaciones y logs locales;
 2. se valida en el dispositivo y se muestra un resumen;
-3. se crea una operación de importación idempotente con `legacy_client_id` y un registro de elementos importados;
+3. se crea una operación de importación idempotente que asocia el ID local con la instantánea remota y registra el resumen de la copia;
 4. los planes y logs se insertan como instantáneas, sin intentar fusionar ni sobrescribir registros remotos;
 5. se verifica el recuento y se confirma a la persona;
 6. la app conserva el modo local hasta que la sincronización esté confirmada.
