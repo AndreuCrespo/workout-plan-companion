@@ -29,6 +29,7 @@ export function PlanConversationView({
   const { theme } = useAppTheme();
   const [response, setResponse] = useState('');
   const activeMessageId = conversation.messages.at(-1)?.id;
+  const isExercisePreferenceStep = conversation.currentStep === 'exercise-preferences';
 
   function sendFreeResponse() {
     const trimmedResponse = response.trim();
@@ -80,7 +81,7 @@ export function PlanConversationView({
             editable={!isSaving}
             multiline
             onChangeText={setResponse}
-            placeholder="Escribe tu respuesta"
+            placeholder={isExercisePreferenceStep ? 'Ej.: Cambiar press de banca' : 'Escribe tu respuesta'}
             placeholderTextColor={theme.colors.textSecondary}
             style={[
               styles.input,

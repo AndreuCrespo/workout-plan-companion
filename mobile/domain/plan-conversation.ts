@@ -17,6 +17,13 @@ export interface PlanConversationMessage {
   suggestions?: PlanConversationSuggestion[];
 }
 
+export interface ExerciseReference {
+  id: string;
+  name: string;
+}
+
+export type RequestedExerciseChange = ExerciseReference;
+
 export interface PlanRequest {
   sourcePlanId: string;
   sourcePlanVersion: string;
@@ -30,6 +37,8 @@ export interface PlanRequest {
   environmentDetails: string;
   priorities: string;
   exercisePreferences: string;
+  availableExercises: ExerciseReference[];
+  requestedExerciseChanges: RequestedExerciseChange[];
   additionalContext: string;
   declaredLimitations: string;
 }
@@ -80,6 +89,8 @@ const exercisePreferenceSuggestions: PlanConversationSuggestion[] = [
   { id: 'try-variations', label: 'Probar variaciones' },
   { id: 'keep-current', label: 'Mantener lo que funciona' },
 ];
+
+const replaceExerciseSuggestionPrefix = 'replace-exercise:';
 
 const noMoreContextSuggestion: PlanConversationSuggestion = { id: 'no-more-context', label: 'No, preparar el resumen' };
 const supportedSessionDurations = [45, 60, 75] as const;
@@ -169,22 +180,34 @@ function createAssistantMessage(
         text: '¿Hay alguna zona, patrón o habilidad que quieras priorizar? También puedes explicármelo con tus palabras.',
         suggestions: prioritySuggestions,
       };
-    case 'exercise-preferences':
+    case 'exercise-preferences': {
+      const replacementSuggestions = request.availableExercises.map((exercise) => ({
+        id: `${replaceExerciseSuggestionPrefix}${exercise.id}`,
+        label: `Cambiar ${exercise.name}`,
+      }));
+
       return {
         id: createId('assistant'),
         role: 'assistant',
-        text: '¿Qué quieres que haga con los ejercicios del ciclo actual?',
-        suggestions: exercisePreferenceSuggestions,
+        text: '¿Qué quieres que haga con los ejercicios del ciclo actual? Puedes elegir uno para cambiarlo o escribir, por ejemplo, “cambia press de banca”.',
+        suggestions: [...exercisePreferenceSuggestions, ...replacementSuggestions],
       };
-    case 'additional-context':
+    }
+    case 'additional-context': {
+      const requestedChanges = request.requestedExerciseChanges.map((exercise) => exercise.name);
+      const replacementContext = requestedChanges.length > 0
+        ? ` Prepararé alternativas locales para ${requestedChanges.join(' y ')} y las verás antes de publicar.`
+        : '';
+
       return {
         id: createId('assistant'),
         role: 'assistant',
-        text: request.declaredLimitations.trim().length > 0
-          ? 'Mantendré en cuenta las limitaciones que declaraste en tu perfil. ¿Quieres añadir algo más para esta propuesta?'
-          : '¿Quieres añadir alguna preferencia o contexto más para esta propuesta?',
+        text: `${request.declaredLimitations.trim().length > 0
+          ? 'Mantendré en cuenta las limitaciones que declaraste en tu perfil. ¿Quieres añadir alguna preferencia o contexto más para esta propuesta?'
+          : '¿Quieres añadir alguna preferencia o contexto más para esta propuesta?'}${replacementContext}`,
         suggestions: [noMoreContextSuggestion],
       };
+    }
     default:
       return {
         id: createId('assistant'),
@@ -225,9 +248,15 @@ function isSessionDuration(value: unknown): value is SessionDurationMinutes {
   return value === '45' || value === '60' || value === '75';
 }
 
-function getSuggestionLabel(step: PlanConversationStep, suggestionId: string | undefined): string | null {
+function getSuggestionLabel(step: PlanConversationStep, suggestionId: string | undefined, request?: PlanRequest): string | null {
   if (!suggestionId) {
     return null;
+  }
+
+  if (step === 'exercise-preferences' && suggestionId.startsWith(replaceExerciseSuggestionPrefix)) {
+    const exerciseId = suggestionId.slice(replaceExerciseSuggestionPrefix.length);
+    const exercise = request?.availableExercises.find((item) => item.id === exerciseId);
+    return exercise ? `Cambiar ${exercise.name}` : null;
   }
 
   const suggestionsByStep: Record<PlanConversationStep, PlanConversationSuggestion[]> = {
@@ -247,13 +276,53 @@ function getSuggestionLabel(step: PlanConversationStep, suggestionId: string | u
   return suggestionsByStep[step].find((suggestion) => suggestion.id === suggestionId)?.label ?? null;
 }
 
+function normalizedText(value: string): string {
+  return value
+    .normalize('NFD')
+    .replaceAll(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('es-ES');
+}
+
+function isExerciseMentioned(response: string, exerciseName: string): boolean {
+  const normalizedResponse = normalizedText(response);
+  const normalizedExerciseName = normalizedText(exerciseName);
+
+  if (normalizedResponse.includes(normalizedExerciseName)) {
+    return true;
+  }
+
+  const relevantWords = normalizedExerciseName
+    .split(' ')
+    .filter((word) => word.length > 2 && !['con', 'del', 'las', 'los', 'para'].includes(word));
+  const matchedWordCount = relevantWords.filter((word) => normalizedResponse.includes(word)).length;
+
+  return relevantWords.length <= 2 ? matchedWordCount === relevantWords.length : matchedWordCount >= 2;
+}
+
+function getRequestedExerciseChanges(
+  request: PlanRequest,
+  response: PlanConversationResponse,
+  text: string,
+): RequestedExerciseChange[] {
+  const selectedExerciseId = response.suggestionId?.startsWith(replaceExerciseSuggestionPrefix)
+    ? response.suggestionId.slice(replaceExerciseSuggestionPrefix.length)
+    : null;
+  const selectedExercise = request.availableExercises.find((exercise) => exercise.id === selectedExerciseId);
+  const expressesReplacement = /\b(cambia|cambiar|sustituye|sustituir|reemplaza|reemplazar|quita|quitar|evita|evitar)\b|no me (encaja|cuadra)|no quiero/.test(normalizedText(text));
+  const mentionedExercises = expressesReplacement
+    ? request.availableExercises.filter((exercise) => isExerciseMentioned(text, exercise.name))
+    : [];
+
+  return [...new Map([...mentionedExercises, ...(selectedExercise ? [selectedExercise] : [])].map((exercise) => [exercise.id, exercise])).values()];
+}
+
 function updateRequestForResponse(
   request: PlanRequest,
   step: PlanConversationStep,
   response: PlanConversationResponse,
 ): PlanRequest {
   const text = response.text.trim();
-  const suggestionLabel = getSuggestionLabel(step, response.suggestionId);
+  const suggestionLabel = getSuggestionLabel(step, response.suggestionId, request);
   const answer = suggestionLabel ?? text;
 
   switch (step) {
@@ -288,8 +357,10 @@ function updateRequestForResponse(
       };
     case 'priorities':
       return { ...request, priorities: answer };
-    case 'exercise-preferences':
-      return { ...request, exercisePreferences: answer };
+    case 'exercise-preferences': {
+      const requestedExerciseChanges = getRequestedExerciseChanges(request, response, text);
+      return { ...request, exercisePreferences: answer, requestedExerciseChanges };
+    }
     case 'additional-context':
       return { ...request, additionalContext: response.suggestionId === 'no-more-context' ? '' : answer };
   }
@@ -310,6 +381,13 @@ export function createPlanConversation(context: PlanConversationContext): PlanCo
     priorities: '',
     exercisePreferences: '',
     additionalContext: '',
+    availableExercises: [...new Map(
+      context.plan.weeks
+        .flatMap((week) => week.sessions)
+        .flatMap((session) => session.exercises)
+        .map((exercise) => [exercise.id, { id: exercise.id, name: exercise.name }]),
+    ).values()],
+    requestedExerciseChanges: [],
     declaredLimitations: context.profile.limitations,
   };
   const timestamp = now();
@@ -335,7 +413,7 @@ export function respondToPlanConversation(
 
   const request = updateRequestForResponse(conversation.request, conversation.currentStep, response);
   const followingStep = nextStep(conversation.currentStep);
-  const responseLabel = getSuggestionLabel(conversation.currentStep, response.suggestionId);
+  const responseLabel = getSuggestionLabel(conversation.currentStep, response.suggestionId, conversation.request);
   const timestamp = now();
 
   return {

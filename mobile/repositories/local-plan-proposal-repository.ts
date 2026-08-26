@@ -25,6 +25,20 @@ function isPlan(value: unknown): value is PlanProposal['plan'] {
   );
 }
 
+function isExerciseReference(value: unknown): value is { id: string; name: string } {
+  return isRecord(value) && typeof value.id === 'string' && typeof value.name === 'string';
+}
+
+function isExerciseSubstitution(value: unknown): value is PlanProposal['exerciseSubstitutions'][number] {
+  return (
+    isRecord(value) &&
+    typeof value.fromExerciseId === 'string' &&
+    typeof value.fromExerciseName === 'string' &&
+    typeof value.toExerciseId === 'string' &&
+    typeof value.toExerciseName === 'string'
+  );
+}
+
 function isRequest(value: unknown): value is PlanProposal['request'] {
   return (
     isRecord(value) &&
@@ -44,6 +58,27 @@ function isRequest(value: unknown): value is PlanProposal['request'] {
   );
 }
 
+function parseRequest(value: unknown): PlanProposal['request'] | null {
+  if (!isRequest(value)) {
+    return null;
+  }
+
+  const availableExercises = value.availableExercises === undefined
+    ? []
+    : Array.isArray(value.availableExercises) && value.availableExercises.every(isExerciseReference)
+      ? value.availableExercises
+      : null;
+  const requestedExerciseChanges = value.requestedExerciseChanges === undefined
+    ? []
+    : Array.isArray(value.requestedExerciseChanges) && value.requestedExerciseChanges.every(isExerciseReference)
+      ? value.requestedExerciseChanges
+      : null;
+
+  return availableExercises && requestedExerciseChanges
+    ? { ...value, availableExercises, requestedExerciseChanges }
+    : null;
+}
+
 function parseProposal(value: unknown): PlanProposal | null {
   if (
     !isRecord(value) ||
@@ -60,14 +95,26 @@ function parseProposal(value: unknown): PlanProposal | null {
     return null;
   }
 
+  const request = parseRequest(value.request);
+  const exerciseSubstitutions = value.exerciseSubstitutions === undefined
+    ? []
+    : Array.isArray(value.exerciseSubstitutions) && value.exerciseSubstitutions.every(isExerciseSubstitution)
+      ? value.exerciseSubstitutions
+      : null;
+
+  if (!request || !exerciseSubstitutions) {
+    return null;
+  }
+
   return {
     id: value.id,
     conversationId: value.conversationId,
     sourcePlanId: value.sourcePlanId,
     sourcePlanVersion: value.sourcePlanVersion,
-    request: value.request,
+    request,
     plan: value.plan,
     changes: value.changes,
+    exerciseSubstitutions,
     reviewItems: value.reviewItems,
     createdAt: value.createdAt,
   };

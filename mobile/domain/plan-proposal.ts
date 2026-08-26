@@ -3,6 +3,13 @@ import { planGoalLabel, trainingAvailabilityLabel, trainingEnvironmentLabel } fr
 import type { PlanConversation, PlanRequest } from '@/domain/plan-conversation';
 import type { Exercise, MonthlyPlan, PlanWeek, WorkoutSession } from '@/domain/models';
 
+export interface ExerciseSubstitution {
+  fromExerciseId: string;
+  fromExerciseName: string;
+  toExerciseId: string;
+  toExerciseName: string;
+}
+
 export interface PlanProposal {
   id: string;
   conversationId: string;
@@ -11,6 +18,7 @@ export interface PlanProposal {
   request: PlanRequest;
   plan: MonthlyPlan;
   changes: string[];
+  exerciseSubstitutions: ExerciseSubstitution[];
   reviewItems: string[];
   createdAt: string;
 }
@@ -94,6 +102,62 @@ function templatesForAvailability(request: PlanRequest): SessionTemplate[] {
   }
 }
 
+const replacementOptionsByExerciseId: Record<string, string[]> = {
+  'sentadilla-barra': ['sentadilla-goblet', 'subida-cajon'],
+  'sentadilla-goblet': ['sentadilla-barra', 'subida-cajon'],
+  'peso-muerto-rumano': ['subida-cajon', 'zancada-mancuernas'],
+  'zancada-mancuernas': ['sentadilla-goblet', 'subida-cajon'],
+  'dead-bug': ['plancha-rotacion'],
+  'plancha-rotacion': ['dead-bug'],
+  'press-banca-barra': ['press-pecho-mancuernas'],
+  'press-pecho-mancuernas': ['press-banca-barra'],
+  'jalon-pecho-polea': ['remo-sentado'],
+  'remo-sentado': ['jalon-pecho-polea'],
+  'curl-biceps-mancuernas': ['curl-martillo-mancuernas'],
+  'extension-triceps-polea': ['extension-triceps-cuerda'],
+};
+
+function applyRequestedExerciseChanges(
+  templates: SessionTemplate[],
+  request: PlanRequest,
+  exercisesById: Map<string, Exercise>,
+): { templates: SessionTemplate[]; substitutions: ExerciseSubstitution[] } {
+  const requestedIds = new Set(request.requestedExerciseChanges.map((exercise) => exercise.id));
+  const substitutions = new Map<string, ExerciseSubstitution>();
+
+  const updatedTemplates = templates.map((template) => {
+    const exerciseIds: string[] = [];
+
+    for (const exerciseId of template.exerciseIds) {
+      const replacementId = requestedIds.has(exerciseId)
+        ? replacementOptionsByExerciseId[exerciseId]?.find((candidateId) => (
+          exercisesById.has(candidateId) && !template.exerciseIds.includes(candidateId) && !exerciseIds.includes(candidateId)
+        ))
+        : undefined;
+      const finalExerciseId = replacementId ?? exerciseId;
+      exerciseIds.push(finalExerciseId);
+
+      if (replacementId) {
+        const fromExercise = exercisesById.get(exerciseId);
+        const toExercise = exercisesById.get(replacementId);
+
+        if (fromExercise && toExercise) {
+          substitutions.set(`${exerciseId}:${replacementId}`, {
+            fromExerciseId: exerciseId,
+            fromExerciseName: fromExercise.name,
+            toExerciseId: replacementId,
+            toExerciseName: toExercise.name,
+          });
+        }
+      }
+    }
+
+    return { ...template, exerciseIds };
+  });
+
+  return { templates: updatedTemplates, substitutions: [...substitutions.values()] };
+}
+
 function proposalName(request: PlanRequest): string {
   switch (request.goal) {
     case 'strength':
@@ -135,9 +199,16 @@ function createSession(
   };
 }
 
-function createProposalPlan(request: PlanRequest, sourcePlan: MonthlyPlan): MonthlyPlan {
+function createProposalPlan(
+  request: PlanRequest,
+  sourcePlan: MonthlyPlan,
+): { plan: MonthlyPlan; substitutions: ExerciseSubstitution[] } {
   const exercisesById = exerciseIndex(sourcePlan);
-  const templates = templatesForAvailability(request);
+  const { templates, substitutions } = applyRequestedExerciseChanges(
+    templatesForAvailability(request),
+    request,
+    exercisesById,
+  );
   const weeks: PlanWeek[] = weeklyGoals.map((goal, weekIndex) => ({
     number: weekIndex + 1,
     goal,
@@ -145,14 +216,17 @@ function createProposalPlan(request: PlanRequest, sourcePlan: MonthlyPlan): Mont
   }));
 
   return {
-    id: `propuesta-${sourcePlan.id}-${Date.now()}`,
-    name: proposalName(request),
-    version: 'Borrador · 4 semanas',
-    weeks,
+    plan: {
+      id: `propuesta-${sourcePlan.id}-${Date.now()}`,
+      name: proposalName(request),
+      version: 'Borrador · 4 semanas',
+      weeks,
+    },
+    substitutions,
   };
 }
 
-function createChanges(request: PlanRequest): string[] {
+function createChanges(request: PlanRequest, substitutions: ExerciseSubstitution[]): string[] {
   const changes = [
     `Objetivo: ${planGoalLabel(request.goal, request.goalDetails)}.`,
     `${trainingAvailabilityLabel(request.availability)} por semana · sesiones de ${request.sessionDurationMinutes} min.`,
@@ -164,11 +238,14 @@ function createChanges(request: PlanRequest): string[] {
   if (request.exercisePreferences.trim()) {
     changes.push(`Ejercicios: ${request.exercisePreferences.trim()}.`);
   }
+  substitutions.forEach((substitution) => {
+    changes.push(`Cambio solicitado: ${substitution.fromExerciseName} → ${substitution.toExerciseName}.`);
+  });
 
   return changes;
 }
 
-function createReviewItems(request: PlanRequest): string[] {
+function createReviewItems(request: PlanRequest, substitutions: ExerciseSubstitution[]): string[] {
   const reviewItems = [`Entorno indicado: ${trainingEnvironmentLabel(request.environment, request.environmentDetails)}.`];
 
   if (request.environment === 'home' || request.environment === 'mixed') {
@@ -180,6 +257,9 @@ function createReviewItems(request: PlanRequest): string[] {
   if (request.additionalContext.trim()) {
     reviewItems.push(`Contexto adicional: ${request.additionalContext.trim()}.`);
   }
+  if (substitutions.length > 0) {
+    reviewItems.push('Comprueba que las alternativas propuestas te resultan cómodas y se ajustan al material disponible antes de publicar.');
+  }
 
   return reviewItems;
 }
@@ -190,6 +270,7 @@ function createReviewItems(request: PlanRequest): string[] {
  */
 export function createPlanProposal(conversation: PlanConversation, sourcePlan: MonthlyPlan): PlanProposal {
   const createdAt = new Date().toISOString();
+  const { plan, substitutions } = createProposalPlan(conversation.request, sourcePlan);
 
   return {
     id: createId('plan-proposal'),
@@ -197,9 +278,10 @@ export function createPlanProposal(conversation: PlanConversation, sourcePlan: M
     sourcePlanId: sourcePlan.id,
     sourcePlanVersion: sourcePlan.version,
     request: conversation.request,
-    plan: createProposalPlan(conversation.request, sourcePlan),
-    changes: createChanges(conversation.request),
-    reviewItems: createReviewItems(conversation.request),
+    plan,
+    changes: createChanges(conversation.request, substitutions),
+    exerciseSubstitutions: substitutions,
+    reviewItems: createReviewItems(conversation.request, substitutions),
     createdAt,
   };
 }

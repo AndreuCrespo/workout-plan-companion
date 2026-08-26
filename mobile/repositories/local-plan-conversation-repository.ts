@@ -29,6 +29,10 @@ function isSuggestion(value: unknown): value is PlanConversationSuggestion {
   return isRecord(value) && typeof value.id === 'string' && typeof value.label === 'string';
 }
 
+function isExerciseReference(value: unknown): value is PlanRequest['availableExercises'][number] {
+  return isRecord(value) && typeof value.id === 'string' && typeof value.name === 'string';
+}
+
 function isMessage(value: unknown): value is PlanConversationMessage {
   return (
     isRecord(value) &&
@@ -60,6 +64,21 @@ function parseRequest(value: unknown): PlanRequest | null {
     return null;
   }
 
+  const availableExercises = value.availableExercises === undefined
+    ? []
+    : Array.isArray(value.availableExercises) && value.availableExercises.every(isExerciseReference)
+      ? value.availableExercises
+      : null;
+  const requestedExerciseChanges = value.requestedExerciseChanges === undefined
+    ? []
+    : Array.isArray(value.requestedExerciseChanges) && value.requestedExerciseChanges.every(isExerciseReference)
+      ? value.requestedExerciseChanges
+      : null;
+
+  if (!availableExercises || !requestedExerciseChanges) {
+    return null;
+  }
+
   return {
     sourcePlanId: value.sourcePlanId,
     sourcePlanVersion: value.sourcePlanVersion,
@@ -73,6 +92,8 @@ function parseRequest(value: unknown): PlanRequest | null {
     environmentDetails: value.environmentDetails,
     priorities: value.priorities,
     exercisePreferences: value.exercisePreferences,
+    availableExercises,
+    requestedExerciseChanges,
     additionalContext: value.additionalContext,
     declaredLimitations: value.declaredLimitations,
   };
