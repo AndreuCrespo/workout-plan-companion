@@ -11,7 +11,8 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 - A reviewed local exercise catalogue based on MIT-covered metadata and instruction text. Third-party media is not included.
 - Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
 - Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
-- A persistent local plan conversation that produces a reviewable, unpublished four-week proposal. It never changes or publishes the active plan automatically.
+- A persistent local plan conversation that produces a reviewable four-week proposal; publication is explicit, creates an immutable new version, and preserves prior plans and logs.
+- A reviewed design for future Supabase persistence and a secure remote assistant; no external service is configured yet.
 - Two persistent themes: Graphite Orange is the default; Active Green is the alternative.
 - Sample data and local repositories, ready to be replaced by remote persistence later.
 - No accounts, Supabase, credentials, AI provider, or external data services.
@@ -48,7 +49,7 @@ GitHub Actions runs both checks for every push and pull request targeting `main`
 - `mobile/domain/`: TypeScript models.
 - `mobile/data/`: isolated sample data.
 - `mobile/repositories/`: contracts and local implementations for data and preferences.
-- `docs/`: approved product brief, visual system, and third-party licence notices.
+- `docs/`: approved product brief, visual system, third-party licence notices, and the [future Supabase/assistant architecture](docs/supabase-assistant-architecture.md).
 
 ## Contributing
 
