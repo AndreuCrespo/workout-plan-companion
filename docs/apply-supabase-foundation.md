@@ -12,7 +12,7 @@ Esta guía aplica la base privada de datos diseñada para Workout Plan Companion
 - Triggers para impedir sobrescribir planes publicados y logs completados.
 - La RPC autenticada `complete_workout_log` para finalizar una sesión.
 
-La migración no incorpora automáticamente datos desde AsyncStorage ni incluye una Edge Function, proveedor de IA o secretos. La app ofrece Magic Link y una copia manual y consentida de perfil y tema; los planes, logs y progreso siguen locales.
+La migración no incorpora automáticamente datos desde AsyncStorage ni incluye una Edge Function, proveedor de IA o secretos. La app ofrece Magic Link y una copia manual y consentida de perfil y tema. La importación de planes publicados y logs terminados requiere la migración posterior descrita en [`apply-training-history-backup.md`](apply-training-history-backup.md); el progreso sigue local.
 
 ## Aplicación desde el panel
 

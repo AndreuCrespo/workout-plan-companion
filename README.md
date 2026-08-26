@@ -12,11 +12,11 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 - Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
 - Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
 - A persistent local plan conversation that produces a reviewable four-week proposal; publication is explicit, creates an immutable new version, and preserves prior plans and logs.
-- Optional Magic Link access through Supabase Auth, with the session kept in device secure storage; a person can explicitly back up their profile and theme, while plans, logs, and progress remain local.
-- A reviewed design for Supabase persistence and a secure remote assistant; remote plan/log sync and AI are not implemented yet.
+- Optional Magic Link access through Supabase Auth, with the session kept in device secure storage; a person can explicitly back up their profile, theme, published plans, and completed logs after applying the reviewed history-backup migration. Drafts and progress remain local.
+- A reviewed design for Supabase persistence and a secure remote assistant; continuous cross-device sync and AI are not implemented yet.
 - Two persistent themes: Graphite Orange is the default; Active Green is the alternative.
 - Sample data and local repositories, ready to be replaced by remote persistence later.
-- No automatic remote sync, remote plan/workout-log/progress repository, AI-provider, or external media service. Supabase Auth and the explicit profile/theme backup are the only remote client operations.
+- No automatic remote sync, remote plan/workout-log/progress repository, AI-provider, or external media service. Supabase Auth and explicit private backups are the only remote client operations.
 
 The repository documentation is in English. The current in-app interface is Spanish; bilingual localisation is planned separately.
 
