@@ -1,3 +1,4 @@
+import { curatedExercises } from '@/data/curated-exercise-catalog';
 import { planGoalLabel, trainingAvailabilityLabel, trainingEnvironmentLabel } from '@/domain/plan-conversation';
 import type { PlanConversation, PlanRequest } from '@/domain/plan-conversation';
 import type { Exercise, MonthlyPlan, PlanWeek, WorkoutSession } from '@/domain/models';
@@ -42,8 +43,8 @@ function cloneExercise(exercise: Exercise): Exercise {
 }
 
 function exerciseIndex(plan: MonthlyPlan): Map<string, Exercise> {
-  const exercises = plan.weeks.flatMap((week) => week.sessions).flatMap((session) => session.exercises);
-  return new Map(exercises.map((exercise) => [exercise.id, exercise]));
+  const planExercises = plan.weeks.flatMap((week) => week.sessions).flatMap((session) => session.exercises);
+  return new Map([...curatedExercises, ...planExercises].map((exercise) => [exercise.id, exercise]));
 }
 
 function templatesForAvailability(request: PlanRequest): SessionTemplate[] {
@@ -51,26 +52,26 @@ function templatesForAvailability(request: PlanRequest): SessionTemplate[] {
     dayLabel: 'Lunes',
     title: 'Tren inferior',
     focus: 'Base, control y estabilidad',
-    exerciseIds: ['sentadilla-goblet', 'peso-muerto-rumano', 'subida-cajon', 'dead-bug'],
+    exerciseIds: ['sentadilla-barra', 'peso-muerto-rumano', 'zancada-mancuernas', 'dead-bug'],
   };
   const upper: SessionTemplate = {
     dayLabel: 'Miércoles',
     title: 'Tren superior',
     focus: 'Empuje y tracción equilibrados',
-    exerciseIds: ['press-pecho-mancuernas', 'remo-sentado', 'dead-bug'],
+    exerciseIds: ['press-banca-barra', 'jalon-pecho-polea', 'curl-biceps-mancuernas', 'extension-triceps-polea'],
   };
   const full: SessionTemplate = {
     dayLabel: 'Viernes',
     title: 'Cuerpo completo',
     focus: 'Técnica y ritmo sostenible',
-    exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'remo-sentado'],
+    exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'remo-sentado', 'plancha-rotacion'],
   };
 
   switch (request.availability) {
     case 'two-days':
       return [
-        { ...lower, dayLabel: 'Martes', title: 'Cuerpo completo A', exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'remo-sentado', 'dead-bug'] },
-        { ...full, dayLabel: 'Viernes', title: 'Cuerpo completo B', exerciseIds: ['peso-muerto-rumano', 'subida-cajon', 'press-pecho-mancuernas', 'dead-bug'] },
+        { ...lower, dayLabel: 'Martes', title: 'Cuerpo completo A', exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'jalon-pecho-polea', 'dead-bug'] },
+        { ...full, dayLabel: 'Viernes', title: 'Cuerpo completo B', exerciseIds: ['peso-muerto-rumano', 'zancada-mancuernas', 'press-banca-barra', 'plancha-rotacion'] },
       ];
     case 'four-days':
       return [

@@ -1,3 +1,4 @@
+import { getCuratedExercise } from '@/data/curated-exercise-catalog';
 import type { MonthlyPlan } from '@/domain/models';
 import type { TrainingRepository } from '@/repositories/training-repository';
 
@@ -17,7 +18,7 @@ class LocalTrainingRepository implements TrainingRepository {
   getExercise(plan: MonthlyPlan, exerciseId: string) {
     return sessionsForPlan(plan)
       .flatMap((session) => session.exercises)
-      .find((exercise) => exercise.id === exerciseId);
+      .find((exercise) => exercise.id === exerciseId) ?? getCuratedExercise(exerciseId);
   }
 }
 
