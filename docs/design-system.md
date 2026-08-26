@@ -4,7 +4,7 @@ The interface should feel warm, clear, and focused. This is not an aggressive bo
 
 ## Themes
 
-### 01 · Active Green — default
+### 01 · Active Green — alternative
 
 | Token | Value |
 | --- | --- |
@@ -18,7 +18,7 @@ The interface should feel warm, clear, and focused. This is not an aggressive bo
 | Warm amber | `#FFBD72` |
 | Border | `#D9E5DE` |
 
-### 09 · Graphite Orange — alternative
+### 09 · Graphite Orange — default
 
 | Token | Value |
 | --- | --- |

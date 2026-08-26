@@ -44,7 +44,7 @@ export default function AppearanceScreen() {
               <View style={styles.optionCopy}>
                 <AppText variant="heading">{option.label}</AppText>
                 <AppText tone="secondary">
-                  {name === 'verde-activo' ? 'Tema predeterminado cálido y claro.' : 'Tema oscuro con acento naranja.'}
+                  {name === 'grafito-naranja' ? 'Tema predeterminado oscuro con acento naranja.' : 'Tema alternativo cálido y claro.'}
                 </AppText>
                 <AppText tone={selected ? 'primary' : 'secondary'} variant="caption">
                   {selected ? 'Seleccionado' : 'Toca para seleccionarlo'}

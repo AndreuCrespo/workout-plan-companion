@@ -86,4 +86,4 @@ export const themes: Record<ThemeName, AppTheme> = {
   },
 };
 
-export const defaultThemeName: ThemeName = 'verde-activo';
+export const defaultThemeName: ThemeName = 'grafito-naranja';
