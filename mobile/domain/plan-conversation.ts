@@ -180,19 +180,13 @@ function createAssistantMessage(
         text: '¿Hay alguna zona, patrón o habilidad que quieras priorizar? También puedes explicármelo con tus palabras.',
         suggestions: prioritySuggestions,
       };
-    case 'exercise-preferences': {
-      const replacementSuggestions = request.availableExercises.map((exercise) => ({
-        id: `${replaceExerciseSuggestionPrefix}${exercise.id}`,
-        label: `Cambiar ${exercise.name}`,
-      }));
-
+    case 'exercise-preferences':
       return {
         id: createId('assistant'),
         role: 'assistant',
-        text: '¿Qué quieres que haga con los ejercicios del ciclo actual? Puedes elegir uno para cambiarlo o escribir, por ejemplo, “cambia press de banca”.',
-        suggestions: [...exercisePreferenceSuggestions, ...replacementSuggestions],
+        text: '¿Qué quieres que haga con los ejercicios del ciclo actual? Cuéntame qué ejercicio no te encaja, qué alternativa prefieres o qué material quieres usar. Por ejemplo: “el press de banca no me cuadra; prefiero mancuernas”.',
+        suggestions: exercisePreferenceSuggestions,
       };
-    }
     case 'additional-context': {
       const requestedChanges = request.requestedExerciseChanges.map((exercise) => exercise.name);
       const replacementContext = requestedChanges.length > 0
@@ -203,8 +197,8 @@ function createAssistantMessage(
         id: createId('assistant'),
         role: 'assistant',
         text: `${request.declaredLimitations.trim().length > 0
-          ? 'Mantendré en cuenta las limitaciones que declaraste en tu perfil. ¿Quieres añadir alguna preferencia o contexto más para esta propuesta?'
-          : '¿Quieres añadir alguna preferencia o contexto más para esta propuesta?'}${replacementContext}`,
+          ? 'Mantendré en cuenta las limitaciones que declaraste en tu perfil. ¿Quieres añadir alguna preferencia o contexto más para la propuesta?'
+          : '¿Quieres añadir alguna preferencia o contexto más para la propuesta?'}${replacementContext}`,
         suggestions: [noMoreContextSuggestion],
       };
     }

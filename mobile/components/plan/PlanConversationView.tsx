@@ -81,7 +81,7 @@ export function PlanConversationView({
             editable={!isSaving}
             multiline
             onChangeText={setResponse}
-            placeholder={isExercisePreferenceStep ? 'Ej.: Cambiar press de banca' : 'Escribe tu respuesta'}
+            placeholder={isExercisePreferenceStep ? 'Ej.: El press de banca no me cuadra; prefiero mancuernas' : 'Escribe tu respuesta'}
             placeholderTextColor={theme.colors.textSecondary}
             style={[
               styles.input,
