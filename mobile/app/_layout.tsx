@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
+import { AuthProvider, useAuth } from '@/auth/auth-context';
 import { PlanProvider, usePlan } from '@/plan/plan-context';
 import { ProfileProvider, useProfile } from '@/profile/profile-context';
 import { AppThemeProvider, useAppTheme } from '@/theme/theme-context';
@@ -15,11 +16,13 @@ export default function RootLayout() {
   return (
     <SafeAreaProvider>
       <AppThemeProvider>
-        <PlanProvider>
-          <ProfileProvider>
-            <RootNavigator />
-          </ProfileProvider>
-        </PlanProvider>
+        <AuthProvider>
+          <PlanProvider>
+            <ProfileProvider>
+              <RootNavigator />
+            </ProfileProvider>
+          </PlanProvider>
+        </AuthProvider>
       </AppThemeProvider>
     </SafeAreaProvider>
   );
@@ -27,9 +30,10 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { isHydrated: isThemeHydrated, theme } = useAppTheme();
+  const { isHydrated: isAuthHydrated } = useAuth();
   const { isHydrated: isPlanHydrated } = usePlan();
   const { isHydrated: isProfileHydrated, profile } = useProfile();
-  const isHydrated = isThemeHydrated && isPlanHydrated && isProfileHydrated;
+  const isHydrated = isThemeHydrated && isAuthHydrated && isPlanHydrated && isProfileHydrated;
   const hasProfile = profile !== null;
 
   useEffect(() => {
@@ -55,6 +59,8 @@ function RootNavigator() {
           <Stack.Screen name="ejercicios/[exerciseId]" options={{ headerShown: false }} />
           <Stack.Screen name="perfil/apariencia" options={{ headerShown: false }} />
           <Stack.Screen name="perfil/editar" options={{ headerShown: false }} />
+          <Stack.Screen name="auth/iniciar-sesion" options={{ headerShown: false }} />
+          <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
           <Stack.Screen name="plan/propuesta" options={{ headerShown: false }} />
           <Stack.Screen name="plan/borrador" options={{ headerShown: false }} />
         </Stack.Protected>
