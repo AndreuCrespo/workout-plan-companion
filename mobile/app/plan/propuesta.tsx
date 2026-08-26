@@ -38,7 +38,7 @@ export default function PlanProposalScreen() {
     try {
       const proposal = createPlanProposal(conversation, plan);
       await planProposalRepository.save(proposal);
-      router.push('../borrador');
+      router.push('/plan/borrador');
     } catch {
       setGenerationError(true);
     } finally {
