@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/logo-epic-v1.png",
     "scheme": "gimnasio",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark",
     "ios": {
       "supportsTablet": true
     },
