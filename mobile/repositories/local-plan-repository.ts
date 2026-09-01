@@ -103,6 +103,20 @@ class LocalPlanRepository implements PlanRepository {
     return readHistory();
   }
 
+  async replaceHistory(publications: PlanPublication[]): Promise<void> {
+    if (publications.length === 0 || publications.some((publication) => !isPlanPublication(publication))) {
+      throw new Error('La copia de planes no tiene un historial válido.');
+    }
+
+    const result = this.writeQueue.then(() => AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(publications)));
+    this.writeQueue = result.then(
+      () => undefined,
+      () => undefined,
+    );
+
+    await result;
+  }
+
   async publish(proposal: PlanProposal): Promise<PlanPublication> {
     const result = this.writeQueue.then(async () => {
       const history = await readHistory();

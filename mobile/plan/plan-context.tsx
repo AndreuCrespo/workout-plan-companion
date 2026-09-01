@@ -13,6 +13,7 @@ interface PlanContextValue {
   isHydrated: boolean;
   plan: MonthlyPlan;
   publishProposal: (proposal: PlanProposal) => Promise<PlanPublication>;
+  restoreHistory: (publications: PlanPublication[]) => Promise<void>;
 }
 
 const PlanContext = createContext<PlanContextValue | null>(null);
@@ -42,6 +43,12 @@ export function PlanProvider({ children }: PropsWithChildren) {
     };
   }, []);
 
+  const restoreHistory = useCallback(async (publications: PlanPublication[]) => {
+    await planRepository.replaceHistory(publications);
+    setHistory(publications);
+    setActivePublication(publications.at(-1) ?? null);
+  }, []);
+
   const publishProposal = useCallback(async (proposal: PlanProposal) => {
     const publication = await planRepository.publish(proposal);
     const publications = await planRepository.getHistory();
@@ -59,8 +66,9 @@ export function PlanProvider({ children }: PropsWithChildren) {
       isHydrated,
       plan: activePublication?.plan ?? mockPlan,
       publishProposal,
+      restoreHistory,
     }),
-    [activePublication, history, isHydrated, publishProposal],
+    [activePublication, history, isHydrated, publishProposal, restoreHistory],
   );
 
   return <PlanContext.Provider value={value}>{children}</PlanContext.Provider>;
