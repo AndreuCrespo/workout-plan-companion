@@ -2,7 +2,6 @@ export type AssistantSafetyStatus = 'clear' | 'needs-professional-review';
 
 export interface AssistantTurnRequest {
   conversationId: string | null;
-  sourcePlanVersionId: string | null;
   message: string;
 }
 
@@ -26,7 +25,7 @@ function optionalUuid(value: unknown): string | null {
   }
 
   if (typeof value !== 'string' || !uuidPattern.test(value)) {
-    throw new Error('El identificador de conversación o plan no es válido.');
+    throw new Error('El identificador de conversación no es válido.');
   }
 
   return value;
@@ -45,7 +44,6 @@ export function parseAssistantTurnRequest(value: unknown): AssistantTurnRequest 
 
   return {
     conversationId: optionalUuid(value.conversationId),
-    sourcePlanVersionId: optionalUuid(value.sourcePlanVersionId),
     message,
   };
 }
