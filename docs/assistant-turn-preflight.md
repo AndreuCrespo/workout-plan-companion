@@ -1,8 +1,8 @@
 # Remote assistant preflight
 
-`supabase/functions/assistant-turn` is source code only. It has **not** been deployed and does not call an AI provider.
+`supabase/functions/assistant-turn` is source code only and has **not** been deployed. Until its required server secrets are configured, it does not call an AI provider.
 
-Its current preflight behavior is deliberately limited:
+Its unconfigured preflight behavior is deliberately limited:
 
 1. accepts only authenticated `POST` requests;
 2. validates the narrow client payload (`conversationId` and message);
@@ -13,7 +13,7 @@ The trusted system instructions are versioned in `supabase/functions/assistant-t
 
 ## Required approval before activation
 
-Before adding a provider adapter or deploying the function, decide and approve:
+Before configuring secrets or deploying the function, decide and approve:
 
 - provider and model;
 - monthly budget, per-user/day quota, and timeout/retry behavior;
@@ -21,4 +21,4 @@ Before adding a provider adapter or deploying the function, decide and approve:
 - provider retention and data-processing terms; and
 - server-side secret name and deployment environment.
 
-After approval, the function derives the active remote plan from the authenticated account rather than accepting a plan ID from Expo. The prepared context loader is limited to the profile, active-plan session summary, active catalogue, and aggregated up/down feedback by exercise. It deliberately excludes notes, individual sets, and full workout logs. The source already includes strict parsing for an untrusted model response: exactly four weeks, valid existing catalogue IDs or structured private exercise candidates, no duplicate exercises in a session, no absolute loads, and no proposal after a professional-review safety status. Assistant candidates receive a private catalogue ID only after plan confirmation. The source also includes a direct OpenAI Responses API adapter and server-only persistence for validated conversation messages and reviewable proposals; neither is invoked until explicit consent and approved provider activation. The next implementation connects the adapter, persistence, and separate publication RPC inside the Edge Function. It must not add a local template fallback.
+After activation, the function derives the active remote plan from the authenticated account rather than accepting a plan ID from Expo. It first requires the current explicit consent, then loads only profile, active-plan session summary, active catalogue, and aggregated up/down feedback by exercise. It deliberately excludes notes, individual sets, and full workout logs. It reserves the server-side daily allowance before calling OpenAI, parses the untrusted model response, persists only a validated conversation/proposal, and returns a reviewable draft. The separate publication RPC activates private assistant exercises and a new immutable plan version only after the person confirms. It must not add a local template fallback.
