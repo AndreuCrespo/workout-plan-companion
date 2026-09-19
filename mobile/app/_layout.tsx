@@ -1,3 +1,4 @@
+import * as Notifications from 'expo-notifications';
 import * as SplashScreen from 'expo-splash-screen';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
@@ -9,6 +10,15 @@ import { AuthProvider, useAuth } from '@/auth/auth-context';
 import { PlanProvider, usePlan } from '@/plan/plan-context';
 import { ProfileProvider, useProfile } from '@/profile/profile-context';
 import { AppThemeProvider, useAppTheme } from '@/theme/theme-context';
+
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: false,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
 
 void SplashScreen.preventAutoHideAsync();
 
@@ -60,7 +70,6 @@ function RootNavigator() {
           <Stack.Screen name="perfil/apariencia" options={{ headerShown: false }} />
           <Stack.Screen name="perfil/editar" options={{ headerShown: false }} />
           <Stack.Screen name="plan/propuesta" options={{ headerShown: false }} />
-          <Stack.Screen name="plan/borrador" options={{ headerShown: false }} />
         </Stack.Protected>
         <Stack.Screen name="auth/iniciar-sesion" options={{ headerShown: false }} />
         <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
