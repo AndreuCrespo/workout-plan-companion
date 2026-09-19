@@ -52,7 +52,7 @@ GitHub Actions runs both checks for every push and pull request targeting `main`
 - `mobile/data/`: isolated sample data.
 - `mobile/repositories/`: contracts and local implementations for data and preferences.
 - `supabase/`: versioned SQL migrations; it contains no credentials.
-- `docs/`: approved product brief, visual system, third-party licence notices, the [future Supabase/assistant architecture](docs/supabase-assistant-architecture.md), the [non-deployed assistant preflight](docs/assistant-turn-preflight.md), and the [initial migration guide](docs/apply-supabase-foundation.md).
+- `docs/`: approved product brief, visual system, third-party licence notices, the [future Supabase/assistant architecture](docs/supabase-assistant-architecture.md), the [non-deployed assistant preflight](docs/assistant-turn-preflight.md), the [OpenAI activation boundary](docs/openai-provider-activation.md), and the [initial migration guide](docs/apply-supabase-foundation.md).
 
 ## Contributing
 
