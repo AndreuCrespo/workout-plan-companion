@@ -1,6 +1,14 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { availabilityOptions, durationOptions, trainingEmphasisOptions, unitOptions } from '@/data/profile-options';
+import {
+  availabilityOptions,
+  durationOptions,
+  equipmentAccessOptions,
+  primaryGoalOptions,
+  trainingEmphasisOptions,
+  trainingExperienceOptions,
+  unitOptions,
+} from '@/data/profile-options';
 import type { ProfileOption } from '@/data/profile-options';
 import type { UserProfile } from '@/domain/models';
 import type { ProfileRepository } from '@/repositories/profile-repository';
@@ -33,12 +41,21 @@ function parseUserProfile(value: unknown): UserProfile | null {
   return {
     availability: value.availability,
     createdAt: value.createdAt,
+    equipmentAccess: isOptionValue(equipmentAccessOptions, value.equipmentAccess)
+      ? value.equipmentAccess
+      : 'full-gym',
     firstName: value.firstName,
     limitations: value.limitations,
+    primaryGoal: isOptionValue(primaryGoalOptions, value.primaryGoal)
+      ? value.primaryGoal
+      : 'strength',
     sessionDurationMinutes: value.sessionDurationMinutes,
     trainingEmphasis: isOptionValue(trainingEmphasisOptions, value.trainingEmphasis)
       ? value.trainingEmphasis
       : 'compound-strength',
+    trainingExperience: isOptionValue(trainingExperienceOptions, value.trainingExperience)
+      ? value.trainingExperience
+      : 'some-experience',
     units: value.units,
     updatedAt: value.updatedAt,
   };

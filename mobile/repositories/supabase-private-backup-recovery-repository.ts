@@ -178,10 +178,21 @@ function profileFromRemote(value: unknown): UserProfile {
   return {
     availability: value.availability,
     createdAt: value.created_at,
+    equipmentAccess: value.equipment_access === 'dumbbells-and-bench'
+      || value.equipment_access === 'bands-and-basic'
+      || value.equipment_access === 'bodyweight'
+      ? value.equipment_access
+      : 'full-gym',
     firstName: value.first_name,
     limitations: value.limitations,
+    primaryGoal: value.primary_goal === 'muscle' || value.primary_goal === 'general-fitness' || value.primary_goal === 'returning'
+      ? value.primary_goal
+      : 'strength',
     sessionDurationMinutes: value.session_duration_minutes,
     trainingEmphasis: value.training_emphasis === 'balanced' ? 'balanced' : 'compound-strength',
+    trainingExperience: value.training_experience === 'starting' || value.training_experience === 'experienced'
+      ? value.training_experience
+      : 'some-experience',
     units: value.units,
     updatedAt: value.updated_at,
   };
@@ -366,7 +377,7 @@ class SupabasePrivateBackupRecoveryRepository implements PrivateBackupRecoveryRe
     const [profileResult, preferenceResult, plansResult, logsResult] = await Promise.all([
       client
         .from('profiles')
-        .select('availability, created_at, first_name, limitations, session_duration_minutes, training_emphasis, units, updated_at')
+        .select('availability, created_at, equipment_access, first_name, limitations, primary_goal, session_duration_minutes, training_emphasis, training_experience, units, updated_at')
         .eq('user_id', userId)
         .maybeSingle(),
       client.from('user_preferences').select('theme_name').eq('user_id', userId).maybeSingle(),

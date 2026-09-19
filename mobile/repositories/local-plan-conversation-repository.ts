@@ -55,6 +55,8 @@ function parseRequest(value: unknown): PlanRequest | null {
     !isDuration(value.sessionDurationMinutes) ||
     typeof value.sessionDurationDetails !== 'string' ||
     (value.trainingEmphasis !== undefined && value.trainingEmphasis !== 'compound-strength' && value.trainingEmphasis !== 'balanced') ||
+    (value.trainingExperience !== undefined && value.trainingExperience !== 'starting' && value.trainingExperience !== 'some-experience' && value.trainingExperience !== 'experienced') ||
+    (value.equipmentAccess !== undefined && value.equipmentAccess !== 'full-gym' && value.equipmentAccess !== 'dumbbells-and-bench' && value.equipmentAccess !== 'bands-and-basic' && value.equipmentAccess !== 'bodyweight') ||
     (value.environment !== null && !isEnvironment(value.environment)) ||
     typeof value.environmentDetails !== 'string' ||
     typeof value.priorities !== 'string' ||
@@ -90,6 +92,14 @@ function parseRequest(value: unknown): PlanRequest | null {
     sessionDurationMinutes: value.sessionDurationMinutes,
     sessionDurationDetails: value.sessionDurationDetails,
     trainingEmphasis: value.trainingEmphasis === 'balanced' ? 'balanced' : 'compound-strength',
+    trainingExperience: value.trainingExperience === 'starting' || value.trainingExperience === 'experienced'
+      ? value.trainingExperience
+      : 'some-experience',
+    equipmentAccess: value.equipmentAccess === 'dumbbells-and-bench'
+      || value.equipmentAccess === 'bands-and-basic'
+      || value.equipmentAccess === 'bodyweight'
+      ? value.equipmentAccess
+      : 'full-gym',
     environment: value.environment,
     environmentDetails: value.environmentDetails,
     priorities: value.priorities,

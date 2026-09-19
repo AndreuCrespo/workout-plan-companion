@@ -2,7 +2,12 @@ import { StyleSheet, View } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
-import { BasicsProfileFields, DetailsProfileFields, TrainingProfileFields } from '@/components/profile/ProfileFormSections';
+import {
+  BasicsProfileFields,
+  DetailsProfileFields,
+  GoalsAndExperienceProfileFields,
+  TrainingProfileFields,
+} from '@/components/profile/ProfileFormSections';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -55,6 +60,7 @@ export default function EditProfileScreen() {
       <View style={styles.section}>
         <AppText variant="heading">Tu semana</AppText>
         <BasicsProfileFields draft={draft} onChange={updateDraft} />
+        <GoalsAndExperienceProfileFields draft={draft} onChange={updateDraft} />
         <TrainingProfileFields draft={draft} onChange={updateDraft} />
       </View>
 

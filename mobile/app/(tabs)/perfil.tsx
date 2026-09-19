@@ -12,9 +12,12 @@ import { ScreenHeader } from '@/components/ui/ScreenHeader';
 import {
   availabilityOptions,
   durationOptions,
+  equipmentAccessOptions,
   getLimitationsLabel,
-  trainingEmphasisOptions,
   getProfileOptionLabel,
+  primaryGoalOptions,
+  trainingEmphasisOptions,
+  trainingExperienceOptions,
   unitOptions,
 } from '@/data/profile-options';
 import { useProfile } from '@/profile/profile-context';
@@ -53,6 +56,13 @@ export default function ProfileScreen() {
       </Card>
 
       <View style={styles.section}>
+        <AppText variant="heading">Tu contexto</AppText>
+        <ListRow label="Objetivo" value={getProfileOptionLabel(primaryGoalOptions, profile.primaryGoal)} />
+        <ListRow label="Experiencia" value={getProfileOptionLabel(trainingExperienceOptions, profile.trainingExperience)} />
+        <ListRow label="Material" value={getProfileOptionLabel(equipmentAccessOptions, profile.equipmentAccess)} />
+      </View>
+
+      <View style={styles.section}>
         <AppText variant="heading">Tu semana</AppText>
         <ListRow label="Disponibilidad" value={getProfileOptionLabel(availabilityOptions, profile.availability)} />
         <ListRow label="Duración" value={getProfileOptionLabel(durationOptions, profile.sessionDurationMinutes)} />
@@ -77,7 +87,7 @@ export default function ProfileScreen() {
           <AppText variant="bodyStrong">{user ? 'Sesión conectada' : 'Aún usas la app sin cuenta'}</AppText>
           <AppText tone="secondary" variant="caption">
             {user
-              ? `Conectada como ${user.email ?? 'tu correo'}. Desde tu cuenta puedes guardar una copia consentida de tu perfil —incluida esta prioridad—, tema, planes publicados y registros terminados.`
+              ? `Conectada como ${user.email ?? 'tu correo'}. Desde tu cuenta puedes guardar una copia consentida de tu perfil —incluidos objetivo, experiencia, material y prioridad—, tema, planes publicados y registros terminados.`
               : 'Puedes entrar con un enlace de correo. Tus datos actuales siguen guardados solo en este dispositivo.'}
           </AppText>
           <PrimaryButton

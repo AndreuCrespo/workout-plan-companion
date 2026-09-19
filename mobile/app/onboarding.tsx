@@ -2,7 +2,12 @@ import { StyleSheet, View } from 'react-native';
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 
-import { BasicsProfileFields, DetailsProfileFields, TrainingProfileFields } from '@/components/profile/ProfileFormSections';
+import {
+  BasicsProfileFields,
+  DetailsProfileFields,
+  GoalsAndExperienceProfileFields,
+  TrainingProfileFields,
+} from '@/components/profile/ProfileFormSections';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
@@ -18,12 +23,17 @@ import { spacing } from '@/theme/tokens';
 
 const onboardingSteps = [
   {
-    eyebrow: 'Paso 1 de 2',
-    title: 'Tu ritmo semanal',
-    description: 'Unos pocos detalles para presentar el plan de muestra de forma clara.',
+    eyebrow: 'Paso 1 de 3',
+    title: 'Tu punto de partida',
+    description: 'Usaremos estos datos como contexto para el próximo plan.',
   },
   {
-    eyebrow: 'Paso 2 de 2',
+    eyebrow: 'Paso 2 de 3',
+    title: 'Tu ritmo y material',
+    description: 'Elige lo que tienes disponible habitualmente.',
+  },
+  {
+    eyebrow: 'Paso 3 de 3',
     title: 'Últimos ajustes',
     description: 'Podrás cambiar esto desde Perfil cuando lo necesites.',
   },
@@ -51,7 +61,7 @@ export default function OnboardingScreen() {
 
   async function continueOnboarding() {
     if (!isLastStep) {
-      setStep(1);
+      setStep((currentStep) => currentStep + 1);
       return;
     }
 
@@ -80,8 +90,10 @@ export default function OnboardingScreen() {
       {step === 0 ? (
         <View style={styles.stepContent}>
           <BasicsProfileFields draft={draft} onChange={updateDraft} />
-          <TrainingProfileFields draft={draft} onChange={updateDraft} />
+          <GoalsAndExperienceProfileFields draft={draft} onChange={updateDraft} />
         </View>
+      ) : step === 1 ? (
+        <TrainingProfileFields draft={draft} onChange={updateDraft} />
       ) : (
         <View style={styles.stepContent}>
           <DetailsProfileFields draft={draft} onChange={updateDraft} />
@@ -109,7 +121,7 @@ export default function OnboardingScreen() {
           <PrimaryButton
             accessibilityHint="Vuelve al paso anterior"
             label="Volver"
-            onPress={() => setStep(0)}
+            onPress={() => setStep((currentStep) => currentStep - 1)}
             variant="secondary"
           />
         ) : null}

@@ -1,4 +1,13 @@
-import type { MonthlyPlan, TrainingAvailability, SessionDurationMinutes, TrainingEmphasis, UserProfile, WorkoutLog } from '@/domain/models';
+import type {
+  EquipmentAccess,
+  MonthlyPlan,
+  TrainingAvailability,
+  SessionDurationMinutes,
+  TrainingEmphasis,
+  TrainingExperience,
+  UserProfile,
+  WorkoutLog,
+} from '@/domain/models';
 
 export type PlanGoal = 'strength' | 'muscle' | 'general-fitness' | 'returning' | 'other';
 export type TrainingEnvironment = 'gym' | 'home' | 'mixed' | 'other';
@@ -34,6 +43,8 @@ export interface PlanRequest {
   sessionDurationMinutes: SessionDurationMinutes;
   sessionDurationDetails: string;
   trainingEmphasis: TrainingEmphasis;
+  trainingExperience: TrainingExperience;
+  equipmentAccess: EquipmentAccess;
   environment: TrainingEnvironment | null;
   environmentDetails: string;
   priorities: string;
@@ -143,11 +154,14 @@ function createAssistantMessage(
       const strengthFoundationContext = request.trainingEmphasis === 'compound-strength'
         ? 'El borrador priorizará ejercicios multiarticulares de fuerza cuando encajen con tu equipo y limitaciones. '
         : '';
+      const profileGoalContext = request.goal
+        ? `En tu perfil indicas “${planGoalLabel(request.goal, '')}”. `
+        : '';
 
       return {
         id: createId('assistant'),
         role: 'assistant',
-        text: `${greeting}${feedbackContext}${strengthFoundationContext}¿Qué te gustaría priorizar en tu próximo ciclo?`,
+        text: `${greeting}${feedbackContext}${profileGoalContext}${strengthFoundationContext}¿Qué te gustaría priorizar en tu próximo ciclo?`,
         suggestions: goalSuggestions,
       };
     }
@@ -369,13 +383,15 @@ export function createPlanConversation(context: PlanConversationContext): PlanCo
   const request: PlanRequest = {
     sourcePlanId: context.plan.id,
     sourcePlanVersion: context.plan.version,
-    goal: null,
+    goal: context.profile.primaryGoal,
     goalDetails: '',
     availability: context.profile.availability,
     availabilityDetails: '',
     sessionDurationMinutes: context.profile.sessionDurationMinutes,
     sessionDurationDetails: '',
     trainingEmphasis: context.profile.trainingEmphasis,
+    trainingExperience: context.profile.trainingExperience,
+    equipmentAccess: context.profile.equipmentAccess,
     environment: null,
     environmentDetails: '',
     priorities: '',
