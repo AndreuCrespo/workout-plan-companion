@@ -92,7 +92,7 @@ Las tablas hijas aplican la misma propiedad mediante su fila padre, por ejemplo 
 
 ## Asistente remoto
 
-El actual asistente local es un fallback determinista. El asistente remoto será conversacional y no debe quedar limitado por el wizard local `PlanConversation`.
+No habrá un asistente ni un generador local como fallback. El asistente remoto será conversacional; mientras no esté configurado, la app explicará que no puede crear un plan nuevo y mantendrá disponibles los planes y registros ya existentes.
 
 ### Contrato de aplicación futuro
 
