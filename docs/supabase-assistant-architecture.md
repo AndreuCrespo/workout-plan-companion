@@ -59,7 +59,7 @@ Todas las tablas privadas tienen `user_id uuid not null references auth.users(id
 
 ### Planes versionados
 
-`plan_versions` no contiene un campo booleano `is_active`: el plan activo se deriva de `active_plan_selection`. Publicar debe ejecutarse mediante una sola RPC transaccional:
+`plan_versions` no contiene un campo booleano `is_active`: el plan activo se deriva de `active_plan_selection`. Publicar debe ejecutarse mediante una sola RPC transaccional (`publish_ai_plan_proposal`):
 
 1. comprueba que la propuesta pertenece al `user_id` del JWT y está en estado `reviewable`;
 2. comprueba que su versión origen coincide con `active_plan_selection`;
