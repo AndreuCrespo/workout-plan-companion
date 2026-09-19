@@ -2,7 +2,7 @@ import { StyleSheet, View } from 'react-native';
 
 import { ChoiceGroup } from '@/components/ui/ChoiceGroup';
 import { ProfileTextField } from '@/components/ui/ProfileTextField';
-import { availabilityOptions, durationOptions, unitOptions } from '@/data/profile-options';
+import { availabilityOptions, durationOptions, trainingEmphasisOptions, unitOptions } from '@/data/profile-options';
 import type { ProfileDraft } from '@/domain/models';
 import { spacing } from '@/theme/tokens';
 
@@ -37,6 +37,13 @@ export function TrainingProfileFields({ draft, onChange }: ProfileFieldsProps) {
         onValueChange={(sessionDurationMinutes) => onChange({ sessionDurationMinutes })}
         options={durationOptions}
         value={draft.sessionDurationMinutes}
+      />
+      <ChoiceGroup
+        description="Esta prioridad no promete cambios hormonales; el plan se ajusta a tu objetivo, equipo y limitaciones declaradas."
+        label="Prioridad de entrenamiento"
+        onValueChange={(trainingEmphasis) => onChange({ trainingEmphasis })}
+        options={trainingEmphasisOptions}
+        value={draft.trainingEmphasis}
       />
     </View>
   );

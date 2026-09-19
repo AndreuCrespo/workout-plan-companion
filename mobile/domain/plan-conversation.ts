@@ -1,4 +1,4 @@
-import type { MonthlyPlan, TrainingAvailability, SessionDurationMinutes, UserProfile, WorkoutLog } from '@/domain/models';
+import type { MonthlyPlan, TrainingAvailability, SessionDurationMinutes, TrainingEmphasis, UserProfile, WorkoutLog } from '@/domain/models';
 
 export type PlanGoal = 'strength' | 'muscle' | 'general-fitness' | 'returning' | 'other';
 export type TrainingEnvironment = 'gym' | 'home' | 'mixed' | 'other';
@@ -33,6 +33,7 @@ export interface PlanRequest {
   availabilityDetails: string;
   sessionDurationMinutes: SessionDurationMinutes;
   sessionDurationDetails: string;
+  trainingEmphasis: TrainingEmphasis;
   environment: TrainingEnvironment | null;
   environmentDetails: string;
   priorities: string;
@@ -139,10 +140,14 @@ function createAssistantMessage(
         ? `Tendré en cuenta tus comentarios sobre ${feedbackExercises.join(' y ')}. `
         : 'Tendré en cuenta las sesiones que has guardado. ';
 
+      const strengthFoundationContext = request.trainingEmphasis === 'compound-strength'
+        ? 'El borrador priorizará ejercicios multiarticulares de fuerza cuando encajen con tu equipo y limitaciones. '
+        : '';
+
       return {
         id: createId('assistant'),
         role: 'assistant',
-        text: `${greeting}${feedbackContext}¿Qué te gustaría priorizar en tu próximo ciclo?`,
+        text: `${greeting}${feedbackContext}${strengthFoundationContext}¿Qué te gustaría priorizar en tu próximo ciclo?`,
         suggestions: goalSuggestions,
       };
     }
@@ -370,6 +375,7 @@ export function createPlanConversation(context: PlanConversationContext): PlanCo
     availabilityDetails: '',
     sessionDurationMinutes: context.profile.sessionDurationMinutes,
     sessionDurationDetails: '',
+    trainingEmphasis: context.profile.trainingEmphasis,
     environment: null,
     environmentDetails: '',
     priorities: '',

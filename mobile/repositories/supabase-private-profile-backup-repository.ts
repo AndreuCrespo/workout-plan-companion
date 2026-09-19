@@ -51,6 +51,7 @@ class SupabasePrivateProfileBackupRepository implements PrivateProfileBackupRepo
         first_name: profile.firstName,
         limitations: profile.limitations,
         session_duration_minutes: profile.sessionDurationMinutes,
+        training_emphasis: profile.trainingEmphasis,
         units: profile.units,
         user_id: userId,
       },

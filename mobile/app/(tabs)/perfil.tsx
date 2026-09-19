@@ -13,6 +13,7 @@ import {
   availabilityOptions,
   durationOptions,
   getLimitationsLabel,
+  trainingEmphasisOptions,
   getProfileOptionLabel,
   unitOptions,
 } from '@/data/profile-options';
@@ -55,6 +56,7 @@ export default function ProfileScreen() {
         <AppText variant="heading">Tu semana</AppText>
         <ListRow label="Disponibilidad" value={getProfileOptionLabel(availabilityOptions, profile.availability)} />
         <ListRow label="Duración" value={getProfileOptionLabel(durationOptions, profile.sessionDurationMinutes)} />
+        <ListRow label="Prioridad" value={getProfileOptionLabel(trainingEmphasisOptions, profile.trainingEmphasis)} />
         <ListRow label="Limitaciones declaradas" value={getLimitationsLabel(profile.limitations)} />
         <ListRow label="Unidades" value={getProfileOptionLabel(unitOptions, profile.units)} />
       </View>
@@ -75,7 +77,7 @@ export default function ProfileScreen() {
           <AppText variant="bodyStrong">{user ? 'Sesión conectada' : 'Aún usas la app sin cuenta'}</AppText>
           <AppText tone="secondary" variant="caption">
             {user
-              ? `Conectada como ${user.email ?? 'tu correo'}. Desde tu cuenta puedes guardar una copia consentida de perfil, tema, planes publicados y registros terminados.`
+              ? `Conectada como ${user.email ?? 'tu correo'}. Desde tu cuenta puedes guardar una copia consentida de tu perfil —incluida esta prioridad—, tema, planes publicados y registros terminados.`
               : 'Puedes entrar con un enlace de correo. Tus datos actuales siguen guardados solo en este dispositivo.'}
           </AppText>
           <PrimaryButton

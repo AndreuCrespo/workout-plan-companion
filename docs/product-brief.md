@@ -25,8 +25,10 @@ A person who used to follow a coach's plan and now trains independently. They wa
 
 - Primary goal (strength, muscle gain, general health, or returning to training).
 - Experience, available days, workout duration, and equipment.
-- The person's preferences and declared limitations.
+- The person's preferences and declared limitations, including whether to prioritize a strength base with multi-joint exercises.
 - Units and visual theme.
+
+A strength-base preference guides the plan structure only when it fits the person's stated context. It is not described as a way to alter testosterone or guarantee any hormonal or physiological outcome.
 
 This data is stored in the profile and can be edited. Each plan stores a copy of the parameters that originated it, and its logged workouts are not retrospectively modified.
 

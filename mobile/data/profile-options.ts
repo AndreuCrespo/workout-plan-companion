@@ -1,4 +1,4 @@
-import type { MeasurementUnits, SessionDurationMinutes, TrainingAvailability } from '@/domain/models';
+import type { MeasurementUnits, SessionDurationMinutes, TrainingAvailability, TrainingEmphasis } from '@/domain/models';
 
 export interface ProfileOption<TValue extends string | number> {
   value: TValue;
@@ -17,6 +17,19 @@ export const durationOptions: readonly ProfileOption<SessionDurationMinutes>[] =
   { value: 45, label: '45 minutos', description: 'Sesiones directas y enfocadas.' },
   { value: 60, label: '60 minutos', description: 'Tiempo para calentar, entrenar y cerrar con calma.' },
   { value: 75, label: '75 minutos', description: 'Más margen para descansos y trabajo complementario.' },
+];
+
+export const trainingEmphasisOptions: readonly ProfileOption<TrainingEmphasis>[] = [
+  {
+    value: 'compound-strength',
+    label: 'Fuerza con ejercicios multiarticulares',
+    description: 'Da prioridad a patrones de fuerza como sentadilla, empuje, tracción y bisagra cuando encajen con tu contexto.',
+  },
+  {
+    value: 'balanced',
+    label: 'Enfoque equilibrado',
+    description: 'Reparte el plan sin añadir una prioridad extra de fuerza.',
+  },
 ];
 
 export const unitOptions: readonly ProfileOption<MeasurementUnits>[] = [

@@ -37,6 +37,18 @@ const weeklyGoals = [
   'Cerrar el ciclo y recoger feedback',
 ];
 
+const compoundStrengthExerciseIds = new Set([
+  'sentadilla-barra',
+  'sentadilla-goblet',
+  'peso-muerto-rumano',
+  'zancada-mancuernas',
+  'subida-cajon',
+  'press-banca-barra',
+  'press-pecho-mancuernas',
+  'jalon-pecho-polea',
+  'remo-sentado',
+]);
+
 function createId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
@@ -159,17 +171,37 @@ function applyRequestedExerciseChanges(
 }
 
 function proposalName(request: PlanRequest): string {
-  switch (request.goal) {
-    case 'strength':
-      return 'Fuerza con control';
-    case 'muscle':
-      return 'Volumen sostenible';
-    case 'general-fitness':
-      return 'Forma física general';
-    case 'returning':
-      return 'Vuelta al entrenamiento';
-    default:
-      return request.goalDetails.trim() || 'Próximo ciclo';
+  const goalName = (() => {
+    switch (request.goal) {
+      case 'strength':
+        return 'Fuerza con control';
+      case 'muscle':
+        return 'Volumen sostenible';
+      case 'general-fitness':
+        return 'Forma física general';
+      case 'returning':
+        return 'Vuelta al entrenamiento';
+      default:
+        return request.goalDetails.trim() || 'Próximo ciclo';
+    }
+  })();
+
+  return request.trainingEmphasis === 'compound-strength' && request.goal !== 'strength'
+    ? `Fuerza base · ${goalName}`
+    : goalName;
+}
+
+function validateCompoundStrengthPriority(templates: SessionTemplate[], request: PlanRequest): void {
+  if (request.trainingEmphasis !== 'compound-strength') {
+    return;
+  }
+
+  const sessionWithoutStrengthBase = templates.find((template) => (
+    template.exerciseIds.filter((exerciseId) => compoundStrengthExerciseIds.has(exerciseId)).length < 2
+  ));
+
+  if (sessionWithoutStrengthBase) {
+    throw new Error('La propuesta no conserva una base suficiente de ejercicios multiarticulares de fuerza.');
   }
 }
 
@@ -209,6 +241,7 @@ function createProposalPlan(
     request,
     exercisesById,
   );
+  validateCompoundStrengthPriority(templates, request);
   const weeks: PlanWeek[] = weeklyGoals.map((goal, weekIndex) => ({
     number: weekIndex + 1,
     goal,
@@ -232,6 +265,9 @@ function createChanges(request: PlanRequest, substitutions: ExerciseSubstitution
     `${trainingAvailabilityLabel(request.availability)} por semana · sesiones de ${request.sessionDurationMinutes} min.`,
   ];
 
+  if (request.trainingEmphasis === 'compound-strength') {
+    changes.push('Base estructural: cada sesión mantiene al menos dos ejercicios multiarticulares de fuerza cuando son compatibles con el contexto indicado.');
+  }
   if (request.priorities.trim()) {
     changes.push(`Prioridad declarada: ${request.priorities.trim()}.`);
   }
@@ -248,6 +284,9 @@ function createChanges(request: PlanRequest, substitutions: ExerciseSubstitution
 function createReviewItems(request: PlanRequest, substitutions: ExerciseSubstitution[]): string[] {
   const reviewItems = [`Entorno indicado: ${trainingEnvironmentLabel(request.environment, request.environmentDetails)}.`];
 
+  if (request.trainingEmphasis === 'compound-strength') {
+    reviewItems.push('Revisa que los movimientos multiarticulares propuestos encajen con tu equipo, experiencia y limitaciones antes de publicar.');
+  }
   if (request.environment === 'home' || request.environment === 'mixed') {
     reviewItems.push('La selección local actual está centrada en gimnasio; revisa el material antes de publicar este borrador.');
   }

@@ -49,6 +49,7 @@ function isRequest(value: unknown): value is PlanProposal['request'] {
     (value.availability === 'two-days' || value.availability === 'three-days' || value.availability === 'four-days' || value.availability === 'five-days') &&
     (value.sessionDurationMinutes === 45 || value.sessionDurationMinutes === 60 || value.sessionDurationMinutes === 75) &&
     typeof value.sessionDurationDetails === 'string' &&
+    (value.trainingEmphasis === undefined || value.trainingEmphasis === 'compound-strength' || value.trainingEmphasis === 'balanced') &&
     (value.environment === null || value.environment === 'gym' || value.environment === 'home' || value.environment === 'mixed' || value.environment === 'other') &&
     typeof value.environmentDetails === 'string' &&
     typeof value.priorities === 'string' &&
@@ -75,7 +76,12 @@ function parseRequest(value: unknown): PlanProposal['request'] | null {
       : null;
 
   return availableExercises && requestedExerciseChanges
-    ? { ...value, availableExercises, requestedExerciseChanges }
+    ? {
+      ...value,
+      availableExercises,
+      requestedExerciseChanges,
+      trainingEmphasis: value.trainingEmphasis === 'balanced' ? 'balanced' : 'compound-strength',
+    }
     : null;
 }
 
