@@ -29,7 +29,7 @@ export default function PlanScreen() {
     router.push({ pathname: '/sesion/[sessionId]', params: { sessionId } });
   }
 
-  function openPlanConversation() {
+  function openPlanAssistant() {
     router.push('/plan/propuesta');
   }
 
@@ -61,9 +61,9 @@ export default function PlanScreen() {
       <View style={[styles.planConversationCard, { backgroundColor: theme.colors.primarySoft, borderColor: theme.colors.border }]}>
         <View style={styles.planConversationCopy}>
           <AppText variant="heading">Prepara tu próximo ciclo</AppText>
-          <AppText tone="secondary">Habla con el asistente sobre lo que quieres cambiar o mantener.</AppText>
+          <AppText tone="secondary">La propuesta se generará con el asistente IA y podrás revisarla antes de publicarla.</AppText>
         </View>
-        <PrimaryButton label="Hablar con el asistente" onPress={openPlanConversation} variant="secondary" />
+        <PrimaryButton label="Abrir asistente IA" onPress={openPlanAssistant} variant="secondary" />
       </View>
 
       <View style={styles.section}>

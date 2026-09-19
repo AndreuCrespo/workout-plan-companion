@@ -1,90 +1,52 @@
-import { useState } from 'react';
 import { StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-import { PlanConversationView } from '@/components/plan/PlanConversationView';
+import { useAuth } from '@/auth/auth-context';
 import { Screen } from '@/components/layout/Screen';
 import { AppText } from '@/components/ui/AppText';
 import { Card } from '@/components/ui/Card';
 import { PrimaryButton } from '@/components/ui/PrimaryButton';
 import { ScreenHeader } from '@/components/ui/ScreenHeader';
-import { createPlanProposal } from '@/domain/plan-proposal';
-import { usePlan } from '@/plan/plan-context';
-import { useProfile } from '@/profile/profile-context';
-import { usePlanConversation } from '@/plan-conversation/use-plan-conversation';
-import { planProposalRepository } from '@/repositories/local-plan-proposal-repository';
 import { spacing } from '@/theme/tokens';
 
 export default function PlanProposalScreen() {
   const router = useRouter();
-  const { plan } = usePlan();
-  const { profile } = useProfile();
-  const { conversation, hasError, isLoading, isSaving, respond, restart } = usePlanConversation(plan, profile);
-  const [isGeneratingProposal, setIsGeneratingProposal] = useState(false);
-  const [generationError, setGenerationError] = useState(false);
-
-  if (!profile) {
-    return null;
-  }
-
-  async function generateProposal() {
-    if (!conversation || conversation.status !== 'ready') {
-      return;
-    }
-
-    setIsGeneratingProposal(true);
-    setGenerationError(false);
-
-    try {
-      const proposal = createPlanProposal(conversation, plan);
-      await planProposalRepository.save(proposal);
-      router.push('/plan/borrador');
-    } catch {
-      setGenerationError(true);
-    } finally {
-      setIsGeneratingProposal(false);
-    }
-  }
+  const { isConfigured, user } = useAuth();
 
   return (
     <Screen>
       <ScreenHeader
-        description="Comparte el contexto que debe respetar tu próximo ciclo."
+        description="El próximo ciclo se preparará con el asistente IA y se revisará antes de publicarse."
         onBack={() => router.back()}
         title="Preparar próximo ciclo"
       />
 
-      {isLoading ? (
+      {!isConfigured ? (
         <Card style={styles.card}>
-          <AppText variant="heading">Cargando tu conversación</AppText>
-          <AppText tone="secondary">Recuperamos el borrador guardado en este dispositivo.</AppText>
+          <AppText variant="heading">Asistente IA no configurado</AppText>
+          <AppText tone="secondary">
+            Esta instalación no tiene la conexión remota necesaria para pedir una propuesta. Tus planes y entrenamientos actuales siguen disponibles en este dispositivo.
+          </AppText>
         </Card>
-      ) : null}
-
-      {hasError || generationError ? (
+      ) : !user ? (
         <Card style={styles.card}>
-          <AppText variant="heading">No pudimos guardar el borrador</AppText>
-          <AppText tone="secondary">Puedes volver a intentarlo; tus respuestas visibles no se han eliminado.</AppText>
+          <AppText variant="heading">Conecta tu cuenta para continuar</AppText>
+          <AppText tone="secondary">
+            El asistente IA usa una sesión autenticada y solo enviará el contexto que aceptes para preparar un borrador revisable.
+          </AppText>
+          <PrimaryButton label="Conectar con correo" onPress={() => router.push('/auth/iniciar-sesion')} />
         </Card>
-      ) : null}
-
-      {conversation && !isLoading ? (
-        <PlanConversationView
-          conversation={conversation}
-          isGeneratingProposal={isGeneratingProposal}
-          isSaving={isSaving}
-          onGenerateProposal={() => void generateProposal()}
-          onRestart={restart}
-          onRespond={respond}
-        />
-      ) : null}
-
-      {!conversation && !isLoading ? (
+      ) : (
         <Card style={styles.card}>
-          <AppText variant="heading">No pudimos iniciar la conversación</AppText>
-          <PrimaryButton label="Volver a Mi plan" onPress={() => router.back()} />
+          <AppText variant="heading">Asistente IA en preparación</AppText>
+          <AppText tone="secondary">
+            No usamos plantillas locales para generar planes nuevos. Falta activar y validar el servicio remoto antes de poder enviar una petición.
+          </AppText>
+          <AppText tone="secondary" variant="caption">
+            Cuando esté activo, podrás explicar lo que necesitas con tus palabras y revisar el borrador antes de publicar una nueva versión.
+          </AppText>
         </Card>
-      ) : null}
+      )}
     </Screen>
   );
 }

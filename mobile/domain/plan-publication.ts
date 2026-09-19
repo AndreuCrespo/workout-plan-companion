@@ -1,4 +1,4 @@
-import type { PlanRequest } from '@/domain/plan-conversation';
+import type { PlanRequestSnapshot } from '@/domain/plan-proposal';
 import type { MonthlyPlan } from '@/domain/models';
 
 /**
@@ -10,5 +10,5 @@ export interface PlanPublication {
   plan: MonthlyPlan;
   publishedAt: string;
   sourceProposalId: string | null;
-  request: PlanRequest | null;
+  request: PlanRequestSnapshot | null;
 }
