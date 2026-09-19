@@ -12,7 +12,7 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 - Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
 - Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
 - A persistent local plan conversation that produces a reviewable four-week proposal; publication is explicit, creates an immutable new version, and preserves prior plans and logs.
-- A persistent training emphasis: by default, new plans prioritize a strength base with multi-joint exercises when compatible with the declared context; it makes no hormonal or physiological promises.
+- A persistent plan context for primary goal, training experience, equipment, and training emphasis. By default, new plans prioritize a strength base with multi-joint exercises when compatible with the declared context; it makes no hormonal or physiological promises.
 - Optional Magic Link access through Supabase Auth, with the session kept in device secure storage; a person can explicitly back up their profile, theme, published plans, and completed logs after applying the reviewed history-backup migration, then explicitly recover that copy on a new device. Drafts remain local and progress is recalculated from recovered logs.
 - A reviewed design for Supabase persistence and a secure remote assistant; continuous cross-device sync and AI are not implemented yet.
 - Two persistent themes: Graphite Orange is the default; Active Green is the alternative.

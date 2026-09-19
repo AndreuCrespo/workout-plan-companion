@@ -50,6 +50,8 @@ function isRequest(value: unknown): value is PlanProposal['request'] {
     (value.sessionDurationMinutes === 45 || value.sessionDurationMinutes === 60 || value.sessionDurationMinutes === 75) &&
     typeof value.sessionDurationDetails === 'string' &&
     (value.trainingEmphasis === undefined || value.trainingEmphasis === 'compound-strength' || value.trainingEmphasis === 'balanced') &&
+    (value.trainingExperience === undefined || value.trainingExperience === 'starting' || value.trainingExperience === 'some-experience' || value.trainingExperience === 'experienced') &&
+    (value.equipmentAccess === undefined || value.equipmentAccess === 'full-gym' || value.equipmentAccess === 'dumbbells-and-bench' || value.equipmentAccess === 'bands-and-basic' || value.equipmentAccess === 'bodyweight') &&
     (value.environment === null || value.environment === 'gym' || value.environment === 'home' || value.environment === 'mixed' || value.environment === 'other') &&
     typeof value.environmentDetails === 'string' &&
     typeof value.priorities === 'string' &&
@@ -80,7 +82,15 @@ function parseRequest(value: unknown): PlanProposal['request'] | null {
       ...value,
       availableExercises,
       requestedExerciseChanges,
+      equipmentAccess: value.equipmentAccess === 'dumbbells-and-bench'
+        || value.equipmentAccess === 'bands-and-basic'
+        || value.equipmentAccess === 'bodyweight'
+        ? value.equipmentAccess
+        : 'full-gym',
       trainingEmphasis: value.trainingEmphasis === 'balanced' ? 'balanced' : 'compound-strength',
+      trainingExperience: value.trainingExperience === 'starting' || value.trainingExperience === 'experienced'
+        ? value.trainingExperience
+        : 'some-experience',
     }
     : null;
 }

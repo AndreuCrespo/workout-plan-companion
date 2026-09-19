@@ -1,10 +1,38 @@
-import type { MeasurementUnits, SessionDurationMinutes, TrainingAvailability, TrainingEmphasis } from '@/domain/models';
+import type {
+  EquipmentAccess,
+  MeasurementUnits,
+  PrimaryTrainingGoal,
+  SessionDurationMinutes,
+  TrainingAvailability,
+  TrainingEmphasis,
+  TrainingExperience,
+} from '@/domain/models';
 
 export interface ProfileOption<TValue extends string | number> {
   value: TValue;
   label: string;
   description: string;
 }
+
+export const primaryGoalOptions: readonly ProfileOption<PrimaryTrainingGoal>[] = [
+  { value: 'strength', label: 'Ganar fuerza', description: 'Mejorar el control y la progresión de movimientos de fuerza.' },
+  { value: 'muscle', label: 'Ganar músculo', description: 'Trabajar con una base sostenible de volumen y técnica.' },
+  { value: 'general-fitness', label: 'Mejorar mi forma física', description: 'Combinar fuerza, capacidad de trabajo y consistencia.' },
+  { value: 'returning', label: 'Retomar el entrenamiento', description: 'Volver al ritmo con margen y progresión gradual.' },
+];
+
+export const trainingExperienceOptions: readonly ProfileOption<TrainingExperience>[] = [
+  { value: 'starting', label: 'Estoy empezando', description: 'Priorizaremos aprender y repetir movimientos con control.' },
+  { value: 'some-experience', label: 'Ya tengo práctica', description: 'Conozco ejercicios básicos y quiero seguir progresando.' },
+  { value: 'experienced', label: 'Entreno con experiencia', description: 'Puedo revisar una propuesta con más autonomía.' },
+];
+
+export const equipmentAccessOptions: readonly ProfileOption<EquipmentAccess>[] = [
+  { value: 'full-gym', label: 'Gimnasio completo', description: 'Barras, banco, máquinas y poleas disponibles.' },
+  { value: 'dumbbells-and-bench', label: 'Mancuernas y banco', description: 'Entreno con mancuernas, un banco estable y espacio libre.' },
+  { value: 'bands-and-basic', label: 'Bandas y material básico', description: 'Cuento con bandas de resistencia y una esterilla o superficie estable.' },
+  { value: 'bodyweight', label: 'Solo peso corporal', description: 'No tengo material de carga disponible ahora mismo.' },
+];
 
 export const availabilityOptions: readonly ProfileOption<TrainingAvailability>[] = [
   { value: 'two-days', label: '2 días por semana', description: 'Dos sesiones para avanzar con margen.' },

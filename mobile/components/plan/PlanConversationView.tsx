@@ -165,6 +165,20 @@ function PlanRequestSummary({ conversation, isGeneratingProposal, onRestart, onG
         label="Base del plan"
         value={request.trainingEmphasis === 'compound-strength' ? 'Fuerza con ejercicios multiarticulares' : 'Enfoque equilibrado'}
       />
+      <SummaryRow
+        label="Experiencia"
+        value={request.trainingExperience === 'starting' ? 'Estoy empezando' : request.trainingExperience === 'experienced' ? 'Entreno con experiencia' : 'Ya tengo práctica'}
+      />
+      <SummaryRow
+        label="Material habitual"
+        value={request.equipmentAccess === 'full-gym'
+          ? 'Gimnasio completo'
+          : request.equipmentAccess === 'dumbbells-and-bench'
+            ? 'Mancuernas y banco'
+            : request.equipmentAccess === 'bands-and-basic'
+              ? 'Bandas y material básico'
+              : 'Solo peso corporal'}
+      />
       <SummaryRow label="Disponibilidad" value={availability} />
       <SummaryRow
         label="Duración"

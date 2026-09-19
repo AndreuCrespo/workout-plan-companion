@@ -2,7 +2,15 @@ import { StyleSheet, View } from 'react-native';
 
 import { ChoiceGroup } from '@/components/ui/ChoiceGroup';
 import { ProfileTextField } from '@/components/ui/ProfileTextField';
-import { availabilityOptions, durationOptions, trainingEmphasisOptions, unitOptions } from '@/data/profile-options';
+import {
+  availabilityOptions,
+  durationOptions,
+  equipmentAccessOptions,
+  primaryGoalOptions,
+  trainingEmphasisOptions,
+  trainingExperienceOptions,
+  unitOptions,
+} from '@/data/profile-options';
 import type { ProfileDraft } from '@/domain/models';
 import { spacing } from '@/theme/tokens';
 
@@ -20,6 +28,25 @@ export function BasicsProfileFields({ draft, onChange }: ProfileFieldsProps) {
       placeholder="Tu nombre (opcional)"
       value={draft.firstName}
     />
+  );
+}
+
+export function GoalsAndExperienceProfileFields({ draft, onChange }: ProfileFieldsProps) {
+  return (
+    <View style={styles.section}>
+      <ChoiceGroup
+        label="Objetivo principal"
+        onValueChange={(primaryGoal) => onChange({ primaryGoal })}
+        options={primaryGoalOptions}
+        value={draft.primaryGoal}
+      />
+      <ChoiceGroup
+        label="Experiencia de entrenamiento"
+        onValueChange={(trainingExperience) => onChange({ trainingExperience })}
+        options={trainingExperienceOptions}
+        value={draft.trainingExperience}
+      />
+    </View>
   );
 }
 
@@ -44,6 +71,12 @@ export function TrainingProfileFields({ draft, onChange }: ProfileFieldsProps) {
         onValueChange={(trainingEmphasis) => onChange({ trainingEmphasis })}
         options={trainingEmphasisOptions}
         value={draft.trainingEmphasis}
+      />
+      <ChoiceGroup
+        label="Material principal disponible"
+        onValueChange={(equipmentAccess) => onChange({ equipmentAccess })}
+        options={equipmentAccessOptions}
+        value={draft.equipmentAccess}
       />
     </View>
   );

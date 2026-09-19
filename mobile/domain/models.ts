@@ -59,8 +59,17 @@ export type MeasurementUnits = 'metric' | 'imperial';
 
 export type TrainingEmphasis = 'compound-strength' | 'balanced';
 
+export type PrimaryTrainingGoal = 'strength' | 'muscle' | 'general-fitness' | 'returning';
+
+export type TrainingExperience = 'starting' | 'some-experience' | 'experienced';
+
+export type EquipmentAccess = 'full-gym' | 'dumbbells-and-bench' | 'bands-and-basic' | 'bodyweight';
+
 export interface UserProfile {
   firstName: string;
+  primaryGoal: PrimaryTrainingGoal;
+  trainingExperience: TrainingExperience;
+  equipmentAccess: EquipmentAccess;
   availability: TrainingAvailability;
   sessionDurationMinutes: SessionDurationMinutes;
   trainingEmphasis: TrainingEmphasis;

@@ -48,10 +48,13 @@ class SupabasePrivateProfileBackupRepository implements PrivateProfileBackupRepo
     const { error: profileError } = await client.from('profiles').upsert(
       {
         availability: profile.availability,
+        equipment_access: profile.equipmentAccess,
         first_name: profile.firstName,
         limitations: profile.limitations,
+        primary_goal: profile.primaryGoal,
         session_duration_minutes: profile.sessionDurationMinutes,
         training_emphasis: profile.trainingEmphasis,
+        training_experience: profile.trainingExperience,
         units: profile.units,
         user_id: userId,
       },

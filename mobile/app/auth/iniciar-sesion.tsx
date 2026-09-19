@@ -60,7 +60,7 @@ export default function SignInScreen() {
 
     Alert.alert(
       'Guardar copia privada',
-      'Se subirán tu nombre, disponibilidad, duración, prioridad de entrenamiento, limitaciones declaradas, unidades y tema. No se subirán planes, entrenamientos, notas ni progreso.',
+      'Se subirán tu nombre, objetivo, experiencia, material habitual, disponibilidad, duración, prioridad de entrenamiento, limitaciones declaradas, unidades y tema. No se subirán planes, entrenamientos, notas ni progreso.',
       [
         { style: 'cancel', text: 'Ahora no' },
         { text: 'Guardar copia', onPress: () => void backup(profile, themeName) },
