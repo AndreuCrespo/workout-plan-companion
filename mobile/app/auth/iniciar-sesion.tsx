@@ -105,6 +105,16 @@ export default function SignInScreen() {
             Esta instalación no tiene la configuración pública de Supabase. Tus datos locales siguen disponibles solo en este dispositivo.
           </AppText>
         </Card>
+      ) : user && !profile ? (
+        <Card style={styles.card}>
+          <AppText variant="heading">Cuenta conectada</AppText>
+          <AppText tone="secondary">{user.email ?? 'Cuenta con correo verificado'}</AppText>
+          <AppText tone="secondary" variant="caption">
+            Puedes recuperar la copia privada asociada a esta cuenta antes de crear un perfil nuevo en este dispositivo.
+          </AppText>
+          <PrimaryButton label="Recuperar mi copia privada" onPress={() => router.push('/auth/recuperar-copia')} />
+          <PrimaryButton disabled={isSigningOut} label={isSigningOut ? 'Cerrando sesión…' : 'Cerrar sesión'} onPress={() => void closeSession()} variant="secondary" />
+        </Card>
       ) : user ? (
         <Card style={styles.card}>
           <AppText variant="heading">Sesión conectada</AppText>

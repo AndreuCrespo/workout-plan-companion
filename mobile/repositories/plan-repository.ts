@@ -9,4 +9,5 @@ export interface PlanRepository {
   getActive(): Promise<PlanPublication>;
   getHistory(): Promise<PlanPublication[]>;
   publish(proposal: PlanProposal): Promise<PlanPublication>;
+  replaceHistory(publications: PlanPublication[]): Promise<void>;
 }

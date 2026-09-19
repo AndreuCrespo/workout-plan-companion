@@ -40,4 +40,4 @@ where schemaname = 'public'
 
 The row has `rowsecurity = true`.
 
-After the migration is applied, a signed-in person can open **Profile → Account** and explicitly save their published plans and completed logs. The confirmation states the item counts before any data leaves the device.
+After the migration is applied, a signed-in person can open **Profile → Account** and explicitly save their published plans and completed logs. The confirmation states the item counts before any data leaves the device. A new-device recovery flow is described in [`recover-private-backup.md`](recover-private-backup.md).

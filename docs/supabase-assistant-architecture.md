@@ -142,7 +142,7 @@ Para una importación aprobada:
 3. se crea una operación de importación idempotente que asocia el ID local con la instantánea remota y registra el resumen de la copia;
 4. los planes y logs se insertan como instantáneas, sin intentar fusionar ni sobrescribir registros remotos;
 5. se verifica el recuento y se confirma a la persona;
-6. la app conserva el modo local hasta que la sincronización esté confirmada.
+6. una instalación nueva puede elegir explícitamente recuperar esa copia antes del onboarding, sin fusionarla con datos locales existentes.
 
 Los borradores en curso y propuestas locales pueden ofrecerse para importar, pero no son necesarios para conservar un historial válido. No se suben datos de una instalación sin consentimiento.
 
