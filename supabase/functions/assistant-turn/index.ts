@@ -1,10 +1,15 @@
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+import { AssistantConsentRequiredError, assertAssistantConsent } from './_shared/assistant-consent.ts';
+import { AssistantContextError, loadAssistantContext } from './_shared/assistant-context.ts';
+import { AssistantQuotaError, AssistantQuotaExceededError, consumeAssistantTurnQuota } from './_shared/assistant-quota.ts';
 import {
   parseAssistantTurnRequest,
   type AssistantSafetyStatus,
   type AssistantTurnResponse,
 } from './_shared/contract.ts';
+import { generateOpenAiPlanProposal, OpenAiPlanAssistantError } from './_shared/openai-plan-assistant.ts';
+import { AssistantPersistenceError, persistAssistantTurn } from './_shared/proposal-persistence.ts';
 import { PLAN_ASSISTANT_PROMPT_VERSION } from './_shared/system-instructions.ts';
 
 const corsHeaders = {
@@ -12,7 +17,13 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-function response(body: AssistantTurnResponse | { code: string; message: string; promptVersion?: string }, status = 200): Response {
+type AssistantTurnErrorResponse = {
+  code: string;
+  message: string;
+  promptVersion?: string;
+};
+
+function response(body: AssistantTurnResponse | AssistantTurnErrorResponse, status = 200): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json; charset=utf-8' },
@@ -28,6 +39,15 @@ function safetyStatus(message: string): AssistantSafetyStatus {
   return /dolor agudo|lesion|embaraz|condicion clinica/.test(normalizedMessage)
     ? 'needs-professional-review'
     : 'clear';
+}
+
+function dailyTurnLimit(value: string | undefined): number | null {
+  if (!value || !/^\d+$/.test(value)) {
+    return null;
+  }
+
+  const limit = Number(value);
+  return Number.isInteger(limit) && limit >= 1 && limit <= 100 ? limit : null;
 }
 
 Deno.serve(async (request) => {
@@ -47,10 +67,10 @@ Deno.serve(async (request) => {
     return response({ code: 'unauthenticated', message: 'Necesitas una sesión válida para usar el asistente.' }, 401);
   }
 
-  const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  const userSupabase = createClient(supabaseUrl, supabaseAnonKey, {
     global: { headers: { Authorization: authorization } },
   });
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { user }, error: userError } = await userSupabase.auth.getUser();
 
   if (userError || !user) {
     return response({ code: 'unauthenticated', message: 'Necesitas una sesión válida para usar el asistente.' }, 401);
@@ -78,11 +98,68 @@ Deno.serve(async (request) => {
     });
   }
 
-  // A provider adapter is deliberately not selected until the owner approves a provider, model,
-  // budget, retention policy, and server-side secret. This preflight must never call an AI API.
-  return response({
-    code: 'assistant_not_configured',
-    message: 'El asistente IA todavía no está configurado para esta instalación.',
-    promptVersion: PLAN_ASSISTANT_PROMPT_VERSION,
-  }, 503);
+  const openAiApiKey = Deno.env.get('OPENAI_API_KEY');
+  const openAiModel = Deno.env.get('OPENAI_MODEL');
+  const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const turnLimit = dailyTurnLimit(Deno.env.get('ASSISTANT_DAILY_TURN_LIMIT'));
+
+  if (!openAiApiKey || !openAiModel || !supabaseServiceRoleKey || !turnLimit) {
+    return response({
+      code: 'assistant_not_configured',
+      message: 'El asistente IA todavía no está configurado para esta instalación.',
+      promptVersion: PLAN_ASSISTANT_PROMPT_VERSION,
+    }, 503);
+  }
+
+  try {
+    await assertAssistantConsent(userSupabase, user.id);
+    const context = await loadAssistantContext(userSupabase, user.id);
+    const serverSupabase = createClient(supabaseUrl, supabaseServiceRoleKey, {
+      auth: { autoRefreshToken: false, persistSession: false },
+    });
+
+    await consumeAssistantTurnQuota(serverSupabase, user.id, turnLimit);
+    const output = await generateOpenAiPlanProposal({
+      apiKey: openAiApiKey,
+      model: openAiModel,
+      reasoningEffort: Deno.env.get('OPENAI_REASONING_EFFORT')?.trim() || null,
+    }, context, input.message);
+    const persisted = await persistAssistantTurn(serverSupabase, {
+      conversationId: input.conversationId,
+      modelMetadata: {
+        model: openAiModel,
+        promptVersion: PLAN_ASSISTANT_PROMPT_VERSION,
+        provider: 'openai',
+      },
+      output,
+      sourcePlanVersionId: context.activePlan?.id ?? null,
+      userId: user.id,
+      userMessage: input.message,
+    });
+
+    return response({
+      conversationId: persisted.conversationId,
+      message: output.assistantMessage,
+      proposalId: persisted.proposalId,
+      safetyStatus: output.safetyStatus,
+    });
+  } catch (error) {
+    if (error instanceof AssistantConsentRequiredError) {
+      return response({ code: 'assistant_consent_required', message: error.message }, 403);
+    }
+    if (error instanceof AssistantQuotaExceededError) {
+      return response({ code: 'assistant_quota_exceeded', message: error.message }, 429);
+    }
+    if (error instanceof AssistantContextError) {
+      return response({ code: error.code, message: error.message }, 409);
+    }
+    if (error instanceof OpenAiPlanAssistantError) {
+      return response({ code: 'assistant_provider_error', message: error.message }, 502);
+    }
+    if (error instanceof AssistantQuotaError || error instanceof AssistantPersistenceError) {
+      return response({ code: 'assistant_unavailable', message: error.message }, 503);
+    }
+
+    return response({ code: 'assistant_unavailable', message: 'No pudimos preparar una propuesta ahora mismo.' }, 503);
+  }
 });
