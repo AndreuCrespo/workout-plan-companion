@@ -11,6 +11,7 @@ Set these only in Supabase Edge Function secrets after reviewing the deployment:
 | `OPENAI_API_KEY` | API key created in the OpenAI Platform project. Never place it in Expo, Git, or a public environment variable. |
 | `OPENAI_MODEL` | Exact API model identifier enabled for that project. |
 | `OPENAI_REASONING_EFFORT` | The reasoning setting supported by that exact model, for example `xhigh` if available. |
+| `ASSISTANT_DAILY_TURN_LIMIT` | Integer server-side quota; start at `5` for personal testing. |
 
 The code does not hard-code a model identifier. Verify that the chosen model supports the Responses API and strict JSON-schema output before activation.
 
