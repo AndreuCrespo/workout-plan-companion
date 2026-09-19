@@ -21,4 +21,4 @@ Before adding a provider adapter or deploying the function, decide and approve:
 - provider retention and data-processing terms; and
 - server-side secret name and deployment environment.
 
-After approval, the function derives the active remote plan from the authenticated account rather than accepting a plan ID from Expo. The next implementation adds catalogue retrieval, provider invocation, strict response validation, remote conversation/proposal persistence, and the separate publication RPC. It must not add a local template fallback.
+After approval, the function derives the active remote plan from the authenticated account rather than accepting a plan ID from Expo. The source already includes strict parsing for an untrusted model response: exactly four weeks, allowed catalogue IDs, no duplicate exercises in a session, no absolute loads, and no proposal after a professional-review safety status. The next implementation adds catalogue retrieval, provider invocation, remote conversation/proposal persistence, and the separate publication RPC. It must not add a local template fallback.
