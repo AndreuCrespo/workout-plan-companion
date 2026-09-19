@@ -47,18 +47,36 @@ const compoundStrengthExerciseIds = new Set([
   'press-pecho-mancuernas',
   'jalon-pecho-polea',
   'remo-sentado',
+  'sentadilla-peso-corporal',
+  'zancada-peso-corporal',
+  'flexiones',
+  'sentadilla-banda',
+  'remo-banda-sentado',
+  'press-pecho-banda',
+  'remo-mancuerna-banco',
+  'press-hombros-mancuernas',
 ]);
 
 function createId(prefix: string): string {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 }
 
-function cloneExercise(exercise: Exercise): Exercise {
+function cloneExercise(exercise: Exercise, trainingExperience: PlanRequest['trainingExperience']): Exercise {
+  const sets = exercise.sets.map((set) => ({ ...set }));
+  const adjustedSets = trainingExperience === 'starting'
+    ? sets.slice(0, 1).map((set) => ({
+      ...set,
+      target: set.target
+        .replace(/^\d+\s*×/, '2 ×')
+        .replace(/RPE\s*\d+/, 'RPE 6'),
+    }))
+    : sets;
+
   return {
     ...exercise,
     techniqueSteps: exercise.techniqueSteps.map((step) => ({ ...step })),
     commonMistakes: [...exercise.commonMistakes],
-    sets: exercise.sets.map((set) => ({ ...set })),
+    sets: adjustedSets,
   };
 }
 
@@ -67,51 +85,178 @@ function exerciseIndex(plan: MonthlyPlan): Map<string, Exercise> {
   return new Map([...curatedExercises, ...planExercises].map((exercise) => [exercise.id, exercise]));
 }
 
-function templatesForAvailability(request: PlanRequest): SessionTemplate[] {
-  const lower: SessionTemplate = {
-    dayLabel: 'Lunes',
-    title: 'Tren inferior',
-    focus: 'Base, control y estabilidad',
-    exerciseIds: ['sentadilla-barra', 'peso-muerto-rumano', 'zancada-mancuernas', 'dead-bug'],
-  };
-  const upper: SessionTemplate = {
-    dayLabel: 'Miércoles',
-    title: 'Tren superior',
-    focus: 'Empuje y tracción equilibrados',
-    exerciseIds: ['press-banca-barra', 'jalon-pecho-polea', 'curl-biceps-mancuernas', 'extension-triceps-polea'],
-  };
-  const full: SessionTemplate = {
-    dayLabel: 'Viernes',
-    title: 'Cuerpo completo',
-    focus: 'Técnica y ritmo sostenible',
-    exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'remo-sentado', 'plancha-rotacion'],
-  };
+function effectiveEquipmentAccess(request: PlanRequest): PlanRequest['equipmentAccess'] {
+  if (request.environment === 'gym') {
+    return 'full-gym';
+  }
 
+  if (request.environment === 'home' && request.equipmentAccess === 'full-gym') {
+    return 'bodyweight';
+  }
+
+  return request.equipmentAccess;
+}
+
+function scheduleTemplates(
+  request: PlanRequest,
+  lower: SessionTemplate,
+  upper: SessionTemplate,
+  full: SessionTemplate,
+): SessionTemplate[] {
   switch (request.availability) {
     case 'two-days':
       return [
-        { ...lower, dayLabel: 'Martes', title: 'Cuerpo completo A', exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'jalon-pecho-polea', 'dead-bug'] },
-        { ...full, dayLabel: 'Viernes', title: 'Cuerpo completo B', exerciseIds: ['peso-muerto-rumano', 'zancada-mancuernas', 'press-banca-barra', 'plancha-rotacion'] },
+        { ...full, dayLabel: 'Martes', title: 'Cuerpo completo A' },
+        { ...full, dayLabel: 'Viernes', title: 'Cuerpo completo B', focus: `${full.focus} · variación` },
       ];
     case 'four-days':
       return [
         { ...lower, dayLabel: 'Lunes' },
         { ...upper, dayLabel: 'Martes' },
-        { ...lower, dayLabel: 'Jueves', title: 'Tren inferior · técnica', focus: 'Patrones con margen' },
-        { ...upper, dayLabel: 'Viernes', title: 'Tren superior · técnica', focus: 'Control y consistencia' },
+        { ...lower, dayLabel: 'Jueves', title: `${lower.title} · técnica`, focus: 'Patrones con margen' },
+        { ...upper, dayLabel: 'Viernes', title: `${upper.title} · técnica`, focus: 'Control y consistencia' },
       ];
     case 'five-days':
       return [
         { ...lower, dayLabel: 'Lunes' },
         { ...upper, dayLabel: 'Martes' },
         { ...full, dayLabel: 'Miércoles', title: 'Cuerpo completo · ligero', focus: 'Práctica y movilidad' },
-        { ...lower, dayLabel: 'Jueves', title: 'Tren inferior · técnica', focus: 'Patrones con margen' },
-        { ...upper, dayLabel: 'Viernes', title: 'Tren superior · técnica', focus: 'Control y consistencia' },
+        { ...lower, dayLabel: 'Jueves', title: `${lower.title} · técnica`, focus: 'Patrones con margen' },
+        { ...upper, dayLabel: 'Viernes', title: `${upper.title} · técnica`, focus: 'Control y consistencia' },
       ];
     case 'three-days':
     default:
       return [lower, upper, full];
   }
+}
+
+function templatesForAvailability(request: PlanRequest): SessionTemplate[] {
+  const equipmentAccess = effectiveEquipmentAccess(request);
+
+  if (equipmentAccess === 'bodyweight') {
+    const fullA: SessionTemplate = {
+      dayLabel: 'Lunes',
+      title: 'Cuerpo completo',
+      focus: 'Patrones básicos con peso corporal',
+      exerciseIds: ['sentadilla-peso-corporal', 'zancada-peso-corporal', 'flexiones', 'dead-bug'],
+    };
+    const fullB: SessionTemplate = {
+      dayLabel: 'Miércoles',
+      title: 'Cuerpo completo',
+      focus: 'Control, equilibrio y empuje',
+      exerciseIds: ['zancada-peso-corporal', 'sentadilla-peso-corporal', 'flexiones', 'plancha-rotacion'],
+    };
+
+    return scheduleTemplates(request, fullA, fullB, fullA);
+  }
+
+  const templatesByEquipment: Record<Exclude<PlanRequest['equipmentAccess'], 'bodyweight'>, {
+    lower: SessionTemplate;
+    upper: SessionTemplate;
+    full: SessionTemplate;
+  }> = {
+    'full-gym': {
+      lower: {
+        dayLabel: 'Lunes',
+        title: 'Tren inferior',
+        focus: 'Base, control y estabilidad',
+        exerciseIds: ['sentadilla-barra', 'peso-muerto-rumano', 'zancada-mancuernas', 'dead-bug'],
+      },
+      upper: {
+        dayLabel: 'Miércoles',
+        title: 'Tren superior',
+        focus: 'Empuje y tracción equilibrados',
+        exerciseIds: ['press-banca-barra', 'jalon-pecho-polea', 'curl-biceps-mancuernas', 'extension-triceps-polea'],
+      },
+      full: {
+        dayLabel: 'Viernes',
+        title: 'Cuerpo completo',
+        focus: 'Técnica y ritmo sostenible',
+        exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'remo-sentado', 'plancha-rotacion'],
+      },
+    },
+    'dumbbells-and-bench': {
+      lower: {
+        dayLabel: 'Lunes',
+        title: 'Tren inferior',
+        focus: 'Patrones con mancuernas y control',
+        exerciseIds: ['sentadilla-goblet', 'peso-muerto-rumano', 'zancada-mancuernas', 'dead-bug'],
+      },
+      upper: {
+        dayLabel: 'Miércoles',
+        title: 'Tren superior',
+        focus: 'Empuje y tracción con mancuernas',
+        exerciseIds: ['press-pecho-mancuernas', 'remo-mancuerna-banco', 'press-hombros-mancuernas', 'curl-biceps-mancuernas'],
+      },
+      full: {
+        dayLabel: 'Viernes',
+        title: 'Cuerpo completo',
+        focus: 'Técnica y ritmo con mancuernas',
+        exerciseIds: ['sentadilla-goblet', 'press-pecho-mancuernas', 'remo-mancuerna-banco', 'plancha-rotacion'],
+      },
+    },
+    'bands-and-basic': {
+      lower: {
+        dayLabel: 'Lunes',
+        title: 'Cuerpo completo con bandas',
+        focus: 'Patrones básicos y tensión controlada',
+        exerciseIds: ['sentadilla-banda', 'zancada-peso-corporal', 'press-pecho-banda', 'dead-bug'],
+      },
+      upper: {
+        dayLabel: 'Miércoles',
+        title: 'Cuerpo completo con bandas',
+        focus: 'Empuje, tracción y control',
+        exerciseIds: ['press-pecho-banda', 'remo-banda-sentado', 'sentadilla-banda', 'plancha-rotacion'],
+      },
+      full: {
+        dayLabel: 'Viernes',
+        title: 'Cuerpo completo con bandas',
+        focus: 'Técnica y ritmo sostenible',
+        exerciseIds: ['sentadilla-banda', 'press-pecho-banda', 'remo-banda-sentado', 'dead-bug'],
+      },
+    },
+  };
+  const templates = templatesByEquipment[equipmentAccess];
+
+  return scheduleTemplates(request, templates.lower, templates.upper, templates.full);
+}
+
+const compatibleExerciseIdsByEquipment: Record<Exclude<PlanRequest['equipmentAccess'], 'full-gym'>, Set<string>> = {
+  'dumbbells-and-bench': new Set([
+    'sentadilla-goblet',
+    'peso-muerto-rumano',
+    'zancada-mancuernas',
+    'dead-bug',
+    'press-pecho-mancuernas',
+    'remo-mancuerna-banco',
+    'press-hombros-mancuernas',
+    'curl-biceps-mancuernas',
+    'curl-martillo-mancuernas',
+    'plancha-rotacion',
+  ]),
+  'bands-and-basic': new Set([
+    'sentadilla-banda',
+    'zancada-peso-corporal',
+    'press-pecho-banda',
+    'remo-banda-sentado',
+    'sentadilla-peso-corporal',
+    'flexiones',
+    'dead-bug',
+    'plancha-rotacion',
+  ]),
+  bodyweight: new Set([
+    'sentadilla-peso-corporal',
+    'zancada-peso-corporal',
+    'flexiones',
+    'dead-bug',
+    'plancha-rotacion',
+  ]),
+};
+
+function isExerciseCompatibleWithEquipment(exerciseId: string, request: PlanRequest): boolean {
+  const equipmentAccess = effectiveEquipmentAccess(request);
+
+  return equipmentAccess === 'full-gym' || compatibleExerciseIdsByEquipment[equipmentAccess].has(exerciseId);
 }
 
 const replacementOptionsByExerciseId: Record<string, string[]> = {
@@ -143,7 +288,10 @@ function applyRequestedExerciseChanges(
     for (const exerciseId of template.exerciseIds) {
       const replacementId = requestedIds.has(exerciseId)
         ? replacementOptionsByExerciseId[exerciseId]?.find((candidateId) => (
-          exercisesById.has(candidateId) && !template.exerciseIds.includes(candidateId) && !exerciseIds.includes(candidateId)
+          exercisesById.has(candidateId)
+          && isExerciseCompatibleWithEquipment(candidateId, request)
+          && !template.exerciseIds.includes(candidateId)
+          && !exerciseIds.includes(candidateId)
         ))
         : undefined;
       const finalExerciseId = replacementId ?? exerciseId;
@@ -215,7 +363,7 @@ function createSession(
   const exercises = template.exerciseIds
     .map((exerciseId) => exercisesById.get(exerciseId))
     .filter((exercise): exercise is Exercise => exercise !== undefined)
-    .map(cloneExercise);
+    .map((exercise) => cloneExercise(exercise, request.trainingExperience));
   const prioritySuffix = request.priorities.trim() ? ` · Prioridad: ${request.priorities.trim()}` : '';
 
   return {
@@ -259,11 +407,38 @@ function createProposalPlan(
   };
 }
 
+function equipmentAccessLabel(equipmentAccess: PlanRequest['equipmentAccess']): string {
+  const labels: Record<PlanRequest['equipmentAccess'], string> = {
+    'full-gym': 'gimnasio completo',
+    'dumbbells-and-bench': 'mancuernas y banco',
+    'bands-and-basic': 'bandas y material básico',
+    bodyweight: 'solo peso corporal',
+  };
+
+  return labels[equipmentAccess];
+}
+
+function trainingExperienceLabel(trainingExperience: PlanRequest['trainingExperience']): string {
+  const labels: Record<PlanRequest['trainingExperience'], string> = {
+    starting: 'estoy empezando',
+    'some-experience': 'ya tengo práctica',
+    experienced: 'entreno con experiencia',
+  };
+
+  return labels[trainingExperience];
+}
+
 function createChanges(request: PlanRequest, substitutions: ExerciseSubstitution[]): string[] {
+  const effectiveEquipment = effectiveEquipmentAccess(request);
   const changes = [
     `Objetivo: ${planGoalLabel(request.goal, request.goalDetails)}.`,
     `${trainingAvailabilityLabel(request.availability)} por semana · sesiones de ${request.sessionDurationMinutes} min.`,
+    `Material aplicado: ${equipmentAccessLabel(effectiveEquipment)} · experiencia declarada: ${trainingExperienceLabel(request.trainingExperience)}.`,
   ];
+
+  if (request.trainingExperience === 'starting') {
+    changes.push('Inicio: cada ejercicio usa una única pauta de 2 series con RPE 6 para dejar margen de aprendizaje.');
+  }
 
   if (request.trainingEmphasis === 'compound-strength') {
     changes.push('Base estructural: cada sesión mantiene al menos dos ejercicios multiarticulares de fuerza cuando son compatibles con el contexto indicado.');
@@ -287,8 +462,16 @@ function createReviewItems(request: PlanRequest, substitutions: ExerciseSubstitu
   if (request.trainingEmphasis === 'compound-strength') {
     reviewItems.push('Revisa que los movimientos multiarticulares propuestos encajen con tu equipo, experiencia y limitaciones antes de publicar.');
   }
-  if (request.environment === 'home' || request.environment === 'mixed') {
-    reviewItems.push('La selección local actual está centrada en gimnasio; revisa el material antes de publicar este borrador.');
+  const effectiveEquipment = effectiveEquipmentAccess(request);
+
+  if (effectiveEquipment === 'bands-and-basic') {
+    reviewItems.push('Inspecciona las bandas antes de usarlas y descarta las que estén desgastadas o dañadas.');
+  }
+  if (effectiveEquipment === 'bodyweight') {
+    reviewItems.push('Con solo peso corporal el borrador no asume barras, puertas ni mobiliario para traccionar. Añade bandas o material revisado si quieres incorporar un patrón de tracción.');
+  }
+  if (request.trainingExperience === 'starting') {
+    reviewItems.push('Empieza con un rango y una carga que controles; si aparece dolor agudo, detén el ejercicio y consulta a un profesional.');
   }
   if (request.declaredLimitations.trim()) {
     reviewItems.push('El borrador conserva las limitaciones declaradas en el perfil para revisarlas antes de publicar.');
