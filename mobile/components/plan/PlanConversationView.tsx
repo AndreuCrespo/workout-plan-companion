@@ -161,6 +161,10 @@ function PlanRequestSummary({ conversation, isGeneratingProposal, onRestart, onG
         </AppText>
       </View>
       <SummaryRow label="Objetivo" value={planGoalLabel(request.goal, request.goalDetails)} />
+      <SummaryRow
+        label="Base del plan"
+        value={request.trainingEmphasis === 'compound-strength' ? 'Fuerza con ejercicios multiarticulares' : 'Enfoque equilibrado'}
+      />
       <SummaryRow label="Disponibilidad" value={availability} />
       <SummaryRow
         label="Duración"

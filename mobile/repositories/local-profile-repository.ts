@@ -1,6 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { availabilityOptions, durationOptions, unitOptions } from '@/data/profile-options';
+import { availabilityOptions, durationOptions, trainingEmphasisOptions, unitOptions } from '@/data/profile-options';
 import type { ProfileOption } from '@/data/profile-options';
 import type { UserProfile } from '@/domain/models';
 import type { ProfileRepository } from '@/repositories/profile-repository';
@@ -18,20 +18,30 @@ function isOptionValue<TValue extends string | number>(
   return options.some((option) => option.value === value);
 }
 
-function isUserProfile(value: unknown): value is UserProfile {
-  if (!isRecord(value)) {
-    return false;
+function parseUserProfile(value: unknown): UserProfile | null {
+  if (!isRecord(value)
+    || typeof value.firstName !== 'string'
+    || !isOptionValue(availabilityOptions, value.availability)
+    || !isOptionValue(durationOptions, value.sessionDurationMinutes)
+    || typeof value.limitations !== 'string'
+    || !isOptionValue(unitOptions, value.units)
+    || typeof value.createdAt !== 'string'
+    || typeof value.updatedAt !== 'string') {
+    return null;
   }
 
-  return (
-    typeof value.firstName === 'string' &&
-    isOptionValue(availabilityOptions, value.availability) &&
-    isOptionValue(durationOptions, value.sessionDurationMinutes) &&
-    typeof value.limitations === 'string' &&
-    isOptionValue(unitOptions, value.units) &&
-    typeof value.createdAt === 'string' &&
-    typeof value.updatedAt === 'string'
-  );
+  return {
+    availability: value.availability,
+    createdAt: value.createdAt,
+    firstName: value.firstName,
+    limitations: value.limitations,
+    sessionDurationMinutes: value.sessionDurationMinutes,
+    trainingEmphasis: isOptionValue(trainingEmphasisOptions, value.trainingEmphasis)
+      ? value.trainingEmphasis
+      : 'compound-strength',
+    units: value.units,
+    updatedAt: value.updatedAt,
+  };
 }
 
 class LocalProfileRepository implements ProfileRepository {
@@ -44,7 +54,7 @@ class LocalProfileRepository implements ProfileRepository {
       }
 
       const parsedProfile: unknown = JSON.parse(storedProfile);
-      return isUserProfile(parsedProfile) ? parsedProfile : null;
+      return parseUserProfile(parsedProfile);
     } catch {
       return null;
     }

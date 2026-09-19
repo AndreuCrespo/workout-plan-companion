@@ -54,6 +54,7 @@ function parseRequest(value: unknown): PlanRequest | null {
     typeof value.availabilityDetails !== 'string' ||
     !isDuration(value.sessionDurationMinutes) ||
     typeof value.sessionDurationDetails !== 'string' ||
+    (value.trainingEmphasis !== undefined && value.trainingEmphasis !== 'compound-strength' && value.trainingEmphasis !== 'balanced') ||
     (value.environment !== null && !isEnvironment(value.environment)) ||
     typeof value.environmentDetails !== 'string' ||
     typeof value.priorities !== 'string' ||
@@ -88,6 +89,7 @@ function parseRequest(value: unknown): PlanRequest | null {
     availabilityDetails: value.availabilityDetails,
     sessionDurationMinutes: value.sessionDurationMinutes,
     sessionDurationDetails: value.sessionDurationDetails,
+    trainingEmphasis: value.trainingEmphasis === 'balanced' ? 'balanced' : 'compound-strength',
     environment: value.environment,
     environmentDetails: value.environmentDetails,
     priorities: value.priorities,

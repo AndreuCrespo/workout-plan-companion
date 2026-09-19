@@ -5,6 +5,7 @@ export function createProfileDraft(): ProfileDraft {
     firstName: '',
     availability: 'three-days',
     sessionDurationMinutes: 60,
+    trainingEmphasis: 'compound-strength',
     limitations: '',
     units: 'metric',
   };
@@ -15,6 +16,7 @@ export function toProfileDraft(profile: UserProfile): ProfileDraft {
     firstName: profile.firstName,
     availability: profile.availability,
     sessionDurationMinutes: profile.sessionDurationMinutes,
+    trainingEmphasis: profile.trainingEmphasis,
     limitations: profile.limitations,
     units: profile.units,
   };

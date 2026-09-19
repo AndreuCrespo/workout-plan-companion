@@ -57,10 +57,13 @@ export type SessionDurationMinutes = 45 | 60 | 75;
 
 export type MeasurementUnits = 'metric' | 'imperial';
 
+export type TrainingEmphasis = 'compound-strength' | 'balanced';
+
 export interface UserProfile {
   firstName: string;
   availability: TrainingAvailability;
   sessionDurationMinutes: SessionDurationMinutes;
+  trainingEmphasis: TrainingEmphasis;
   limitations: string;
   units: MeasurementUnits;
   createdAt: string;
