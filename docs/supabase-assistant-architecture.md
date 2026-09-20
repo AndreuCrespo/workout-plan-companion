@@ -45,7 +45,7 @@ Todas las tablas privadas tienen `user_id uuid not null references auth.users(id
 
 | Área | Tabla propuesta | Datos esenciales | Regla |
 | --- | --- | --- | --- |
-| Perfil | `profiles` | `user_id`, nombre, objetivo, experiencia, material, disponibilidad, duración, prioridad de entrenamiento, limitaciones, unidades, fechas | una fila privada por persona |
+| Perfil | `profiles` | `user_id`, nombre, objetivo, experiencia, material, disponibilidad, duración, prioridad, preferencias libres de planificación, limitaciones, unidades, fechas | una fila privada por persona |
 | Preferencias | `user_preferences` | `user_id`, tema, fechas | privada; el tema no cambia con un plan |
 | Fichas privadas de IA | `exercise_catalog` | id estable, propietario, origen, nombre, equipo, técnica, errores, series, atribución y estado | entradas IA privadas de su propietario; escritura solo backend |
 | Plan publicado | `plan_versions` | id, `user_id`, número de versión, nombre, petición de origen JSONB, propuesta de origen, `published_at` | inserción; no actualización ni borrado por cliente |

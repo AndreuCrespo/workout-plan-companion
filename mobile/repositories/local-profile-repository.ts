@@ -53,6 +53,7 @@ function parseUserProfile(value: unknown): UserProfile | null {
     trainingEmphasis: isOptionValue(trainingEmphasisOptions, value.trainingEmphasis)
       ? value.trainingEmphasis
       : 'compound-strength',
+    trainingPreferences: typeof value.trainingPreferences === 'string' ? value.trainingPreferences : '',
     trainingExperience: isOptionValue(trainingExperienceOptions, value.trainingExperience)
       ? value.trainingExperience
       : 'some-experience',

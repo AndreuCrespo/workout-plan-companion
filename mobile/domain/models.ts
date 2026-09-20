@@ -73,6 +73,7 @@ export interface UserProfile {
   availability: TrainingAvailability;
   sessionDurationMinutes: SessionDurationMinutes;
   trainingEmphasis: TrainingEmphasis;
+  trainingPreferences: string;
   limitations: string;
   units: MeasurementUnits;
   createdAt: string;

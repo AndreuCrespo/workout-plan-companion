@@ -15,6 +15,7 @@ Apply these files in timestamp order using the Supabase CLI or SQL Editor:
 3. `20260826184500_add_private_ai_exercise_catalog.sql`
 4. `20260826190000_add_publish_ai_plan_proposal_rpc.sql`
 5. `20260826191500_add_assistant_use_consent.sql`
+6. `20260826193000_add_training_preferences_to_profiles.sql`
 
 Do not edit the existing base migrations. The initial foundation and training-history migrations must already exist in that project. Do not apply the removed reviewed-catalogue seed: the assistant now defines every new-plan exercise as a private structured candidate.
 
@@ -43,6 +44,6 @@ Also test revoked consent, denied notification permission, an unavailable provid
 
 ## Development activation record
 
-The development environment uses `gpt-5.6-terra` through a direct OpenAI Responses API call from `assistant-turn`. It has no per-day assistant quota; OpenAI project billing controls remain the cost boundary. The first authenticated end-to-end assistant turn and optional local publication notification remain to be tested on a development device.
+The development environment uses `gpt-5.6-terra` through a direct OpenAI Responses API call from `assistant-turn`. It has no per-day assistant quota; OpenAI project billing controls remain the cost boundary. Apply the later `training_preferences` migration before deploying the revision that sends free plan preferences. The first authenticated end-to-end assistant turn and optional local publication notification remain to be tested on a development device.
 
 Never share an API key in chat.

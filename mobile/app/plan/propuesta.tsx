@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { Alert, StyleSheet, TextInput } from 'react-native';
+import { useEffect, useRef, useState } from 'react';
+import { Alert, ScrollView, StyleSheet, TextInput } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { useAuth } from '@/auth/auth-context';
@@ -32,6 +32,7 @@ export default function PlanProposalScreen() {
   const [isUpdatingConsent, setIsUpdatingConsent] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [proposalId, setProposalId] = useState<string | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
     let isMounted = true;
@@ -113,6 +114,10 @@ export default function PlanProposalScreen() {
     }
   }
 
+  function revealComposer() {
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 250);
+  }
+
   async function sendMessage() {
     const message = draft.trim();
 
@@ -138,9 +143,9 @@ export default function PlanProposalScreen() {
   }
 
   return (
-    <Screen>
+    <Screen scrollViewRef={scrollViewRef}>
       <ScreenHeader
-        description="Explica qué quieres cambiar. La IA elegirá los ejercicios y prepararará un borrador para que lo revises."
+        description="Explica qué quieres cambiar. La IA elegirá los ejercicios y preparará un borrador para que lo revises."
         onBack={() => router.back()}
         title="Asistente IA"
       />
@@ -219,6 +224,7 @@ export default function PlanProposalScreen() {
               accessibilityLabel="Mensaje para el asistente IA"
               accessibilityHint="Describe qué quieres cambiar o mantener en tu próximo plan"
               multiline
+              onFocus={revealComposer}
               onChangeText={setDraft}
               placeholder="Cuéntame qué necesitas para el próximo ciclo"
               placeholderTextColor={theme.colors.textSecondary}

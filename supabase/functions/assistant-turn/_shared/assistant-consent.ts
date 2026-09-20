@@ -1,6 +1,6 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
-export const ASSISTANT_CONSENT_VERSION = '2026-09-19.1';
+export const ASSISTANT_CONSENT_VERSION = '2026-09-20.2';
 
 export class AssistantConsentRequiredError extends Error {
   constructor() {

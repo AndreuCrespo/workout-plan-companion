@@ -86,7 +86,16 @@ export function DetailsProfileFields({ draft, onChange }: ProfileFieldsProps) {
   return (
     <View style={styles.section}>
       <ProfileTextField
-        description="Comparte solo lo que quieras tener presente al planificar."
+        description="Por ejemplo: repartir tren inferior, empuje, tracción y un día de cardio. El asistente lo tendrá en cuenta en los próximos borradores."
+        label="Preferencias para próximos planes"
+        maxLength={1_000}
+        multiline
+        onChangeText={(trainingPreferences) => onChange({ trainingPreferences })}
+        placeholder="Cómo te gustaría organizar o priorizar tus sesiones"
+        value={draft.trainingPreferences}
+      />
+      <ProfileTextField
+        description="Comparte solo lo que quieras tener presente al planificar. Ante dolor agudo, lesión o una condición clínica, pausa y consulta a un profesional."
         label="Limitaciones declaradas"
         multiline
         onChangeText={(limitations) => onChange({ limitations })}

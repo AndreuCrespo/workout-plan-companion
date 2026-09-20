@@ -190,6 +190,7 @@ function profileFromRemote(value: unknown): UserProfile {
       : 'strength',
     sessionDurationMinutes: value.session_duration_minutes,
     trainingEmphasis: value.training_emphasis === 'balanced' ? 'balanced' : 'compound-strength',
+    trainingPreferences: typeof value.training_preferences === 'string' ? value.training_preferences : '',
     trainingExperience: value.training_experience === 'starting' || value.training_experience === 'experienced'
       ? value.training_experience
       : 'some-experience',
@@ -377,7 +378,7 @@ class SupabasePrivateBackupRecoveryRepository implements PrivateBackupRecoveryRe
     const [profileResult, preferenceResult, plansResult, logsResult] = await Promise.all([
       client
         .from('profiles')
-        .select('availability, created_at, equipment_access, first_name, limitations, primary_goal, session_duration_minutes, training_emphasis, training_experience, units, updated_at')
+        .select('availability, created_at, equipment_access, first_name, limitations, primary_goal, session_duration_minutes, training_emphasis, training_preferences, training_experience, units, updated_at')
         .eq('user_id', userId)
         .maybeSingle(),
       client.from('user_preferences').select('theme_name').eq('user_id', userId).maybeSingle(),
