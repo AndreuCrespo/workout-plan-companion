@@ -150,6 +150,40 @@ function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null;
 }
 
+function providerFailureMessage(status: number): string {
+  if (status === 400 || status === 404) {
+    return 'La configuración del modelo de IA necesita revisión antes de crear una propuesta.';
+  }
+
+  if (status === 401 || status === 403) {
+    return 'La configuración del proveedor de IA necesita revisión antes de crear una propuesta.';
+  }
+
+  if (status === 408 || status === 504) {
+    return 'El proveedor de IA tardó demasiado en responder. Inténtalo de nuevo más tarde.';
+  }
+
+  if (status === 429) {
+    return 'El proveedor de IA está temporalmente ocupado. Inténtalo de nuevo más tarde.';
+  }
+
+  return 'No pudimos obtener una propuesta del asistente IA.';
+}
+
+async function providerErrorCode(response: Response): Promise<string | null> {
+  try {
+    const payload: unknown = await response.clone().json();
+
+    if (isRecord(payload) && isRecord(payload.error) && typeof payload.error.code === 'string') {
+      return payload.error.code;
+    }
+  } catch {
+    // Provider error bodies are not sent to the device or persisted in logs.
+  }
+
+  return null;
+}
+
 function outputText(response: unknown): string {
   if (!isRecord(response)) {
     throw new OpenAiPlanAssistantError('La respuesta del proveedor no es válida.');
@@ -231,7 +265,12 @@ export async function generateOpenAiPlanProposal(
   }
 
   if (!response.ok) {
-    throw new OpenAiPlanAssistantError();
+    console.error(JSON.stringify({
+      event: 'assistant_provider_request_failed',
+      providerErrorCode: await providerErrorCode(response),
+      status: response.status,
+    }));
+    throw new OpenAiPlanAssistantError(providerFailureMessage(response.status));
   }
 
   let payload: unknown;

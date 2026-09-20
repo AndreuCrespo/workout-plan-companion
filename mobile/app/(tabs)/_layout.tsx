@@ -64,7 +64,8 @@ function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps) {
         {
           backgroundColor: theme.colors.surface,
           borderTopColor: theme.colors.border,
-          paddingBottom: insets.bottom + 8,
+          height: 64,
+          marginBottom: insets.bottom + 8,
         },
       ]}>
       <View style={styles.tabActions}>
@@ -122,7 +123,7 @@ const styles = StyleSheet.create({
   },
   tabActions: {
     flexDirection: 'row',
-    minHeight: 64,
+    height: 64,
   },
   tabAction: {
     alignItems: 'center',
