@@ -1,6 +1,6 @@
 # Activate the remote plan assistant in a non-production Supabase project
 
-The application source is prepared, but no migration, secret, Edge Function, APK, or external service has been activated by this repository. Perform this checklist only in a separate non-production Supabase project first.
+The remote assistant is activated only in the isolated development Supabase project. Its migrations are applied, `assistant-turn` is deployed with JWT verification, and server-only OpenAI secrets are configured there. No production project, production APK, or public provider secret has been created. Use this checklist for another non-production project or to repeat the verification deliberately.
 
 ## 1. Use an isolated project
 
@@ -41,6 +41,8 @@ Deploy only `assistant-turn`, which requires JWT verification in `supabase/confi
 
 Also test revoked consent, denied notification permission, an unavailable provider, and a message mentioning acute pain or injury. The latter must return the safety stop without loading context or calling OpenAI.
 
-## Do not activate yet
+## Development activation record
 
-Activation still requires the exact model API identifier and the owner's explicit approval to apply migrations, configure test-project secrets, and deploy. Never share an API key in chat.
+The development environment uses `gpt-5.6-terra` through a direct OpenAI Responses API call from `assistant-turn`. It has no per-day assistant quota; OpenAI project billing controls remain the cost boundary. The first authenticated end-to-end assistant turn and optional local publication notification remain to be tested on a development device.
+
+Never share an API key in chat.

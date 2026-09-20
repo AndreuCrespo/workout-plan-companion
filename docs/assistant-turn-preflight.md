@@ -1,8 +1,8 @@
 # Remote assistant preflight
 
-`supabase/functions/assistant-turn` is source code only and has **not** been deployed. Until its required server secrets are configured, it does not call an AI provider.
+`supabase/functions/assistant-turn` is deployed only to the isolated development Supabase project. It requires a valid JWT and server-only secrets before it can call an AI provider. It is not deployed to production.
 
-Its unconfigured preflight behavior is deliberately limited:
+When its required secrets are absent, its preflight behavior is deliberately limited:
 
 1. accepts only authenticated `POST` requests;
 2. validates the narrow client payload (`conversationId` and message);
@@ -13,7 +13,7 @@ The trusted system instructions are versioned in `supabase/functions/assistant-t
 
 ## Required approval before activation
 
-Before configuring secrets or deploying the function, decide and approve:
+Before configuring another environment or deploying to production, decide and approve:
 
 - provider and model;
 - monthly budget and timeout/retry behavior;

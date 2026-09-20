@@ -1,6 +1,6 @@
 # Diseño de Supabase y asistente remoto
 
-> **Estado: diseño propuesto para revisar antes de autorizar los servicios.** Este documento no crea un proyecto de Supabase, migraciones, credenciales ni llamadas a un proveedor de IA.
+> **Estado: desarrollo activado en un proyecto Supabase aislado.** El asistente remoto y sus migraciones existen solo en desarrollo; producción sigue pendiente de una revisión y autorización separadas.
 
 ## Objetivo y límites
 
@@ -92,11 +92,9 @@ Las tablas hijas aplican la misma propiedad mediante su fila padre, por ejemplo 
 
 ## Asistente remoto
 
-No habrá un asistente ni un generador local como fallback. El asistente remoto será conversacional; mientras no esté configurado, la app explicará que no puede crear un plan nuevo y mantendrá disponibles los planes y registros ya existentes.
+No habrá generador local como fallback. El asistente remoto es conversacional; si no está configurado o falla, la app conserva disponibles los planes y registros existentes y explica que no puede crear un plan nuevo.
 
-### Contrato de aplicación futuro
-
-Se añadirá un límite de repositorio independiente, por ejemplo:
+### Contrato de aplicación
 
 ```ts
 interface PlanAssistantRepository {
@@ -118,7 +116,7 @@ Esto permite peticiones naturales como: “el press de banca no me encaja; prefi
 4. Envía al modelo un contexto minimizado, delimitado y sin instrucciones de confianza procedentes de texto de usuario. Incluye reglas de producto y un esquema de salida estricto de fichas privadas.
 5. Valida de nuevo la respuesta contra JSON Schema y reglas de negocio: cuatro semanas, sesiones compatibles con disponibilidad/duración y fichas privadas estructuradas, sin cargas absolutas, sin diagnósticos y con avisos de revisión.
 6. Persiste los nuevos mensajes y, si procede, una `plan_proposal` inmutable en estado `reviewable`.
-7. Devuelve un resultado redactado para la interfaz. Si el proveedor falla, no cambia el plan y la app comunica el error o usa el fallback local.
+7. Devuelve un resultado redactado para la interfaz. Si el proveedor falla, no cambia el plan y la app comunica el error, sin fallback local.
 
 La función no invoca `publish_plan_proposal`. La publicación se solicita después desde el cliente autenticado mediante su propia RPC y confirmación explícita.
 
@@ -126,8 +124,7 @@ La función no invoca `publish_plan_proposal`. La publicación se solicita despu
 
 - Enviar al modelo el mínimo contexto necesario; no los logs completos por defecto.
 - Conservar `provider`, versión de modelo, fecha, versión de prompt y resultado de validación como metadatos de la propuesta; no registrar secretos.
-- Establecer límites por usuario y ventana de tiempo en backend antes de llamar al proveedor.
-- Definir presupuesto mensual y un modelo permitido antes de activar la función.
+- Definir presupuesto mensual y un modelo permitido antes de activar cualquier entorno.
 - Ofrecer claramente la opción de no usar IA y mantener la app local.
 - Definir retención, exportación y borrado de conversaciones antes de producción.
 
@@ -146,20 +143,18 @@ Para una importación aprobada:
 
 Los borradores en curso y propuestas locales pueden ofrecerse para importar, pero no son necesarios para conservar un historial válido. No se suben datos de una instalación sin consentimiento.
 
-## Orden de implementación posterior
+## Pendiente antes de producción
 
-1. Obtener las decisiones pendientes de abajo y autorización para crear el proyecto Supabase.
-2. Crear migraciones revisadas, RLS, triggers de inmutabilidad y RPC de publicación/finalización; probarlas con usuarios A/B.
-3. Integrar Auth y repositorios remotos de perfil, preferencias, planes y logs, conservando el modo local.
-4. Implementar importación consentida y pruebas de conflicto/sin conexión.
-5. Crear Edge Function, secretos y límites de uso; integrar `PlanAssistantRepository` y la conversación remota.
-6. Validar el flujo completo: petición natural → propuesta → revisión → publicación → ejecución → historial y progreso.
+1. Validar en desarrollo el flujo completo: petición natural → propuesta → revisión → publicación → ejecución → historial y progreso.
+2. Probar errores de proveedor, consentimiento revocado, notificación denegada y condiciones de seguridad.
+3. Revisar presupuesto, retención y borrado de conversaciones.
+4. Autorizar por separado una migración y despliegue de producción.
 
 ## Decisiones necesarias antes de crear recursos externos
 
-- Organización, región y presupuesto del proyecto Supabase.
+- Organización, región y presupuesto del proyecto Supabase de producción.
 - Métodos de acceso iniciales (correo/contraseña, magic link, Apple/Google) y requisitos de eliminación de cuenta.
-- Proveedor, modelo, presupuesto mensual, límites de uso y política de retención de IA.
+- Proveedor, modelo, presupuesto mensual y política de retención de IA.
 - Texto de consentimiento para enviar contexto al asistente y para importar datos locales.
 - Política de copias de seguridad, exportación y borrado de datos.
 - Revisión final de los esquemas SQL, RLS y RPC antes de aplicarlos en cualquier entorno remoto.
