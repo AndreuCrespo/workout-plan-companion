@@ -2,7 +2,6 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 
 import { AssistantConsentRequiredError, assertAssistantConsent } from './_shared/assistant-consent.ts';
 import { AssistantContextError, loadAssistantContext } from './_shared/assistant-context.ts';
-import { AssistantQuotaError, AssistantQuotaExceededError, consumeAssistantTurnQuota } from './_shared/assistant-quota.ts';
 import {
   parseAssistantTurnRequest,
   type AssistantSafetyStatus,
@@ -39,15 +38,6 @@ function safetyStatus(message: string): AssistantSafetyStatus {
   return /dolor agudo|lesion|embaraz|condicion clinica/.test(normalizedMessage)
     ? 'needs-professional-review'
     : 'clear';
-}
-
-function dailyTurnLimit(value: string | undefined): number | null {
-  if (!value || !/^\d+$/.test(value)) {
-    return null;
-  }
-
-  const limit = Number(value);
-  return Number.isInteger(limit) && limit >= 1 && limit <= 100 ? limit : null;
 }
 
 Deno.serve(async (request) => {
@@ -101,9 +91,7 @@ Deno.serve(async (request) => {
   const openAiApiKey = Deno.env.get('OPENAI_API_KEY');
   const openAiModel = Deno.env.get('OPENAI_MODEL');
   const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-  const turnLimit = dailyTurnLimit(Deno.env.get('ASSISTANT_DAILY_TURN_LIMIT'));
-
-  if (!openAiApiKey || !openAiModel || !supabaseServiceRoleKey || !turnLimit) {
+  if (!openAiApiKey || !openAiModel || !supabaseServiceRoleKey) {
     return response({
       code: 'assistant_not_configured',
       message: 'El asistente IA todavía no está configurado para esta instalación.',
@@ -118,7 +106,6 @@ Deno.serve(async (request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    await consumeAssistantTurnQuota(serverSupabase, user.id, turnLimit);
     const output = await generateOpenAiPlanProposal({
       apiKey: openAiApiKey,
       model: openAiModel,
@@ -147,16 +134,13 @@ Deno.serve(async (request) => {
     if (error instanceof AssistantConsentRequiredError) {
       return response({ code: 'assistant_consent_required', message: error.message }, 403);
     }
-    if (error instanceof AssistantQuotaExceededError) {
-      return response({ code: 'assistant_quota_exceeded', message: error.message }, 429);
-    }
     if (error instanceof AssistantContextError) {
       return response({ code: error.code, message: error.message }, 409);
     }
     if (error instanceof OpenAiPlanAssistantError) {
       return response({ code: 'assistant_provider_error', message: error.message }, 502);
     }
-    if (error instanceof AssistantQuotaError || error instanceof AssistantPersistenceError) {
+    if (error instanceof AssistantPersistenceError) {
       return response({ code: 'assistant_unavailable', message: error.message }, 503);
     }
 

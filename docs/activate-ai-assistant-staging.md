@@ -15,7 +15,6 @@ Apply these files in timestamp order using the Supabase CLI or SQL Editor:
 3. `20260826184500_add_private_ai_exercise_catalog.sql`
 4. `20260826190000_add_publish_ai_plan_proposal_rpc.sql`
 5. `20260826191500_add_assistant_use_consent.sql`
-6. `20260826192000_add_assistant_daily_turn_limit.sql`
 
 Do not edit the existing base migrations. The initial foundation and training-history migrations must already exist in that project. Do not apply the removed reviewed-catalogue seed: the assistant now defines every new-plan exercise as a private structured candidate.
 
@@ -28,7 +27,6 @@ In the **test** Supabase project, set these server-only secrets. Do not place an
 | `OPENAI_API_KEY` | The project's OpenAI API key. |
 | `OPENAI_MODEL` | Exact API model identifier confirmed in OpenAI Platform. |
 | `OPENAI_REASONING_EFFORT` | A setting supported by that exact model, or omit it. |
-| `ASSISTANT_DAILY_TURN_LIMIT` | Integer from 1 to 100; start with `5`. |
 
 `SUPABASE_SERVICE_ROLE_KEY` is supplied to hosted Edge Functions by Supabase. Never copy it into the mobile client or configure it as a public Expo variable.
 
@@ -37,12 +35,11 @@ In the **test** Supabase project, set these server-only secrets. Do not place an
 Deploy only `assistant-turn`, which requires JWT verification in `supabase/config.toml`. Then, with a test account:
 
 1. confirm the consent notice and send an ordinary request;
-2. verify one daily quota turn is consumed;
-3. inspect the reviewable four-week proposal without confirming it;
-4. confirm it, verify the remote immutable plan version and locally visible plan; and
-5. verify the local “Nuevo plan mensual activo” notification appears if system permission is granted.
+2. inspect the reviewable four-week proposal without confirming it;
+3. confirm it, verify the remote immutable plan version and locally visible plan; and
+4. verify the local “Nuevo plan mensual activo” notification appears if system permission is granted.
 
-Also test revoked consent, denied notification permission, quota exhaustion, unavailable provider, and a message mentioning acute pain or injury. The latter must return the safety stop without loading context or calling OpenAI.
+Also test revoked consent, denied notification permission, an unavailable provider, and a message mentioning acute pain or injury. The latter must return the safety stop without loading context or calling OpenAI.
 
 ## Do not activate yet
 
