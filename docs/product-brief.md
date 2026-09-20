@@ -28,7 +28,7 @@ A person who used to follow a coach's plan and now trains independently. They wa
 - The person's preferences and declared limitations, including whether to prioritize a strength base with multi-joint exercises.
 - Units and visual theme.
 
-A strength-base preference guides an assistant proposal only when it fits the person's stated context. The remote assistant will select only from the reviewed catalogue and may leave more margin in the initial prescription for someone who is starting. There is intentionally no local template-generator fallback. It does not interpret free-text limitations as a diagnosis, and the person reviews every proposal before publishing. It is not described as a way to alter testosterone or guarantee any hormonal or physiological outcome.
+A strength-base preference guides an assistant proposal only when it fits the person's stated context. The remote assistant defines every proposed exercise as a structured private candidate and may leave more margin in the initial prescription for someone who is starting. There is intentionally no local template-generator fallback. It does not interpret free-text limitations as a diagnosis, and the person reviews every proposal before publishing. It is not described as a way to alter testosterone or guarantee any hormonal or physiological outcome.
 
 This data is stored in the profile and can be edited. Each plan stores a copy of the parameters that originated it, and its logged workouts are not retrospectively modified.
 

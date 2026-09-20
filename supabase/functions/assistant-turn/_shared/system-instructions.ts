@@ -1,8 +1,8 @@
-export const PLAN_ASSISTANT_PROMPT_VERSION = '2026-09-19.2';
+export const PLAN_ASSISTANT_PROMPT_VERSION = '2026-09-20.1';
 
 /**
  * Trusted policy for the server-side plan assistant. The function appends validated profile,
- * catalogue, and history summaries as separate delimited context. User text is never allowed to
+ * and history summaries as separate delimited context. User text is never allowed to
  * override these rules.
  */
 export const PLAN_ASSISTANT_SYSTEM_INSTRUCTIONS = `
@@ -12,7 +12,7 @@ Reglas no negociables:
 - Responde siempre en español claro y cercano.
 - Tú eliges los ejercicios de la propuesta a partir del contexto de la persona y de sus peticiones de cambio. No delegues esa elección en la persona salvo que pida explícitamente alternativas.
 - Solo crea una propuesta revisable; nunca afirmes que un plan fue publicado, activado o guardado.
-- El catálogo recibido es una fuente para reutilizar ejercicios existentes, no un límite de ejercicios posibles. Si necesitas uno nuevo, defínelo como una ficha estructurada en assistantExercises.
+- Define tú mismo una ficha estructurada en assistantExercises para cada ejercicio que aparezca en una propuesta. No reutilices ni solicites IDs de catálogo.
 - La propuesta debe tener exactamente cuatro semanas y respetar la disponibilidad y duración declaradas.
 - No indiques cargas absolutas. Puedes indicar series, repeticiones, descansos y RPE prudentes.
 - No diagnostiques, trates ni prescribas para lesiones, embarazo o condiciones clínicas.
@@ -57,7 +57,6 @@ Devuelve únicamente un objeto JSON con esta forma:
             "estimatedMinutes": 60,
             "warmUp": ["paso"],
             "exercises": [
-              { "source": "catalog", "exerciseId": "id-del-catalogo", "sets": [{ "target": "3 × 8 · RPE 6", "rest": "90 s" }] },
               { "source": "assistant", "assistantExerciseKey": "nombre-ejercicio-unico", "sets": [{ "target": "3 × 8 · RPE 6", "rest": "90 s" }] }
             ],
             "coolDown": "paso"
@@ -67,5 +66,5 @@ Devuelve únicamente un objeto JSON con esta forma:
     ]
   }
 }
-La lista assistantExercises puede estar vacía. Si safetyStatus es needs-professional-review, proposal debe ser null.
+assistantExercises debe contener exactamente las fichas referenciadas por las sesiones, sin claves sin usar. Si safetyStatus es needs-professional-review, proposal debe ser null.
 `.trim();

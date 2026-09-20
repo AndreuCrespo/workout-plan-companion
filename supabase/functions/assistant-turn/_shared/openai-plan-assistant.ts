@@ -71,28 +71,14 @@ const assistantCandidateSchema = {
 };
 
 const exerciseSchema = {
-  anyOf: [
-    {
-      type: 'object',
-      additionalProperties: false,
-      required: ['source', 'exerciseId', 'sets'],
-      properties: {
-        source: { const: 'catalog' },
-        exerciseId: { type: 'string', minLength: 1, maxLength: 160 },
-        sets: { type: 'array', minItems: 1, maxItems: 6, items: setSchema },
-      },
-    },
-    {
-      type: 'object',
-      additionalProperties: false,
-      required: ['source', 'assistantExerciseKey', 'sets'],
-      properties: {
-        source: { const: 'assistant' },
-        assistantExerciseKey: { type: 'string', minLength: 1, maxLength: 64 },
-        sets: { type: 'array', minItems: 1, maxItems: 6, items: setSchema },
-      },
-    },
-  ],
+  type: 'object',
+  additionalProperties: false,
+  required: ['source', 'assistantExerciseKey', 'sets'],
+  properties: {
+    source: { const: 'assistant' },
+    assistantExerciseKey: { type: 'string', minLength: 1, maxLength: 64 },
+    sets: { type: 'array', minItems: 1, maxItems: 6, items: setSchema },
+  },
 };
 
 const sessionSchema = {
@@ -130,7 +116,7 @@ const proposalSchema = {
       maxItems: 20,
       items: { type: 'string', minLength: 1, maxLength: 500 },
     },
-    assistantExercises: { type: 'array', maxItems: 20, items: assistantCandidateSchema },
+    assistantExercises: { type: 'array', minItems: 1, maxItems: 20, items: assistantCandidateSchema },
     weeks: {
       type: 'array',
       minItems: 4,
@@ -253,9 +239,7 @@ export async function generateOpenAiPlanProposal(
   try {
     payload = await response.json();
     const parsedOutput = JSON.parse(outputText(payload)) as unknown;
-    const allowedCatalogExerciseIds = new Set(context.catalogue.map((exercise) => exercise.id));
-
-    return parseAssistantModelOutput(parsedOutput, allowedCatalogExerciseIds);
+    return parseAssistantModelOutput(parsedOutput);
   } catch (error) {
     if (error instanceof OpenAiPlanAssistantError) {
       throw error;

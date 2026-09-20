@@ -22,15 +22,11 @@ export interface AssistantExerciseCandidate {
   techniqueSteps: AssistantExerciseTechniqueStep[];
 }
 
-export type GeneratedExercise = {
-  exerciseId: string;
-  sets: GeneratedSet[];
-  source: 'catalog';
-} | {
+export interface GeneratedExercise {
   assistantExerciseKey: string;
   sets: GeneratedSet[];
   source: 'assistant';
-};
+}
 
 export interface GeneratedSession {
   coolDown: string;
@@ -148,43 +144,23 @@ function parseAssistantExerciseCandidate(value: unknown): AssistantExerciseCandi
   };
 }
 
-function parseExercise(
-  value: unknown,
-  allowedCatalogExerciseIds: ReadonlySet<string>,
-  assistantExerciseKeys: ReadonlySet<string>,
-): GeneratedExercise {
-  if (!isRecord(value) || (value.source !== 'catalog' && value.source !== 'assistant')) {
-    throw new Error('Una sesión contiene un ejercicio no válido.');
+function parseExercise(value: unknown, assistantExerciseKeys: ReadonlySet<string>): GeneratedExercise {
+  if (!isRecord(value) || value.source !== 'assistant' || !Array.isArray(value.sets)
+    || value.sets.length === 0 || value.sets.length > 6
+    || typeof value.assistantExerciseKey !== 'string' || !assistantExerciseKeys.has(value.assistantExerciseKey)) {
+    throw new Error('Una sesión debe referenciar un ejercicio asistido definido en la propuesta.');
   }
 
-  if (!Array.isArray(value.sets) || value.sets.length === 0 || value.sets.length > 6) {
-    throw new Error('Un ejercicio debe incluir entre una y seis pautas de series.');
-  }
-
-  const sets = value.sets.map(parseSet);
-
-  if (value.source === 'catalog') {
-    if (typeof value.exerciseId !== 'string' || !allowedCatalogExerciseIds.has(value.exerciseId)) {
-      throw new Error('La propuesta contiene una referencia de catálogo que no está disponible.');
-    }
-
-    return { exerciseId: value.exerciseId, sets, source: 'catalog' };
-  }
-
-  if (typeof value.assistantExerciseKey !== 'string' || !assistantExerciseKeys.has(value.assistantExerciseKey)) {
-    throw new Error('La propuesta referencia un ejercicio asistido que no fue definido.');
-  }
-
-  return { assistantExerciseKey: value.assistantExerciseKey, sets, source: 'assistant' };
+  return {
+    assistantExerciseKey: value.assistantExerciseKey,
+    sets: value.sets.map(parseSet),
+    source: 'assistant',
+  };
 }
 
 function exerciseReference(value: unknown): string {
   if (!isRecord(value)) {
     throw new Error('Una sesión contiene un ejercicio no válido.');
-  }
-
-  if (value.source === 'catalog' && typeof value.exerciseId === 'string') {
-    return `catalog:${value.exerciseId}`;
   }
 
   if (value.source === 'assistant' && typeof value.assistantExerciseKey === 'string') {
@@ -194,11 +170,7 @@ function exerciseReference(value: unknown): string {
   throw new Error('Una sesión contiene un ejercicio no válido.');
 }
 
-function parseSession(
-  value: unknown,
-  allowedCatalogExerciseIds: ReadonlySet<string>,
-  assistantExerciseKeys: ReadonlySet<string>,
-): GeneratedSession {
+function parseSession(value: unknown, assistantExerciseKeys: ReadonlySet<string>): GeneratedSession {
   if (!isRecord(value)
     || typeof value.estimatedMinutes !== 'number'
     || !Number.isInteger(value.estimatedMinutes)
@@ -220,19 +192,14 @@ function parseSession(
     coolDown: requiredText(value.coolDown, 'El enfriamiento', 500),
     dayLabel: requiredText(value.dayLabel, 'El día de la sesión', 80),
     estimatedMinutes: value.estimatedMinutes,
-    exercises: value.exercises.map((exercise) => parseExercise(exercise, allowedCatalogExerciseIds, assistantExerciseKeys)),
+    exercises: value.exercises.map((exercise) => parseExercise(exercise, assistantExerciseKeys)),
     focus: requiredText(value.focus, 'El foco de la sesión', 500),
     title: requiredText(value.title, 'El título de la sesión', 160),
     warmUp: textList(value.warmUp, 'El calentamiento', 6, 240),
   };
 }
 
-function parseWeek(
-  value: unknown,
-  expectedNumber: number,
-  allowedCatalogExerciseIds: ReadonlySet<string>,
-  assistantExerciseKeys: ReadonlySet<string>,
-): GeneratedWeek {
+function parseWeek(value: unknown, expectedNumber: number, assistantExerciseKeys: ReadonlySet<string>): GeneratedWeek {
   if (!isRecord(value)
     || value.number !== expectedNumber
     || !Array.isArray(value.sessions)
@@ -244,15 +211,16 @@ function parseWeek(
   return {
     goal: requiredText(value.goal, 'El objetivo semanal', 400),
     number: expectedNumber,
-    sessions: value.sessions.map((session) => parseSession(session, allowedCatalogExerciseIds, assistantExerciseKeys)),
+    sessions: value.sessions.map((session) => parseSession(session, assistantExerciseKeys)),
   };
 }
 
-function parseProposal(value: unknown, allowedCatalogExerciseIds: ReadonlySet<string>): GeneratedPlanProposal {
+function parseProposal(value: unknown): GeneratedPlanProposal {
   if (!isRecord(value)
     || !Array.isArray(value.weeks)
     || value.weeks.length !== 4
     || !Array.isArray(value.assistantExercises)
+    || value.assistantExercises.length === 0
     || value.assistantExercises.length > 20) {
     throw new Error('Una propuesta debe incluir exactamente cuatro semanas y una lista válida de ejercicios asistidos.');
   }
@@ -264,22 +232,30 @@ function parseProposal(value: unknown, allowedCatalogExerciseIds: ReadonlySet<st
     throw new Error('Una propuesta no puede repetir la clave de un ejercicio asistido.');
   }
 
+  const weeks = value.weeks.map((week, index) => parseWeek(week, index + 1, assistantExerciseKeys));
+  const referencedKeys = new Set(
+    weeks.flatMap((week) => week.sessions.flatMap((session) => session.exercises.map((exercise) => exercise.assistantExerciseKey))),
+  );
+
+  if (referencedKeys.size !== assistantExercises.length || assistantExercises.some((exercise) => !referencedKeys.has(exercise.key))) {
+    throw new Error('Cada ejercicio asistido debe usarse en la propuesta y cada referencia debe tener una ficha.');
+  }
+
   return {
     assistantExercises,
     changes: textList(value.changes, 'Los cambios de la propuesta', 20, 500),
     name: requiredText(value.name, 'El nombre del plan', 160),
     reviewItems: textList(value.reviewItems, 'Los puntos de revisión', 20, 500),
-    weeks: value.weeks.map((week, index) => parseWeek(week, index + 1, allowedCatalogExerciseIds, assistantExerciseKeys)),
+    weeks,
   };
 }
 
 /**
- * Validates untrusted model output before it can be stored as a reviewable proposal. Existing
- * catalogue references must be active for the person; the model may additionally define
- * structured assistant exercise candidates. Those candidates receive private catalogue IDs only
- * after the person confirms publication.
+ * Validates untrusted model output before it can be stored as a reviewable proposal. Every
+ * proposed exercise is a structured private candidate and receives a database ID only after the
+ * person confirms publication.
  */
-export function parseAssistantModelOutput(value: unknown, allowedCatalogExerciseIds: ReadonlySet<string>): AssistantModelOutput {
+export function parseAssistantModelOutput(value: unknown): AssistantModelOutput {
   if (!isRecord(value)
     || (value.safetyStatus !== 'clear' && value.safetyStatus !== 'needs-professional-review')) {
     throw new Error('La respuesta del asistente no tiene un estado de seguridad válido.');
@@ -287,7 +263,7 @@ export function parseAssistantModelOutput(value: unknown, allowedCatalogExercise
 
   const proposal = value.proposal === null
     ? null
-    : parseProposal(value.proposal, allowedCatalogExerciseIds);
+    : parseProposal(value.proposal);
 
   if (value.safetyStatus === 'needs-professional-review' && proposal !== null) {
     throw new Error('Una respuesta que requiere revisión profesional no puede incluir una propuesta.');

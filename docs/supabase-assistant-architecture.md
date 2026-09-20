@@ -15,7 +15,7 @@ No forma parte de esta fase: diagnóstico de lesiones, recomendaciones médicas,
 3. El asistente solo crea **propuestas revisables**. La persona confirma la publicación con una acción explícita.
 4. Una propuesta solo se puede publicar si deriva de la versión que sigue activa. Una propuesta desfasada se conserva como historial, pero se rechaza al publicar.
 5. El historial, el perfil, las limitaciones declaradas, las notas y las conversaciones pertenecen exclusivamente a su autor.
-6. La IA puede proponer ejercicios nuevos o reutilizar entradas existentes. Un ejercicio nuevo se valida como ficha estructurada, queda dentro de un borrador y solo se convierte en una entrada privada de la persona al confirmar la publicación; nunca se comparte ni se activa por una mera respuesta del modelo.
+6. La IA define cada ejercicio de una propuesta como ficha estructurada privada. La ficha queda dentro del borrador y solo se convierte en una entrada privada de la persona al confirmar la publicación; nunca se comparte ni se activa por una mera respuesta del modelo.
 7. Dolor agudo, lesión, embarazo o condición clínica declarada requieren un mensaje prudente para detenerse y consultar a un profesional; el asistente no diagnostica ni prescribe.
 
 ## Arquitectura objetivo
@@ -47,7 +47,7 @@ Todas las tablas privadas tienen `user_id uuid not null references auth.users(id
 | --- | --- | --- | --- |
 | Perfil | `profiles` | `user_id`, nombre, objetivo, experiencia, material, disponibilidad, duración, prioridad de entrenamiento, limitaciones, unidades, fechas | una fila privada por persona |
 | Preferencias | `user_preferences` | `user_id`, tema, fechas | privada; el tema no cambia con un plan |
-| Catálogo | `exercise_catalog` | id estable, propietario opcional, origen curado/asistente, nombre, equipo, técnica, errores, series, atribución y estado | entradas curadas compartidas; entradas IA privadas de su propietario; escritura solo backend |
+| Fichas privadas de IA | `exercise_catalog` | id estable, propietario, origen, nombre, equipo, técnica, errores, series, atribución y estado | entradas IA privadas de su propietario; escritura solo backend |
 | Plan publicado | `plan_versions` | id, `user_id`, número de versión, nombre, petición de origen JSONB, propuesta de origen, `published_at` | inserción; no actualización ni borrado por cliente |
 | Estructura del plan | `plan_weeks`, `plan_sessions`, `plan_session_exercises` | FK a versión, orden, objetivo, calentamiento, ejercicios, series y enfriamiento | se insertan junto con la versión; no se editan |
 | Plan activo | `active_plan_selection` | `user_id` único, `plan_version_id`, `selected_at` | es un puntero; cambiarlo no cambia ninguna versión |
@@ -63,7 +63,7 @@ Todas las tablas privadas tienen `user_id uuid not null references auth.users(id
 
 1. comprueba que la propuesta pertenece al `user_id` del JWT y está en estado `reviewable`;
 2. comprueba que su versión origen coincide con `active_plan_selection`;
-3. valida esquema, catálogo permitido y cuatro semanas;
+3. valida el esquema de fichas privadas y las cuatro semanas;
 4. inserta `plan_versions`, semanas, sesiones y ejercicios como instantáneas;
 5. marca la propuesta como `published` y enlaza la nueva versión;
 6. actualiza únicamente el puntero `active_plan_selection`;
@@ -88,7 +88,7 @@ No se utilizará `service_role` desde Expo. Para toda tabla privada, las políti
 
 Las tablas hijas aplican la misma propiedad mediante su fila padre, por ejemplo comprobando que el `workout_log` o `plan_version` asociado sea del `auth.uid()` actual. Las RPC de publicación y finalización verifican también el usuario internamente y no confían en un `user_id` recibido desde el móvil.
 
-`exercise_catalog` se expone en modo solo lectura a usuarios autenticados. Las entradas curadas activas son compartidas; una entrada creada por IA solo se muestra a su propietario tras confirmar la publicación del plan que la contiene. El cliente no puede insertar ni activar entradas. Las operaciones editoriales y la importación de datos con licencia se ejecutan fuera del cliente y quedan auditadas. No se almacenará ni referenciará media de Gym Visual sin licencia directa.
+`exercise_catalog` almacena fichas privadas creadas por IA y se expone en modo solo lectura a usuarios autenticados. Una entrada solo se muestra a su propietario tras confirmar la publicación del plan que la contiene. El cliente no puede insertar ni activar entradas. No se almacena ni referencia media de terceros.
 
 ## Asistente remoto
 
@@ -113,10 +113,10 @@ Esto permite peticiones naturales como: “el press de banca no me encaja; prefi
 ### Edge Function `assistant-turn`
 
 1. Verifica el JWT de Supabase Auth y obtiene el `user_id` del token.
-2. Lee bajo RLS el perfil, la versión activa, el catálogo permitido, la conversación y solo el historial relevante (feedback, progresión resumida y notas necesarias).
+2. Lee bajo RLS el perfil, la versión activa, la conversación y solo el historial relevante de reacciones agregadas.
 3. Detecta primero señales de seguridad. Si hay dolor agudo, lesión, embarazo o condición clínica, devuelve un mensaje prudente sin generar prescripción y pide pausar/consultar a un profesional.
-4. Envía al modelo un contexto minimizado, delimitado y sin instrucciones de confianza procedentes de texto de usuario. Incluye reglas de producto, catálogo permitido y un esquema de salida estricto.
-5. Valida de nuevo la respuesta contra JSON Schema y reglas de negocio: cuatro semanas, sesiones compatibles con disponibilidad/duración, IDs existentes o fichas nuevas estructuradas, sin cargas absolutas, sin diagnósticos y con avisos de revisión.
+4. Envía al modelo un contexto minimizado, delimitado y sin instrucciones de confianza procedentes de texto de usuario. Incluye reglas de producto y un esquema de salida estricto de fichas privadas.
+5. Valida de nuevo la respuesta contra JSON Schema y reglas de negocio: cuatro semanas, sesiones compatibles con disponibilidad/duración y fichas privadas estructuradas, sin cargas absolutas, sin diagnósticos y con avisos de revisión.
 6. Persiste los nuevos mensajes y, si procede, una `plan_proposal` inmutable en estado `reviewable`.
 7. Devuelve un resultado redactado para la interfaz. Si el proveedor falla, no cambia el plan y la app comunica el error o usa el fallback local.
 

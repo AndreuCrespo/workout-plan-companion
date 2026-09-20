@@ -103,9 +103,7 @@ export default function RemotePlanDraftScreen() {
             <AppText variant="bodyStrong">{session.dayLabel} · {session.title}</AppText>
             <AppText tone="secondary">{session.focus} · {session.estimatedMinutes} min</AppText>
             {session.exercises.map((exercise, index) => {
-              const name = exercise.source === 'catalog'
-                ? exercise.exerciseId.replaceAll('-', ' ')
-                : draft.assistantExercises.find((candidate) => candidate.key === exercise.assistantExerciseKey)?.name ?? 'Ejercicio nuevo';
+              const name = draft.assistantExercises.find((candidate) => candidate.key === exercise.assistantExerciseKey)?.name ?? 'Ejercicio nuevo';
               return <AppText key={`${name}-${index}`} tone="secondary">• {name}: {exercise.sets.map((set) => set.target).join(' · ')}</AppText>;
             })}
           </View>)}

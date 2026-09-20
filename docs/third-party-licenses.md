@@ -2,7 +2,7 @@
 
 ## Exercises Dataset text and metadata
 
-`mobile/data/curated-exercise-catalog.ts` contains a small, reviewed selection of exercise metadata and instruction text adapted from [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset).
+`supabase/migrations/20260826172000_add_consented_training_history_backup.sql` contains the small reviewed exercise set needed to validate recovery of the existing sample-plan history, adapted from [hasaneyldrm/exercises-dataset](https://github.com/hasaneyldrm/exercises-dataset). It is not a shared catalogue used by the AI assistant.
 
 Copyright (c) 2026 Hasan Emir Yıldırım
 

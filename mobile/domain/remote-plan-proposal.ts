@@ -1,16 +1,11 @@
-import { curatedExercises } from '@/data/curated-exercise-catalog';
 import type { Exercise, MonthlyPlan, PlanWeek, WorkoutSession } from '@/domain/models';
 import type { PlanProposal } from '@/domain/plan-proposal';
 
-export type RemoteProposalExercise = {
-  exerciseId: string;
-  sets: { rest: string; target: string }[];
-  source: 'catalog';
-} | {
+export interface RemoteProposalExercise {
   assistantExerciseKey: string;
   sets: { rest: string; target: string }[];
   source: 'assistant';
-};
+}
 
 export interface RemoteAssistantExercise extends Omit<Exercise, 'id' | 'sets'> {
   key: string;
@@ -119,9 +114,9 @@ export function parseRemotePlanProposal(value: unknown): RemotePlanProposal {
         if (!isRecord(exercise)) return null;
         const plannedSets = sets(exercise.sets);
         if (!plannedSets) return null;
-        if (exercise.source === 'catalog' && text(exercise.exerciseId)) return { exerciseId: exercise.exerciseId as string, sets: plannedSets, source: 'catalog' as const };
-        if (exercise.source === 'assistant' && text(exercise.assistantExerciseKey)) return { assistantExerciseKey: exercise.assistantExerciseKey as string, sets: plannedSets, source: 'assistant' as const };
-        return null;
+        return exercise.source === 'assistant' && text(exercise.assistantExerciseKey)
+          ? { assistantExerciseKey: exercise.assistantExerciseKey as string, sets: plannedSets, source: 'assistant' as const }
+          : null;
       });
       const coolDown = text(session.coolDown);
       const dayLabel = text(session.dayLabel);
@@ -140,15 +135,8 @@ export function parseRemotePlanProposal(value: unknown): RemotePlanProposal {
 
 /** Builds a local immutable snapshot only after the server atomically publishes the same reviewed proposal. */
 export function toLocalPublishedProposal(remote: RemotePlanProposal, sourcePlan: MonthlyPlan): PlanProposal {
-  const catalogById = new Map(curatedExercises.map((exercise) => [exercise.id, exercise]));
   const assistantByKey = new Map(remote.assistantExercises.map((exercise) => [exercise.key, exercise]));
   const resolveExercise = (exercise: RemoteProposalExercise): Exercise => {
-    if (exercise.source === 'catalog') {
-      const catalogExercise = catalogById.get(exercise.exerciseId);
-      if (!catalogExercise) throw new Error('Un ejercicio del borrador no está disponible en el catálogo local.');
-      return { ...catalogExercise, sets: exercise.sets.map((set) => ({ ...set })) };
-    }
-
     const assistantExercise = assistantByKey.get(exercise.assistantExerciseKey);
     if (!assistantExercise) throw new Error('Un ejercicio nuevo del borrador no está disponible.');
     return { ...assistantExercise, id: `assistant-${assistantExercise.key}`, sets: exercise.sets.map((set) => ({ ...set })) };

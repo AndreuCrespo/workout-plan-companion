@@ -6,7 +6,7 @@ The consent covers only the assistant turn described in the current in-app notic
 
 - the person's message;
 - their declared profile context;
-- summary of active plan and allowed catalogue; and
+- summary of the active plan; and
 - aggregated positive/negative exercise reactions.
 
 It excludes notes, individual sets, and complete workout logs. A person can revoke consent; later assistant turns are then rejected until they consent again to the current policy version.
