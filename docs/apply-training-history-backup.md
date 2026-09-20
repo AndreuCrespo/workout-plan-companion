@@ -8,11 +8,11 @@ Apply [`20260826135522_initial_private_data_foundation.sql`](../supabase/migrati
 
 ## What it adds
 
-- The six reviewed exercises used by the sample plan to the curated catalogue, without media.
+- The six reviewed exercise records required to validate the existing sample-plan history, without media.
 - `training_history_backups`, a private per-account record of the last completed import and its item counts.
 - `import_local_training_history(jsonb)`, an authenticated transactional RPC.
 
-The RPC receives no `user_id`; it obtains ownership from the authenticated session. It inserts immutable plan snapshots and completed logs, validates every exercise against the approved catalogue, calculates canonical kilograms server-side, and is idempotent for the same local plan history. Draft workouts are excluded.
+The RPC receives no `user_id`; it obtains ownership from the authenticated session. It inserts immutable plan snapshots and completed logs, validates every exercise against the records required by that recovered history, calculates canonical kilograms server-side, and is idempotent for the same local plan history. Draft workouts are excluded. These records are not supplied to the AI assistant.
 
 ## Apply
 

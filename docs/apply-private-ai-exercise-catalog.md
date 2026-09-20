@@ -1,18 +1,14 @@
-# Apply the private AI exercise-catalog migration
+# Apply private AI exercise storage
 
-This migration changes the exercise catalogue from a shared curated-only list into two scopes:
-
-- **Curated** entries are shared reviewed starting points.
-- **Assistant** entries belong to one authenticated person and are created only when that person explicitly confirms a plan proposal containing them.
+This migration prepares the existing `exercise_catalog` table to store only the private, structured exercise entries created when a person explicitly confirms an AI plan proposal. It does not seed or expose a shared exercise catalogue.
 
 An assistant entry is not visible to other accounts. It is not created merely because the AI mentioned it in an unconfirmed draft. Published-plan snapshots remain immutable.
 
 ## Prerequisites
 
-Apply the private data foundation and the reviewed catalogue migration first:
+Apply the private data foundation first:
 
 1. [`apply-supabase-foundation.md`](apply-supabase-foundation.md)
-2. [`apply-reviewed-exercise-catalog.md`](apply-reviewed-exercise-catalog.md)
 
 ## Apply
 
@@ -22,7 +18,7 @@ Run the full contents of:
 
 ## Verify privacy
 
-As an authenticated account, active rows with `owner_user_id` set are visible only when that value is your own user ID. Curated rows keep `owner_user_id = null`.
+As an authenticated account, active rows with `owner_user_id` set are visible only when that value is your own user ID. No shared exercise seed is applied for the AI assistant.
 
 ```sql
 select entry_source, count(*)

@@ -13,7 +13,6 @@ declare
   v_assistant_exercise_id text;
   v_assistant_exercise_ids jsonb := '{}'::jsonb;
   v_assistant_key text;
-  v_catalog_exercise record;
   v_cool_down text;
   v_exercise jsonb;
   v_exercise_id text;
@@ -26,7 +25,6 @@ declare
   v_proposal_snapshot jsonb;
   v_session jsonb;
   v_session_position integer;
-  v_source text;
   v_version_number integer;
   v_warm_up text[];
   v_week jsonb;
@@ -198,35 +196,7 @@ begin
         from jsonb_array_elements(v_session->'exercises')
       loop
         v_exercise_position := v_exercise_position + 1;
-        v_source := v_exercise->>'source';
-
-        if v_source = 'catalog' then
-          v_exercise_id := v_exercise->>'exerciseId';
-
-          select * into v_catalog_exercise
-          from public.exercise_catalog
-          where id = v_exercise_id
-            and is_active
-            and (owner_user_id is null or owner_user_id = auth.uid());
-
-          if v_catalog_exercise.id is null then
-            raise exception 'Proposal references an unavailable catalogue exercise';
-          end if;
-
-          v_exercise_snapshot := jsonb_build_object(
-            'id', v_catalog_exercise.id,
-            'name', v_catalog_exercise.name,
-            'equipment', v_catalog_exercise.equipment,
-            'equipmentSetup', v_catalog_exercise.equipment_setup,
-            'techniqueSteps', v_catalog_exercise.technique_steps,
-            'coachingCue', v_catalog_exercise.coaching_cue,
-            'preparation', v_catalog_exercise.preparation,
-            'execution', v_catalog_exercise.execution,
-            'breathing', v_catalog_exercise.breathing,
-            'commonMistakes', v_catalog_exercise.common_mistakes,
-            'sets', v_exercise->'sets'
-          );
-        elsif v_source = 'assistant' then
+        if v_exercise->>'source' = 'assistant' then
           v_assistant_key := v_exercise->>'assistantExerciseKey';
           v_exercise_id := v_assistant_exercise_ids->>v_assistant_key;
 
@@ -252,7 +222,7 @@ begin
             'sets', v_exercise->'sets'
           );
         else
-          raise exception 'Proposal exercise source is invalid';
+          raise exception 'Proposal exercises must be private assistant candidates';
         end if;
 
         insert into public.plan_session_exercises (

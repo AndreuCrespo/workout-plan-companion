@@ -8,7 +8,6 @@ A personal mobile app for organising a monthly gym plan, guiding each workout, a
 
 - Expo Router navigation: **Today**, **My plan**, **Progress**, and **Profile**.
 - An initial local four-week sample plan, exercise details with material and step-by-step guidance.
-- A reviewed local exercise catalogue based on MIT-covered metadata and instruction text. Third-party media is not included.
 - Local workout drafts and immutable completed logs for sets, load, repetitions, RPE, notes, and per-exercise feedback; the session flow includes a rest timer and a completion summary.
 - Local progress based on completed logs: adherence, volume, a 12-week activity heatmap, exercise history, personal bests, and transparent Epley 1RM estimates where applicable.
 - A persistent plan context for primary goal, training experience, equipment, and training emphasis, ready for consented use by the remote assistant. It makes no hormonal or physiological promises.

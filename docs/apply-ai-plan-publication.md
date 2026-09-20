@@ -17,8 +17,7 @@ If any check or insert fails, no assistant exercise becomes active and no plan i
 Apply the following reviewed migrations first:
 
 1. [`apply-supabase-foundation.md`](apply-supabase-foundation.md)
-2. [`apply-reviewed-exercise-catalog.md`](apply-reviewed-exercise-catalog.md)
-3. [`apply-private-ai-exercise-catalog.md`](apply-private-ai-exercise-catalog.md)
+2. [`apply-private-ai-exercise-catalog.md`](apply-private-ai-exercise-catalog.md)
 
 ## Apply
 

@@ -12,13 +12,12 @@ Apply these files in timestamp order using the Supabase CLI or SQL Editor:
 
 1. `20260826174500_add_training_emphasis_to_profiles.sql`
 2. `20260826180000_add_profile_plan_context.sql`
-3. `20260826183000_seed_reviewed_exercise_catalog.sql`
-4. `20260826184500_add_private_ai_exercise_catalog.sql`
-5. `20260826190000_add_publish_ai_plan_proposal_rpc.sql`
-6. `20260826191500_add_assistant_use_consent.sql`
-7. `20260826192000_add_assistant_daily_turn_limit.sql`
+3. `20260826184500_add_private_ai_exercise_catalog.sql`
+4. `20260826190000_add_publish_ai_plan_proposal_rpc.sql`
+5. `20260826191500_add_assistant_use_consent.sql`
+6. `20260826192000_add_assistant_daily_turn_limit.sql`
 
-Do not edit published migration files. The initial foundation and training-history migrations must already exist in that project.
+Do not edit the existing base migrations. The initial foundation and training-history migrations must already exist in that project. Do not apply the removed reviewed-catalogue seed: the assistant now defines every new-plan exercise as a private structured candidate.
 
 ## 3. Configure Edge Function secrets
 

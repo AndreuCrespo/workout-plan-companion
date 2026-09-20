@@ -1,12 +1,5 @@
 import type { SupabaseClient } from 'npm:@supabase/supabase-js@2';
 
-export interface AssistantCatalogueExercise {
-  equipment: string;
-  id: string;
-  name: string;
-  prescribedSets: unknown;
-}
-
 export interface AssistantFeedbackSummary {
   exerciseId: string;
   negativeCount: number;
@@ -29,7 +22,6 @@ export interface AssistantContext {
     sessions: AssistantPlanSessionSummary[];
     versionNumber: number;
   } | null;
-  catalogue: AssistantCatalogueExercise[];
   feedback: AssistantFeedbackSummary[];
   profile: {
     availability: string;
@@ -118,7 +110,7 @@ function summarizeSessions(rows: unknown): AssistantPlanSessionSummary[] {
  * the person has accepted assistant use.
  */
 export async function loadAssistantContext(supabase: SupabaseClient, userId: string): Promise<AssistantContext> {
-  const [profileResult, activeSelectionResult, catalogueResult, feedbackResult] = await Promise.all([
+  const [profileResult, activeSelectionResult, feedbackResult] = await Promise.all([
     supabase
       .from('profiles')
       .select('availability, equipment_access, limitations, primary_goal, session_duration_minutes, training_emphasis, training_experience, units')
@@ -130,16 +122,11 @@ export async function loadAssistantContext(supabase: SupabaseClient, userId: str
       .eq('user_id', userId)
       .maybeSingle(),
     supabase
-      .from('exercise_catalog')
-      .select('id, name, equipment, prescribed_sets')
-      .eq('is_active', true)
-      .order('name'),
-    supabase
       .from('workout_exercise_feedback')
       .select('exercise_id, reaction'),
   ]);
 
-  if (profileResult.error || activeSelectionResult.error || catalogueResult.error || feedbackResult.error) {
+  if (profileResult.error || activeSelectionResult.error || feedbackResult.error) {
     throw new AssistantContextError('remote_data_unavailable');
   }
 
@@ -157,19 +144,6 @@ export async function loadAssistantContext(supabase: SupabaseClient, userId: str
     trainingExperience: asString(profileResult.data.training_experience),
     units: asString(profileResult.data.units),
   };
-  const catalogue = asRecordArray(catalogueResult.data)
-    .map((exercise) => ({
-      equipment: asString(exercise.equipment),
-      id: asString(exercise.id),
-      name: asString(exercise.name),
-      prescribedSets: exercise.prescribed_sets,
-    }))
-    .filter((exercise) => exercise.id && exercise.name);
-
-  if (catalogue.length === 0) {
-    throw new AssistantContextError('remote_data_unavailable');
-  }
-
   const selection = activeSelectionResult.data;
   const activePlanRow = isRecord(selection) && isRecord(selection.plan_versions)
     ? selection.plan_versions
@@ -203,7 +177,6 @@ export async function loadAssistantContext(supabase: SupabaseClient, userId: str
 
   return {
     activePlan,
-    catalogue,
     feedback: summarizeFeedback(feedbackResult.data),
     profile,
   };
