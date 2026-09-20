@@ -123,7 +123,7 @@ const styles = StyleSheet.create({
   },
   tabActions: {
     flexDirection: 'row',
-    height: 64,
+    height: 56,
   },
   tabAction: {
     alignItems: 'center',
