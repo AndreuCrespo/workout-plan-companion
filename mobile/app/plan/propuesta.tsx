@@ -115,7 +115,7 @@ export default function PlanProposalScreen() {
   }
 
   function revealComposer() {
-    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 250);
+    setTimeout(() => scrollViewRef.current?.scrollToEnd({ animated: true }), 350);
   }
 
   async function sendMessage() {
