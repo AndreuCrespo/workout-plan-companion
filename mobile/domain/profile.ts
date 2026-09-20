@@ -9,6 +9,7 @@ export function createProfileDraft(): ProfileDraft {
     availability: 'three-days',
     sessionDurationMinutes: 60,
     trainingEmphasis: 'compound-strength',
+    trainingPreferences: '',
     limitations: '',
     units: 'metric',
   };
@@ -23,6 +24,7 @@ export function toProfileDraft(profile: UserProfile): ProfileDraft {
     availability: profile.availability,
     sessionDurationMinutes: profile.sessionDurationMinutes,
     trainingEmphasis: profile.trainingEmphasis,
+    trainingPreferences: profile.trainingPreferences,
     limitations: profile.limitations,
     units: profile.units,
   };

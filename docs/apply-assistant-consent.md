@@ -5,7 +5,7 @@ This migration records a person's explicit, versioned consent before the Edge Fu
 The consent covers only the assistant turn described in the current in-app notice:
 
 - the person's message;
-- their declared profile context;
+- their declared profile context, including free plan-structure preferences;
 - summary of the active plan; and
 - aggregated positive/negative exercise reactions.
 
@@ -27,4 +27,4 @@ where routine_schema = 'public'
 order by routine_name;
 ```
 
-The query returns two rows. This migration has not been applied to Supabase.
+The query returns two rows. The migration is applied in the isolated development project; a new consent version is required whenever the disclosed context changes.

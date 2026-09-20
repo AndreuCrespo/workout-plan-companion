@@ -11,6 +11,7 @@ interface ProfileTextFieldProps {
   placeholder: string;
   description?: string;
   multiline?: boolean;
+  maxLength?: number;
 }
 
 export function ProfileTextField({
@@ -20,6 +21,7 @@ export function ProfileTextField({
   placeholder,
   description,
   multiline = false,
+  maxLength,
 }: ProfileTextFieldProps) {
   const { theme } = useAppTheme();
 
@@ -32,6 +34,7 @@ export function ProfileTextField({
       <TextInput
         accessibilityHint={description}
         accessibilityLabel={label}
+        maxLength={maxLength}
         multiline={multiline}
         numberOfLines={multiline ? 4 : 1}
         onChangeText={onChangeText}

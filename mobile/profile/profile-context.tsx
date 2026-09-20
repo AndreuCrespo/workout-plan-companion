@@ -48,6 +48,7 @@ export function ProfileProvider({ children }: PropsWithChildren) {
         ...draft,
         firstName: draft.firstName.trim(),
         limitations: draft.limitations.trim(),
+        trainingPreferences: draft.trainingPreferences.trim(),
         createdAt: profile?.createdAt ?? now,
         updatedAt: now,
       };

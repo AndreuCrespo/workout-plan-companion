@@ -31,6 +31,7 @@ export interface AssistantContext {
     sessionDurationMinutes: number;
     trainingEmphasis: string;
     trainingExperience: string;
+    trainingPreferences: string;
     units: string;
   };
 }
@@ -113,7 +114,7 @@ export async function loadAssistantContext(supabase: SupabaseClient, userId: str
   const [profileResult, activeSelectionResult, feedbackResult] = await Promise.all([
     supabase
       .from('profiles')
-      .select('availability, equipment_access, limitations, primary_goal, session_duration_minutes, training_emphasis, training_experience, units')
+      .select('availability, equipment_access, limitations, primary_goal, session_duration_minutes, training_emphasis, training_experience, training_preferences, units')
       .eq('user_id', userId)
       .maybeSingle(),
     supabase
@@ -142,6 +143,7 @@ export async function loadAssistantContext(supabase: SupabaseClient, userId: str
     sessionDurationMinutes: asNumber(profileResult.data.session_duration_minutes),
     trainingEmphasis: asString(profileResult.data.training_emphasis),
     trainingExperience: asString(profileResult.data.training_experience),
+    trainingPreferences: asString(profileResult.data.training_preferences),
     units: asString(profileResult.data.units),
   };
   const selection = activeSelectionResult.data;

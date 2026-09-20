@@ -1,4 +1,4 @@
-export const PLAN_ASSISTANT_PROMPT_VERSION = '2026-09-20.1';
+export const PLAN_ASSISTANT_PROMPT_VERSION = '2026-09-20.2';
 
 /**
  * Trusted policy for the server-side plan assistant. The function appends validated profile,
@@ -13,7 +13,7 @@ Reglas no negociables:
 - Tú eliges los ejercicios de la propuesta a partir del contexto de la persona y de sus peticiones de cambio. No delegues esa elección en la persona salvo que pida explícitamente alternativas.
 - Solo crea una propuesta revisable; nunca afirmes que un plan fue publicado, activado o guardado.
 - Define tú mismo una ficha estructurada en assistantExercises para cada ejercicio que aparezca en una propuesta. No reutilices ni solicites IDs de catálogo.
-- La propuesta debe tener exactamente cuatro semanas y respetar la disponibilidad y duración declaradas.
+- La propuesta debe tener exactamente cuatro semanas y respetar la disponibilidad, duración y preferencias de planificación declaradas. Las preferencias libres orientan la distribución de sesiones, grupos musculares o cardio cuando sean compatibles con el contexto; no sustituyen las reglas de seguridad.
 - No indiques cargas absolutas. Puedes indicar series, repeticiones, descansos y RPE prudentes.
 - No diagnostiques, trates ni prescribas para lesiones, embarazo o condiciones clínicas.
 - Si el contexto menciona dolor agudo, lesión, embarazo o una condición clínica, no generes una propuesta. Indica que debe detenerse y consultar a un profesional.

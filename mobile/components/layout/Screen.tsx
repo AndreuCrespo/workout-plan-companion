@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -9,14 +9,16 @@ import { spacing } from '@/theme/tokens';
 interface ScreenProps {
   children: ReactNode;
   contentContainerStyle?: StyleProp<ViewStyle>;
+  scrollViewRef?: RefObject<ScrollView | null>;
 }
 
-export function Screen({ children, contentContainerStyle }: ScreenProps) {
+export function Screen({ children, contentContainerStyle, scrollViewRef }: ScreenProps) {
   const { theme } = useAppTheme();
 
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView edges={['top', 'left', 'right', 'bottom']} style={[styles.safeArea, { backgroundColor: theme.colors.background }]}>
       <ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={[styles.content, contentContainerStyle]}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}>
