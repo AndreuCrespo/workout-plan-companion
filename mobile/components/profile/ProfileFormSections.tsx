@@ -78,13 +78,6 @@ export function TrainingProfileFields({ draft, onChange }: ProfileFieldsProps) {
         options={equipmentAccessOptions}
         value={draft.equipmentAccess}
       />
-    </View>
-  );
-}
-
-export function DetailsProfileFields({ draft, onChange }: ProfileFieldsProps) {
-  return (
-    <View style={styles.section}>
       <ProfileTextField
         description="Por ejemplo: repartir tren inferior, empuje, tracción y un día de cardio. El asistente lo tendrá en cuenta en los próximos borradores."
         label="Información adicional para tus planes"
@@ -94,6 +87,13 @@ export function DetailsProfileFields({ draft, onChange }: ProfileFieldsProps) {
         placeholder="Cómo te gustaría organizar o priorizar tus sesiones"
         value={draft.trainingPreferences}
       />
+    </View>
+  );
+}
+
+export function DetailsProfileFields({ draft, onChange }: ProfileFieldsProps) {
+  return (
+    <View style={styles.section}>
       <ProfileTextField
         description="Comparte solo lo que quieras tener presente al planificar. Ante dolor agudo, lesión o una condición clínica, pausa y consulta a un profesional."
         label="Limitaciones declaradas"
