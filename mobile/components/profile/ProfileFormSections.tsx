@@ -87,7 +87,7 @@ export function DetailsProfileFields({ draft, onChange }: ProfileFieldsProps) {
     <View style={styles.section}>
       <ProfileTextField
         description="Por ejemplo: repartir tren inferior, empuje, tracción y un día de cardio. El asistente lo tendrá en cuenta en los próximos borradores."
-        label="Preferencias para próximos planes"
+        label="Información adicional para tus planes"
         maxLength={1_000}
         multiline
         onChangeText={(trainingPreferences) => onChange({ trainingPreferences })}

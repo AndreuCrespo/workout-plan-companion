@@ -67,7 +67,7 @@ export default function ProfileScreen() {
         <ListRow label="Disponibilidad" value={getProfileOptionLabel(availabilityOptions, profile.availability)} />
         <ListRow label="Duración" value={getProfileOptionLabel(durationOptions, profile.sessionDurationMinutes)} />
         <ListRow label="Prioridad" value={getProfileOptionLabel(trainingEmphasisOptions, profile.trainingEmphasis)} />
-        <ListRow label="Preferencias de plan" value={profile.trainingPreferences || 'Sin preferencia adicional'} />
+        <ListRow label="Información adicional" value={profile.trainingPreferences || 'Sin información adicional'} />
         <ListRow label="Limitaciones declaradas" value={getLimitationsLabel(profile.limitations)} />
         <ListRow label="Unidades" value={getProfileOptionLabel(unitOptions, profile.units)} />
       </View>
