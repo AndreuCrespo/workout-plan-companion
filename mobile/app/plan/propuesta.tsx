@@ -207,8 +207,9 @@ export default function PlanProposalScreen() {
             <Card style={styles.card}>
               <AppText variant="heading">Borrador preparado</AppText>
               <AppText tone="secondary">
-                La propuesta se ha guardado como borrador remoto. La revisión detallada y la confirmación se mostrarán aquí antes de activar el plan.
+                Revísalo completo antes de confirmar. No cambiará tu plan activo hasta que lo actives expresamente.
               </AppText>
+              <PrimaryButton label="Revisar borrador" onPress={() => router.push({ pathname: '/plan/borrador', params: { proposalId } })} variant="secondary" />
             </Card>
           ) : null}
 
