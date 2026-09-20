@@ -1,6 +1,6 @@
 # OpenAI provider activation
 
-The source contains a direct OpenAI Responses API adapter for the remote plan assistant. It is not deployed or invoked until the owner explicitly activates the Edge Function.
+The source contains a direct OpenAI Responses API adapter for the remote plan assistant. It is deployed only in the isolated development Supabase project after the owner explicitly activated the Edge Function; production remains inactive.
 
 ## Server-only secrets
 
@@ -12,7 +12,7 @@ Set these only in Supabase Edge Function secrets after reviewing the deployment:
 | `OPENAI_MODEL` | Exact API model identifier enabled for that project. |
 | `OPENAI_REASONING_EFFORT` | The reasoning setting supported by that exact model, for example `xhigh` if available. |
 
-The code does not hard-code a model identifier. Verify that the chosen model supports the Responses API and strict JSON-schema output before activation.
+The code does not hard-code a model identifier. The development environment uses `gpt-5.6-terra`; verify any future model supports the Responses API and strict JSON-schema output before activation.
 
 ## Request boundary
 
