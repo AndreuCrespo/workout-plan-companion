@@ -1,7 +1,9 @@
 import { SymbolView } from 'expo-symbols';
 import { Tabs } from 'expo-router';
-import { Platform, StyleSheet } from 'react-native';
+import type { BottomTabBarProps } from 'expo-router/build/react-navigation/bottom-tabs';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { ColorValue } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAppTheme } from '@/theme/theme-context';
 
@@ -13,11 +15,8 @@ export default function TabLayout() {
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: theme.colors.background },
-        tabBarActiveTintColor: theme.colors.primaryStrong,
-        tabBarInactiveTintColor: theme.colors.textSecondary,
-        tabBarLabelStyle: styles.label,
-        tabBarStyle: [styles.tabBar, { backgroundColor: theme.colors.surface, borderTopColor: theme.colors.border }],
-      }}>
+      }}
+      tabBar={(props) => <AppTabBar {...props} />}>
       <Tabs.Screen
         name="index"
         options={{
@@ -54,6 +53,58 @@ export default function TabLayout() {
   );
 }
 
+function AppTabBar({ descriptors, navigation, state }: BottomTabBarProps) {
+  const { theme } = useAppTheme();
+  const insets = useSafeAreaInsets();
+
+  return (
+    <View
+      style={[
+        styles.tabBar,
+        {
+          backgroundColor: theme.colors.surface,
+          borderTopColor: theme.colors.border,
+          paddingBottom: insets.bottom + 8,
+        },
+      ]}>
+      <View style={styles.tabActions}>
+        {state.routes.map((route, index) => {
+          const isFocused = state.index === index;
+          const options = descriptors[route.key].options;
+          const color = isFocused ? theme.colors.primaryStrong : theme.colors.textSecondary;
+          const label = typeof options.tabBarLabel === 'string' ? options.tabBarLabel : options.title ?? route.name;
+
+          function onPress() {
+            const event = navigation.emit({
+              canPreventDefault: true,
+              target: route.key,
+              type: 'tabPress',
+            });
+
+            if (!isFocused && !event.defaultPrevented) {
+              navigation.navigate(route.name, route.params);
+            }
+          }
+
+          return (
+            <Pressable
+              accessibilityLabel={options.tabBarAccessibilityLabel ?? `Ir a ${label}`}
+              accessibilityRole="tab"
+              accessibilityState={{ selected: isFocused }}
+              key={route.key}
+              onLongPress={() => navigation.emit({ target: route.key, type: 'tabLongPress' })}
+              onPress={onPress}
+              style={({ pressed }) => [styles.tabAction, pressed && styles.tabActionPressed]}>
+              {options.tabBarIcon?.({ color, focused: isFocused, size: 24 })}
+              <Text allowFontScaling numberOfLines={1} style={[styles.tabLabel, { color }]}>{label}</Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 interface TabIconProps {
   color: ColorValue;
   ios: 'house.fill' | 'calendar' | 'chart.line.uptrend.xyaxis' | 'person.crop.circle';
@@ -66,13 +117,25 @@ function TabIcon({ color, ios, android, web }: TabIconProps) {
 }
 
 const styles = StyleSheet.create({
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
   tabBar: {
     borderTopWidth: 1,
-    height: Platform.select({ ios: 82, default: 68 }),
-    paddingTop: 6,
+  },
+  tabActions: {
+    flexDirection: 'row',
+    minHeight: 64,
+  },
+  tabAction: {
+    alignItems: 'center',
+    flex: 1,
+    gap: 4,
+    justifyContent: 'center',
+    minHeight: 48,
+  },
+  tabActionPressed: {
+    opacity: 0.72,
+  },
+  tabLabel: {
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
