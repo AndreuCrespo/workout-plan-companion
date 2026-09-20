@@ -51,7 +51,7 @@ export const trainingEmphasisOptions: readonly ProfileOption<TrainingEmphasis>[]
   {
     value: 'compound-strength',
     label: 'Fuerza con ejercicios multiarticulares',
-    description: 'Da prioridad a patrones de fuerza como sentadilla, empuje, tracción y bisagra cuando encajen con tu contexto.',
+    description: 'Pide al asistente al menos un patrón multiarticular por sesión cuando encaje con tu material, experiencia y limitaciones.',
   },
   {
     value: 'balanced',
